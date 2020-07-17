@@ -18,6 +18,8 @@ function New-SDPURI {
 
     # trim front and rear / marks if needed
 
+    write-verbose "-- Invoke-SDPRestCall --> New-SDPURI -> accepted endpoint $endpoint"
+
     if ($endpoint[0] -eq '/') {
         $endpoint = $endpoint.Substring(1)
     }
@@ -26,8 +28,14 @@ function New-SDPURI {
         $endpoint = $endpoint.Substring(0,$endpoint.Length-1)
     }
 
+    if ([string]$endpoint.contains("?") -eq $true) {
+        $trail = '&'
+    } else {
+        $trail = '?'
+    }
+
     $server = Get-Variable -Scope Global -Name $k2context -ValueOnly
-    $results = 'https://' + $server.K2Endpoint + '/api/v2/' + $endpoint + '?'
+    $results = 'https://' + $server.K2Endpoint + '/api/v2/' + $endpoint + $trail
     write-verbose "-- Invoke-SDPRestCall --> New-SDPURI -> Using SDPURI endpoint URI $results"
     return $results
 }

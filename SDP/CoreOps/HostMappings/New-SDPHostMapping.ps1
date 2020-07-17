@@ -49,7 +49,7 @@ function New-SDPHostMapping {
             $volumeid = Get-SDPVolume -name $volumeName
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
         } elseif ($snapshotName) {
-            $volumeid = Get-SDPVolumeSnapshot -name $snapshotName
+            $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeid.id -nestedObject
         } else {
             $message = "Please supply either a -volumeName or -snapshotName"
