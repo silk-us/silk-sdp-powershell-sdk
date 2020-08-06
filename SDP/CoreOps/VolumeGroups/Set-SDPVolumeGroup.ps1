@@ -3,7 +3,7 @@ function Set-SDPVolumeGroup {
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [array] $id,
-        [parameter(Mandatory)]
+        [parameter()]
         [string] $name,
         [parameter()]
         [int] $quotaInGB,
@@ -50,7 +50,9 @@ function Set-SDPVolumeGroup {
         # Build the object
 
         $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name name -Value $name
+        if ($name) {
+            $o | Add-Member -MemberType NoteProperty -Name name -Value $name
+        }
         if 
         ($quotaInGB) {
             $o | Add-Member -MemberType NoteProperty -Name quota -Value $size
@@ -71,6 +73,8 @@ function Set-SDPVolumeGroup {
         $body = $o 
 
         $endpointURI = $endpoint + '/' + $id
+
+        $endpointURI | write-verbose
         
         $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
         return $results
