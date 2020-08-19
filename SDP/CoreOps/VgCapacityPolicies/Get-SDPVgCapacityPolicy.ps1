@@ -1,4 +1,4 @@
-function Get-SDPVgCapacityPolicies {
+function Get-SDPVgCapacityPolicy {
     param(
         [parameter()]
         [Alias("CriticalThreshold")]
