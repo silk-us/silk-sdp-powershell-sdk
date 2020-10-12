@@ -23,8 +23,6 @@ New-MSDSMSupportedHW –VendorID KMNRIO –Product KDP
 $iSCSIData1 = Get-NetIPAddress -InterfaceAlias $Data1Interface -AddressFamily ipv4
 $iSCSIData2 = Get-NetIPAddress -InterfaceAlias $Data2Interface -AddressFamily ipv4
 
-$SDPIQN = Get-IscsiTarget
-
 $dataPorts = Get-SDPSystemNetPorts | where-object {$_.name -match "data"}
 
 foreach ($i in $dataPorts) {
