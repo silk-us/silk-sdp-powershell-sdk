@@ -5,7 +5,7 @@ function New-SDPSystemNetIps {
         [parameter(Mandatory)]
         [IPAddress] $subnetMask,
         [parameter(Mandatory)]
-        [ValidateSet('iscsi','replication')]
+        [ValidateSet('iscsi','Replication', IgnoreCase = $false)]
         [string] $service,
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
