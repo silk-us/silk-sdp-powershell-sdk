@@ -12,7 +12,7 @@ param(
 
     .EXAMPLE
         New-WIndowsINIT.ps1 -Data1Interface Data1 -Data2Interface Data2
-    
+
 #>
 
 Set-Service -Name MSiSCSI -StartupType Automatic
@@ -32,14 +32,16 @@ foreach ($i in $dataPorts) {
     $currentInt = Get-SDPSystemNetIps | Where-Object {$_.net_port.ref -eq $portpath}
     if ($i.name -like "*01") {
         New-IscsiTargetPortal -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData1.IPAddress
+        $SDPIQN = Get-IscsiTarget
         Connect-IscsiTarget -NodeAddress $SDPIQN.NodeAddress -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData1.IPAddress -IsPersistent $true -IsMultipathEnabled $true
-    } elseif ($i.name -like "*02") {
+    } elseif ($i.name -like "*01") {
         New-IscsiTargetPortal -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData2.IPAddress
+        $SDPIQN = Get-IscsiTarget
         Connect-IscsiTarget -NodeAddress $SDPIQN.NodeAddress -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData2.IPAddress -IsPersistent $true -IsMultipathEnabled $true
     }
 }
 
-# Initiate those disks and put a ring on it. 
+# Initiate those disks and for a ring on it. 
 
 if ($initialize) {
     Get-Disk | Where-Object {$_.FriendlyName -like "KMNRIO*" -and $_.size -gt "262144"} | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -AssignDriveLetter -UseMaximumSize | Format-Volume -FileSystem NTFS -NewFileSystemLabel "SDPVol" -Confirm:$false
