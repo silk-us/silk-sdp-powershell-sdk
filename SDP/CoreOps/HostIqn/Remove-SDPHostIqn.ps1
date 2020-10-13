@@ -1,8 +1,8 @@
 function Remove-SDPHostIqn {
     param(
-        [parameter(ValueFromPipelineByPropertyName)]
-        [Alias('pipeId')]
-        [string] $id,
+        [parameter(Mandatory,ValueFromPipelineByPropertyName)]
+        [Alias('pipeName')]
+        [string] $hostName,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -32,8 +32,11 @@ function Remove-SDPHostIqn {
     }
 
     process {
+
+        $hostObject = Get-SDPHostIqn -hostName $hostName
+
         ## Make the call
-        $endpointURI = $endpoint + '/' + $id
+        $endpointURI = $endpoint + '/' + $hostObject.id
         $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
         return $results
     }
