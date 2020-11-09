@@ -4,7 +4,11 @@ param(
     [parameter(Mandatory)]
     [string] $Data2Interface,
     [parameter()]
-    [switch] $initialize
+    [switch] $initialize,
+    [parameter()]
+    [switch] $startiSCSI,
+    [parameter()]
+    [switch] $addHW
 )
 <#
     .SYNOPSIS
@@ -15,10 +19,15 @@ param(
 
 #>
 
-Set-Service -Name MSiSCSI -StartupType Automatic
-Start-Service MSiSCSI 
+if ($startiSCSI) {
+    Set-Service -Name MSiSCSI -StartupType Automatic
+    Start-Service MSiSCSI 
+}
 
-New-MSDSMSupportedHW –VendorID KMNRIO –Product KDP
+if ($addHW) {
+    New-MSDSMSupportedHW -VendorID KMNRIO -Product KDP
+}
+
 
 $iSCSIData1 = Get-NetIPAddress -InterfaceAlias $Data1Interface -AddressFamily ipv4
 $iSCSIData2 = Get-NetIPAddress -InterfaceAlias $Data2Interface -AddressFamily ipv4
