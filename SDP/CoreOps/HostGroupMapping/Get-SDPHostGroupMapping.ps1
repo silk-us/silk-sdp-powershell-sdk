@@ -43,13 +43,11 @@ function Get-SDPHostGroupMapping {
     }
     
     process {
-        # parameter cleanup
-        <#
-        if ($hostName) {
-            $PSBoundParameters.host = $PSBoundParameters.hostref 
-            $PSBoundParameters.remove('hostref') | Out-Null
+
+        if ($asSnapshot) {
+            Write-Verbose 'removing asSnapshot from parameter list.'
+            $PSBoundParameters.remove('asSnapshot') | Out-Null
         }
-        #>
 
         # special ops
 
@@ -68,7 +66,11 @@ function Get-SDPHostGroupMapping {
         }
 
         # make the call
+
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        if ($asSnapshot) {
+            $results = $results | Where-Object {$_.volume -match '/snapshots/'}
+        } 
         return $results
     }
 

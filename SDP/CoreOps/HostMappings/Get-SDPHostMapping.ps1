@@ -27,6 +27,9 @@ function Get-SDPHostMapping {
         .EXAMPLE 
         Get-SDPHost -name "Host01" | Get-SDPHostMapping
 
+        .EXAMPLE 
+        Get-SDPHostMapping -hostName "Host01" -asSnapshot
+
         .DESCRIPTION
         Query for any host mapping on the SDP. This function accepts piped input from Get-SDPHost. 
 
@@ -44,12 +47,10 @@ function Get-SDPHostMapping {
     
     process {
         # parameter cleanup
-        <#
-        if ($hostName) {
-            $PSBoundParameters.host = $PSBoundParameters.hostref 
-            $PSBoundParameters.remove('hostref') | Out-Null
+        if ($asSnapshot) {
+            Write-Verbose 'removing asSnapshot from parameter list.'
+            $PSBoundParameters.remove('asSnapshot') | Out-Null
         }
-        #>
 
         # special ops
 
@@ -69,6 +70,9 @@ function Get-SDPHostMapping {
 
         # make the call
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        if ($asSnapshot) {
+            $results = $results | Where-Object {$_.volume -match '/snapshots/'}
+        } 
         return $results
     }
 
