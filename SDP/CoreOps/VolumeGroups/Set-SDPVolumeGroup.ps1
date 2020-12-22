@@ -8,7 +8,7 @@ function Set-SDPVolumeGroup {
         [parameter()]
         [int] $quotaInGB,
         [parameter()]
-        [switch] $enableDeDuplication,
+        [bool] $enableDeDuplication = $false,
         [parameter()]
         [string] $Description,
         [parameter()]
@@ -67,7 +67,7 @@ function Set-SDPVolumeGroup {
             $o | Add-Member -MemberType NoteProperty -Name capacity_policy -Value $cappol
         }
         if ($enableDeDuplication) {
-            $o | Add-Member -MemberType NoteProperty -Name is_dedupe -Value $true
+            $o | Add-Member -MemberType NoteProperty -Name is_dedupe -Value $enableDeDuplication
         }
 
         $body = $o 
