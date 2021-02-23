@@ -46,6 +46,8 @@ if ($Data2Interface) {
     $iSCSIData2 = Get-NetIPAddress -InterfaceAlias $Data2Interface -AddressFamily ipv4
 }
 
+# Set the global MPIO policy to round robin
+Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR
 
 $dataPorts = Get-SDPSystemNetPorts | where-object {$_.name -match "data"}
 
