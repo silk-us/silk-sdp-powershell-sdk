@@ -2,7 +2,7 @@ param(
     [parameter(Mandatory)]
     [string] $Data1Interface,
     [parameter()]
-    [string] $Data2Interface
+    [string] $Data2Interface,
     [parameter()]
     [switch] $startiSCSI,
     [parameter()]
@@ -44,8 +44,13 @@ if ($Data2Interface) {
 }
 
 # Set the global MPIO policy to round robin
-Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy RR
+Set-MSDSMGlobalDefaultLoadBalancePolicy -Policy LQD
 Enable-MSDSMAutomaticClaim -BusType iSCSI -Confirm:$false
+Set-MPIOSetting -NewPathVerificationState Enabled
+Set-MPIOSetting -NewPathVerificationPeriod 1
+Set-MPIOSetting -NewDiskTimeout 60
+Set-MPIOSetting -NewRetryCount 3
+Set-MPIOSetting -NewPDORemovePeriod 80
 
 $dataPorts = Get-SDPSystemNetPorts | where-object {$_.name -match "data"}
 
@@ -64,7 +69,4 @@ foreach ($i in $dataPorts) {
         }
     }
 }
-
-# Initiate those disks and for a ring on it. 
-
 
