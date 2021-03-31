@@ -8,7 +8,9 @@ param(
     [parameter()]
     [ipaddress] $remoteData1Subnet,
     [parameter()]
-    [ipaddress] $remoteData2Subnet
+    [ipaddress] $remoteData2Subnet,
+    [parameter()]
+    [ipaddress] $remoteDataSubnetMask = $subnetMask
 )
 
 <#
@@ -28,73 +30,25 @@ param(
 
 #>
 
-[ipaddress] $data1Gateway = $data1Subnet.Address + 16777216
-[ipaddress] $data2Gateway = $data2Subnet.Address + 16777216
+$dataPorts = Get-SDPSystemNetPorts | Where-Object {$_.name -match "dataport0"}
 
-[ipaddress] $data1Interface = $data1Gateway.Address + 16777216
-[ipaddress] $data2Interface = $data2Gateway.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node02_dataport01) {
-    Get-SDPSystemNetPorts -name c-node02_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node02_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
+foreach ($i in $dataPorts) {
+    [string]$ipid = $i.name.Split('_')[0][-1]
+    [string]$dpid = $i.name[-1]
+    $ipup = 16777216 * $ipid
+    if ($dpid -eq "1") {
+        [ipaddress]$ipint = $data1Subnet.Address + $ipup        
+    } else {
+        [ipaddress]$ipint = $data2Subnet.Address + $ipup
+    }
+    Get-SDPSystemNetPorts -name $i.name | New-SDPSystemNetIps -ipAddress $ipint.IPAddressToString -subnetMask $subnetMask -service iscsi
 }
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node03_dataport01) {
-    Get-SDPSystemNetPorts -name c-node03_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node03_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-}
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node04_dataport01) {
-    Get-SDPSystemNetPorts -name c-node04_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node04_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-}
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node05_dataport01) {
-    Get-SDPSystemNetPorts -name c-node05_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node05_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-}
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node06_dataport01) {
-    Get-SDPSystemNetPorts -name c-node06_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node06_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-}
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node07_dataport01) {
-    Get-SDPSystemNetPorts -name c-node07_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node07_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-}
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
-
-if (Get-SDPSystemNetPorts -name c-node08_dataport01) {
-    Get-SDPSystemNetPorts -name c-node08_dataport01 | New-SDPSystemNetIps -ipAddress $data1Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-    Get-SDPSystemNetPorts -name c-node08_dataport02 | New-SDPSystemNetIps -ipAddress $data2Interface.IPAddressToString -subnetMask $subnetMask -service iscsi
-}
-
-[ipaddress] $data1Interface = $data1Interface.Address + 16777216
-[ipaddress] $data2Interface = $data2Interface.Address + 16777216
 
 if ($remoteData1Subnet) {
-    New-SDPStaticRoute -destinationSubnetIp $remoteData1Subnet.IPAddressToString -destinationSubnetMask $subnetMask -gatewayIp $data1Gateway.IPAddressToString
+    New-SDPStaticRoute -destinationSubnetIp $remoteData1Subnet.IPAddressToString -destinationSubnetMask $remoteDataSubnetMask -gatewayIp $data1Gateway.IPAddressToString
 }
 
 if ($remoteData2Subnet) {
-    New-SDPStaticRoute -destinationSubnetIp $remoteData2Subnet.IPAddressToString -destinationSubnetMask $subnetMask -gatewayIp $data2Gateway.IPAddressToString
+    New-SDPStaticRoute -destinationSubnetIp $remoteData2Subnet.IPAddressToString -destinationSubnetMask $remoteDataSubnetMask -gatewayIp $data2Gateway.IPAddressToString
 }
 
