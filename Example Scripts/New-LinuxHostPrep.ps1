@@ -25,24 +25,28 @@ param(
 #>
 
 # Create the host
-New-SDPHost -name $name -type Linux
+try {
+    New-SDPHost -name $name -type Linux -verbose
+} catch {
+    Write-Error -Message "Host Creation failed"
+}
 
 # Create the volume group
 $vgname = $name + '-vg'
-New-SDPVolumeGroup -name $vgname
+New-SDPVolumeGroup -name $vgname -verbose
 
 # Create the volumes
 $number = 1
 while ($number -le $numberOfVolumes) {
     $volname = $name + '-vol-' + $number
-    New-SDPVolume -VolumeGroupName $vgname -sizeInGB $sizeInGB -name $volname
-    New-SDPHostMapping -volumeName $volname -hostName $name
+    New-SDPVolume -VolumeGroupName $vgname -sizeInGB $sizeInGB -name $volname -verbose
+    New-SDPHostMapping -volumeName $volname -hostName $name -verbose
     $number++
 }
 
 # Add host connection information
-if ($iqn) {Set-SDPHostIqn -iqn $iqn -hostName $name}
-if ($pwwn) {Set-SDPHostPwwn -pwwn $pwwn -hostName $name}
+if ($iqn) {Set-SDPHostIqn -iqn $iqn -hostName $name -verbose}
+if ($pwwn) {Set-SDPHostPwwn -pwwn $pwwn -hostName $name -verbose}
 
 Write-Host -ForegroundColor yellow '--- To remove all objects ---'
 Write-Host -ForegroundColor yellow "Get-SDPHost -name $name | Get-SDPHostMapping | Remove-SDPHostMapping"
