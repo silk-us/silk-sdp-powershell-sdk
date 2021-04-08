@@ -9,7 +9,7 @@ Import-Module ./path/SDP/sdp.psd1
 
 Or install via the PowerShell Gallery
 ```powershell
-Find-Module SDP -AllowPrerelease | Install-Module -confirm:0
+Find-Module SDP | Install-Module -confirm:0
 ```
 
 Or, run the provided InstallSDP.ps1 script. 
