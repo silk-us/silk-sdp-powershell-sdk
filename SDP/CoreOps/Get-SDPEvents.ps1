@@ -82,7 +82,7 @@ function Get-SDPEvents {
             $classSDPEvent.timestamp = $classTimeStamp
             $classSDPEvent.user = $i.user
             $classSDPEvent.pipeId = $i.pipeId
-            $classSDPEvent.pipeName = $is.pipeName
+            $classSDPEvent.pipeName = $i.pipeName
 
             $eventArray += $classSDPEvent
         }
