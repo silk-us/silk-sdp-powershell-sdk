@@ -1,3 +1,16 @@
+class sdpevent {
+    [string] $event_id
+    [string] $id
+    [string] $labels
+    [string] $level 
+    [string] $message
+    [string] $name
+    [datetime] $timestamp 
+    [string] $user
+    [string] $pipeId
+    [string] $pipeName
+}
+
 function Get-SDPEvents {
     param(
         [parameter()]
@@ -50,7 +63,25 @@ function Get-SDPEvents {
         }
         
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
-        return $results
+
+        # Object
+        # Build an instance of the class
+        $classSDPEvent = [sdpevent]::new()
+
+        # Populate the class object
+        $classSDPEvent.event_id = $results.event_id
+        $classSDPEvent.id = $results.id
+        $classSDPEvent.labels = $results.labels
+        $classSDPEvent.level = $results.level
+        $classSDPEvent.message = $results.message
+        $classSDPEvent.name = $results.name
+        $classTimeStamp = Convert-SDPTimeStampFrom -timestamp $results.timestamp
+        $classSDPEvent.timestamp = $classTimeStamp
+        $classSDPEvent.user = $results.user
+        $classSDPEvent.pipeId = $results.pipeId
+        $classSDPEvent.pipeName = $results.pipeName
+
+        return $classSDPEvent
     }
 }
 
