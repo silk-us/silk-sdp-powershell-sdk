@@ -44,7 +44,7 @@ function Get-SDPEvents {
     # function specific operations
     process {
         if ($timestamp) {
-            $cdate = Convert-SDPTimeStamp -timestamp $timestamp
+            $cdate = Convert-SDPTimeStampTo -timestamp $timestamp
             $PSBoundParameters.remove('timestamp') | Out-Null
             $PSBoundParameters.timestamp = $cdate
         }
