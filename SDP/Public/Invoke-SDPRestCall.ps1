@@ -16,6 +16,10 @@ function Invoke-SDPRestCall {
         [parameter()]
         [switch] $strictURI,
         [parameter()]
+        [array] $strictURIgte,
+        [parameter()]
+        [array] $strictURIlte,
+        [parameter()]
         [switch] $fullResponse
     )
 
@@ -68,7 +72,13 @@ function Invoke-SDPRestCall {
                     Write-Verbose "$p is declares as REF... skipping URI"
                 } else {
                     if ($parseTarget -is [int]) {
-                        $endpointURI = $endpointURI + $p + '__in='+$parseTarget + '&'
+                        if ($strictURIgte -contains $p) {
+                            $endpointURI = $endpointURI + $p + '__gt='+$parseTarget + '&'
+                        } elseif ($strictURIlte -contains $p) {
+                            $endpointURI = $endpointURI + $p + '__lt='+$parseTarget + '&'
+                        } else {
+                            $endpointURI = $endpointURI + $p + '__in='+$parseTarget + '&'
+                        }
                     } else {
                         $endpointURI = $endpointURI + $p + '__contains='+$parseTarget + '&'
                     }
@@ -147,7 +157,7 @@ function Invoke-SDPRestCall {
         $results = $results.hits
     }
     
-    if ($parameterList.Count -gt 0) {
+    if ($parameterList.Count -gt 0 -and $strictURI -eq $false) {
         $rcount = $results.Count
         Write-Verbose "Found $rcount results"
         if ($parameterList.keys) {
