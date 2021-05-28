@@ -6,6 +6,8 @@ param(
     [parameter()]
     [switch] $startiSCSI,
     [parameter()]
+    [int] $sessionsPerPath = 1,
+    [parameter()]
     [switch] $addHW,
     [parameter()]
     [switch] $addHost
@@ -19,7 +21,7 @@ param(
             -startiSCSI -- This will start the iSCSI service and set it for automatic start. 
 
     .EXAMPLE
-        New-WIndowsINIT.ps1 -Data1Interface Data1 -Data2Interface Data2 -addHost -startiSCSI -addHW 
+        New-WIndowsINIT.ps1 -Data1Interface 'Ethernet 4' -Data2Interface 'Ethernet 5' -addHost -startiSCSI -addHW 
 
 #>
 
@@ -57,16 +59,20 @@ $dataPorts = Get-SDPSystemNetPorts | where-object {$_.name -match "data"}
 foreach ($i in $dataPorts) {
     $portpath = '/system/net_ports/' + $i.id
     $currentInt = Get-SDPSystemNetIps | Where-Object {$_.net_port.ref -eq $portpath}
-    if ($i.name -like "*01") {
-        New-IscsiTargetPortal -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData1.IPAddress
-        $SDPIQN = Get-IscsiTarget
-        Connect-IscsiTarget -NodeAddress $SDPIQN.NodeAddress -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData1.IPAddress -IsPersistent $true -IsMultipathEnabled $true
-    } elseif ($i.name -like "*02") {
-        if ($Data2Interface) {
-            New-IscsiTargetPortal -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData2.IPAddress
+    $session = 0
+    while ($session -lt $sessionsPerPath) {
+        if ($i.name -like "*01") {
+            New-IscsiTargetPortal -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData1.IPAddress
             $SDPIQN = Get-IscsiTarget
-            Connect-IscsiTarget -NodeAddress $SDPIQN.NodeAddress -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData2.IPAddress -IsPersistent $true -IsMultipathEnabled $true
+            Connect-IscsiTarget -NodeAddress $SDPIQN.NodeAddress -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData1.IPAddress -IsPersistent $true -IsMultipathEnabled $true
+        } elseif ($i.name -like "*02") {
+            if ($Data2Interface) {
+                New-IscsiTargetPortal -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData2.IPAddress
+                $SDPIQN = Get-IscsiTarget
+                Connect-IscsiTarget -NodeAddress $SDPIQN.NodeAddress -TargetPortalAddress $currentInt.ip_address -TargetPortalPortNumber 3260 -InitiatorPortalAddress $iSCSIData2.IPAddress -IsPersistent $true -IsMultipathEnabled $true
+            }
         }
+    $session++
     }
 }
 
