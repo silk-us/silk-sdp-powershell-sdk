@@ -12,6 +12,9 @@ function New-SDPHost {
         [parameter(Mandatory)]
         [ValidateSet('Linux','Windows','ESX',IgnoreCase = $false)]
         [string] $type,
+        [parameter(Mandatory)]
+        [ValidateSet('FC','NVME','ISCSI',IgnoreCase = $false)]
+        [string] $connectivityType,
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
@@ -55,6 +58,9 @@ function New-SDPHost {
         $o | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
         $o | Add-Member -MemberType NoteProperty -Name 'type' -Value $type
         $o | Add-Member -MemberType NoteProperty -Name "host_group" -Value $hgpath
+        if ($connectivityType) {
+            $o | Add-Member -MemberType NoteProperty -Name "connectivity_type" -Value $connectivityType
+        }
 
         # end special ops
 
