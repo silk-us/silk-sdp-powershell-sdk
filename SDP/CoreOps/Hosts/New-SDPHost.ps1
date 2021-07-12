@@ -12,7 +12,7 @@ function New-SDPHost {
         [parameter(Mandatory)]
         [ValidateSet('Linux','Windows','ESX',IgnoreCase = $false)]
         [string] $type,
-        [parameter(Mandatory)]
+        [parameter()]
         [ValidateSet('FC','NVME','ISCSI',IgnoreCase = $false)]
         [string] $connectivityType,
         [parameter()]
