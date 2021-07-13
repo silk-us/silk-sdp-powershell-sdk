@@ -13,7 +13,7 @@ function New-SDPHost {
         [ValidateSet('Linux','Windows','ESX',IgnoreCase = $false)]
         [string] $type,
         [parameter()]
-        [ValidateSet('FC','NVME','ISCSI',IgnoreCase = $false)]
+        [ValidateSet('FC','NVME','iSCSI',IgnoreCase = $false)]
         [string] $connectivityType,
         [parameter()]
         [string] $k2context = "k2rfconnection"
