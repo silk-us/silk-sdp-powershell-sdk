@@ -16,9 +16,13 @@ function Invoke-SDPRestCall {
         [parameter()]
         [switch] $strictURI,
         [parameter()]
+        [switch] $strictString,
+        [parameter()]
         [array] $strictURIgte,
         [parameter()]
         [array] $strictURIlte,
+        [parameter()]
+        [switch] $noLimit,
         [parameter()]
         [switch] $fullResponse
     )
@@ -47,8 +51,10 @@ function Invoke-SDPRestCall {
 
     $endpointURI = New-SDPURI -endpoint $endpoint -k2context $k2context
     if ($method -eq 'GET') {
-        $limitURI = '__limit=' + $limit.ToString() + '&'
-        $endpointURI = $endpointURI + $limitURI
+        if (!$noLimit) {
+            $limitURI = '__limit=' + $limit.ToString() + '&'
+            $endpointURI = $endpointURI + $limitURI
+        }
     }
 
     # Cleanup the parameter list and construct the URI with the argued parameters. (This removes system parameters, such as 'Verbose' and 'ErrorAction')
@@ -79,8 +85,14 @@ function Invoke-SDPRestCall {
                         } else {
                             $endpointURI = $endpointURI + $p + '__in='+$parseTarget + '&'
                         }
+                    } elseif ($parseTarget -is [bool]) {
+                        $endpointURI = $endpointURI + $p + '='+$parseTarget + '&'
                     } else {
-                        $endpointURI = $endpointURI + $p + '__contains='+$parseTarget + '&'
+                        if ($strictString) {
+                            $endpointURI = $endpointURI + $p + '='+$parseTarget + '&'
+                        } else {
+                            $endpointURI = $endpointURI + $p + '__contains='+$parseTarget + '&'
+                        }
                     }
                 }
             }

@@ -1,7 +1,7 @@
 param(
     [parameter(Mandatory)]
     [ipaddress] $data1Subnet,
-    [parameter(Mandatory)]
+    [parameter()]
     [ipaddress] $data2Subnet,
     [parameter()]
     [ipaddress] $subnetMask = 255.255.255.240,
@@ -37,13 +37,15 @@ foreach ($i in $dataPorts) {
     [string]$dpid = $i.name[-1]
     $ipup = 16777216 * $ipid
     if ($dpid -eq "1") {
-        [ipaddress]$ipint = $data1Subnet.Address + $ipup        
+        [ipaddress]$ipint = $data1Subnet.Address + $ipup   
+        Get-SDPSystemNetPorts -name $i.name | New-SDPSystemNetIps -ipAddress $ipint.IPAddressToString -subnetMask $subnetMask -service iscsi     
     } else {
-        [ipaddress]$ipint = $data2Subnet.Address + $ipup
+        if ($data2Subnet) {
+            [ipaddress]$ipint = $data2Subnet.Address + $ipup
+            Get-SDPSystemNetPorts -name $i.name | New-SDPSystemNetIps -ipAddress $ipint.IPAddressToString -subnetMask $subnetMask -service iscsi
+        }
     }
-    Get-SDPSystemNetPorts -name $i.name | New-SDPSystemNetIps -ipAddress $ipint.IPAddressToString -subnetMask $subnetMask -service iscsi
 }
-
 if ($remoteData1Subnet) {
     New-SDPStaticRoute -destinationSubnetIp $remoteData1Subnet.IPAddressToString -destinationSubnetMask $remoteDataSubnetMask -gatewayIp $data1Gateway.IPAddressToString
 }
