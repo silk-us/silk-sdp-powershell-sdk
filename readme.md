@@ -4,7 +4,7 @@
 ### Installation 
 For now, clone this repo and import the module manually via:
 ```powershell
-Import-Module ./path/SDP/sdp.psd1
+Import-Module ./path/SDP/sdp.psd1 
 ```
 
 Or install via the PowerShell Gallery
