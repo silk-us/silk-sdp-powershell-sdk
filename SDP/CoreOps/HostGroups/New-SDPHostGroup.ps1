@@ -5,8 +5,6 @@ function New-SDPHostGroup {
         [parameter()]
         [string] $description,
         [parameter()]
-        [string] $ConnectivityType,
-        [parameter()]
         [switch] $allowDifferentHostTypes,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
@@ -39,9 +37,6 @@ function New-SDPHostGroup {
         $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
         if ($description) {
             $o | Add-Member -MemberType NoteProperty -Name "description" -Value $description
-        }
-        if ($ConnectivityType) {
-            $o | Add-Member -MemberType NoteProperty -Name "connectivity_type" -Value $ConnectivityType
         }
         if ($allowDifferentHostTypes) {
             $o | Add-Member -MemberType NoteProperty -Name "allow_different_host_types" -Value $true

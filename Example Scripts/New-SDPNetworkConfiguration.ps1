@@ -10,7 +10,11 @@ param(
     [parameter()]
     [ipaddress] $remoteData2Subnet,
     [parameter()]
-    [ipaddress] $remoteDataSubnetMask = $subnetMask
+    [ipaddress] $remoteDataSubnetMask = $subnetMask,
+    [parameter()]
+    [ipaddress] $data1Gateway,
+    [parameter()]
+    [ipaddress] $data2Gateway
 )
 
 <#
