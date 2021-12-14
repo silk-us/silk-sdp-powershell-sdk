@@ -21,6 +21,10 @@ function Get-SDPSystemStats {
         [parameter()]
         [switch] $rwBreakdown,
         [parameter()]
+        [datetime] $fromTime,
+        [parameter()]
+        [int] $dataPoints,
+        [parameter()]
         [ValidateSet('5m','1h')]
         [string] $resolution,
         [parameter()]
@@ -41,6 +45,19 @@ function Get-SDPSystemStats {
         if ($rwBreakdown) {
             $PSBoundParameters.remove('rwBreakdown') | Out-Null
             $PSBoundParameters.__rw_breakdown = $true
+        }
+
+        if ($fromTime) {
+            $PSBoundParameters.remove('fromTime') | Out-Null
+            $paramTime = Convert-SDPTimeStampTo -timestamp $fromTime
+            $paramTimeStamp = (Convert-SDPTimeStampFrom -timestamp $paramTime).toString()
+            $PSBoundParameters.__from_time = $paramTime
+            Write-Verbose "Using $paramTimeStamp as UTC time"
+        }
+
+        if ($dataPoints) {
+            $PSBoundParameters.remove('dataPoints') | Out-Null
+            $PSBoundParameters.__datapoints = $dataPoints.ToString()
         }
 
         if ($resolution) {

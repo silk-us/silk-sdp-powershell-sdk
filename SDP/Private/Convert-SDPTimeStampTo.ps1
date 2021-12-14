@@ -3,11 +3,17 @@ function Convert-SDPTimeStampTo {
         [parameter(Mandatory)]
         [datetime] $timestamp,
         [parameter()]
-        [switch] $int
+        [switch] $int,
+        [parameter()]
+        [switch] $useLocalTime
     )
 
     $epoch = Get-Date -Date "01/01/1970"
-    $return = (New-TimeSpan -Start $epoch -End $timestamp.ToUniversalTime()).TotalSeconds
+    if ($useLocalTime) {
+        $return = (New-TimeSpan -Start $epoch -End $timestamp).TotalSeconds
+    } else {
+        $return = (New-TimeSpan -Start $epoch -End $timestamp.ToUniversalTime()).TotalSeconds
+    }
     if ($int) {
         [int]$return = $return
     }
