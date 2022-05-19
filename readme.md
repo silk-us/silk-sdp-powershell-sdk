@@ -1,5 +1,5 @@
 # Silk Data Pod (formerly Kaminario K2) PowerShell SDK 
-## This SDK and module, though nearly feature complete, is still pre-release and undergoing development. 
+## This SDK and module is provided as-is. 
 
 ### Installation 
 For now, clone this repo and import the module manually via:

@@ -1,4 +1,4 @@
-function Get-SDPVolumeVolsnap {
+function Get-SDPVolumeView {
     param(
         [parameter()]
         [Alias("BaseVolume")]
