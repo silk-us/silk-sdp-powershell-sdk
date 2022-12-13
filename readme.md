@@ -35,7 +35,7 @@ This module requires Powershell 4.x or above and was developed on PowerShell Cor
 After importing, you can connect to the Silk Data Platform or Kaminario K2 appliance using a conventional PowerShell credential object
 ```powershell
 $creds = get-credential
-Connect-SDP -Server 10.10.47.15 -Credentials $cred
+Connect-SDP -Server 10.10.47.16 -Credentials $cred
 ```
 
 You can then use the functions in the module manifest to perform the desired operations. 
