@@ -12,7 +12,7 @@ Or install via the PowerShell Gallery
 Find-Module SDP | Install-Module -confirm:0
 ```
 
-Or, run the provided InstallSDP.ps1 script. 
+Or, run the provided `InstallSDP.ps1` script. 
 ```powershell
 Unblock-File .\InstallSDP.ps1
 .\InstallSDP.ps1
