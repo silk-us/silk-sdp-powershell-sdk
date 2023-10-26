@@ -10,6 +10,8 @@ function New-SDPReplicationSession {
         [string] $retentionPolicyName,
         [parameter(Mandatory)]
         [string] $externalRetentionPolicyName,
+        [parameter()]
+        [switch] $mapped,
         [parameter(Mandatory)]
         [int] $RPO,
         [parameter()]
@@ -60,6 +62,12 @@ function New-SDPReplicationSession {
         $o | Add-Member -MemberType NoteProperty -Name "local_volume_group" -Value $volumeGroupPath
         $o | Add-Member -MemberType NoteProperty -Name "retention_policy" -Value $retentionPolicypath
         $o | Add-Member -MemberType NoteProperty -Name "external_retention_policy" -Value $externalRetentionPolicypath
+        $o | Add-Member -MemberType NoteProperty -Name "auto_configure_peer_volumes" -Value $true
+        if ($mapped) {
+            $o | Add-Member -MemberType NoteProperty -Name "target_exposure" -Value 'Mapped - Not Exposed'
+        } else {
+            $o | Add-Member -MemberType NoteProperty -Name "target_exposure" -Value 'Read Only'
+        }
 
 
         # Make the call 
@@ -67,12 +75,12 @@ function New-SDPReplicationSession {
         $body = $o
         
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
         } catch {
             return $Error[0]
         }
         
-        return $body
+        return $results
     }
 }
 
