@@ -4,6 +4,8 @@ function Stop-SDPReplicationSession {
         [Alias('pipeName')]
         [string] $name,
         [parameter()]
+        [switch] $idle,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
 
@@ -15,7 +17,11 @@ function Stop-SDPReplicationSession {
         $session = Get-SDPReplicationSessions -name $name
         if ($session) {
             $o = New-Object psobject
-            $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'suspended'
+            if ($idle) {
+                $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'idle'
+            } else {
+                $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'suspended'
+            }
 
             $body = $o
             $endpoint = $endpoint + '/' + $session.id

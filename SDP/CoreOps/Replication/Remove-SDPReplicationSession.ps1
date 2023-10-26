@@ -8,7 +8,7 @@ function Remove-SDPReplicationSession {
     )
 
     begin {
-        $endpoint = "replication/sessions/" + $id.tostring()
+        $endpoint = "replication/sessions/" 
     }
     
     process {
