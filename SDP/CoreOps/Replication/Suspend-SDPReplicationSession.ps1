@@ -1,4 +1,4 @@
-function Start-SDPReplicationSession {
+function Suspend-SDPReplicationSession {
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -15,7 +15,7 @@ function Start-SDPReplicationSession {
         $session = Get-SDPReplicationSessions -name $name
         if ($session) {
             $o = New-Object psobject
-            $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'in_sync'
+            $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'suspended'
 
             $body = $o
             $endpoint = $endpoint + '/' + $session.id
