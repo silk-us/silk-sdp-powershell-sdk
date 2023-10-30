@@ -14,7 +14,10 @@ function Remove-SDPReplicationSession {
     process {
         $session = Get-SDPReplicationSessions -name $name
         if ($session) {
-
+            if ($session.state -ne 'idle') {
+                $errormsg = 'Please ensure replication session is currently "idle"'
+                return $errormsg | Write-Error
+            }
             $endpoint = $endpoint + '/' + $session.id
             
             try {
