@@ -4,6 +4,8 @@ function Start-SDPReplicationSession {
         [Alias('pipeName')]
         [string] $name,
         [parameter()]
+        [switch] $wait,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
 
@@ -24,6 +26,12 @@ function Start-SDPReplicationSession {
                 $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
             } catch {
                 return $Error[0]
+            }
+            if ($wait) {
+                while ($session.state -ne 'in_sync') {
+                    $session = Get-SDPReplicationSessions -name $name
+                    Start-Sleep -Seconds 2
+                }
             }
             $results = Get-SDPReplicationSessions -name $name
             return $results

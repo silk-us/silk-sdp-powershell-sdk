@@ -4,6 +4,8 @@ function Suspend-SDPReplicationSession {
         [Alias('pipeName')]
         [string] $name,
         [parameter()]
+        [switch] $wait,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
 
@@ -14,6 +16,11 @@ function Suspend-SDPReplicationSession {
     process {
         $session = Get-SDPReplicationSessions -name $name
         if ($session) {
+            if ($session.state -ne 'in_sync') {
+                $errormsg = 'Please ensure replication session is currently "in_sync"'
+                return $errormsg | Write-Error
+            }
+
             $o = New-Object psobject
             $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'suspended'
 
@@ -24,6 +31,12 @@ function Suspend-SDPReplicationSession {
                 $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
             } catch {
                 return $Error[0]
+            }
+            if ($wait) {
+                while ($session.state -ne 'suspended') {
+                    $session = Get-SDPReplicationSessions -name $name
+                    Start-Sleep -Seconds 2
+                }
             }
             $results = Get-SDPReplicationSessions -name $name
             return $results
