@@ -20,20 +20,24 @@ function Start-SDPReplicationSession {
             $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'in_sync'
 
             $body = $o
-            $endpoint = $endpoint + '/' + $session.id
+            $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
             } catch {
                 return $Error[0]
             }
             if ($wait) {
                 while ($session.state -ne 'in_sync') {
-                    $session = Get-SDPReplicationSessions -name $name
-                    Start-Sleep -Seconds 2
+                    while ($session.current_snapshot_progress -lt 100) {
+                        $activityString = "Starting replication session " + $name + " - " + $session.estimated_remaining_time + " secs"
+                        Write-Progress -PercentComplete $session.current_snapshot_progress -Activity $activityString
+                        Start-Sleep -Seconds 2
+                        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+                    }
                 }
             }
-            $results = Get-SDPReplicationSessions -name $name
+            $results = Get-SDPReplicationSessions -name $name -k2context $k2context
             return $results
         }
     }

@@ -25,20 +25,20 @@ function Stop-SDPReplicationSession {
             $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'idle'
 
             $body = $o
-            $endpoint = $endpoint + '/' + $session.id
+            $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
             } catch {
                 return $Error[0]
             }
             if ($wait) {
                 while ($session.state -ne 'idle') {
-                    $session = Get-SDPReplicationSessions -name $name
+                    $session = Get-SDPReplicationSessions -name $name -k2context $k2context
                     Start-Sleep -Seconds 2
                 }
             }
-            $results = Get-SDPReplicationSessions -name $name
+            $results = Get-SDPReplicationSessions -name $name -k2context $k2context
             return $results
         }
     }

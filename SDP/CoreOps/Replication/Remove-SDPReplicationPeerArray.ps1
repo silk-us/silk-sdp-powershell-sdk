@@ -14,8 +14,8 @@ function Remove-SDPReplicationPeerArray {
 
     process {
         ## Make the call
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
+        $subendpoint = $endpoint + '/' + $id
+        $results = Invoke-SDPRestCall -endpoint $subendpoint -method DELETE -k2context $k2context
         return $results
     }
 }

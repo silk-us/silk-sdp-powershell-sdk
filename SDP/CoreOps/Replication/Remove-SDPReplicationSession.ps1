@@ -12,16 +12,16 @@ function Remove-SDPReplicationSession {
     }
     
     process {
-        $session = Get-SDPReplicationSessions -name $name
+        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
         if ($session) {
             if ($session.state -ne 'idle') {
                 $errormsg = 'Please ensure replication session is currently "idle"'
                 return $errormsg | Write-Error
             }
-            $endpoint = $endpoint + '/' + $session.id
+            $subendpoint = $endpoint + '/' + $session.id
             
             try {
-                $results = Invoke-SDPRestCall -endpoint $endpoint -method DELETE -k2context $k2context
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method DELETE -k2context $k2context
             } catch {
                 return $Error[0]
             }
