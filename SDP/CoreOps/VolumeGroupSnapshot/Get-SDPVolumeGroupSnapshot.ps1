@@ -70,7 +70,7 @@ function Get-SDPVolumeGroupSnapshot {
     
     process {
         if ($volumeGroupName) {
-            $volumeGroupid = Get-SDPVolumeGroup -name $volumeGroupName
+            $volumeGroupid = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
             $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $volumeGroupid.id -ObjectPath 'volume_groups' -nestedObject
             $PSBoundParameters.remove('volumeGroupName') | Out-Null
             $PSBoundParameters.volume_group = $volumeGroupPath

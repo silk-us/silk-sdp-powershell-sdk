@@ -39,7 +39,7 @@ function New-SDPVolumeGroup {
         }
         
         if ($capacityPolicy) {
-            $cappolstats = Get-SDPVgCapacityPolicies | Where-Object {$_.name -eq $capacityPolicy}
+            $cappolstats = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object {$_.name -eq $capacityPolicy}
             $cappol = ConvertTo-SDPObjectPrefix -ObjectID $cappolstats.id -ObjectPath vg_capacity_policies -nestedObject
         }
 
@@ -71,7 +71,7 @@ function New-SDPVolumeGroup {
             return $Error[0]
         }
         
-        $results = Get-SDPVolumeGroup -name $name
+        $results = Get-SDPVolumeGroup -name $name -k2context $k2context
         while (!$results) {
             Write-Verbose " --> Waiting on volume group $name"
             $results = Get-SDPVolumeGroup -name $name

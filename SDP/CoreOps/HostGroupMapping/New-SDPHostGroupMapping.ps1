@@ -41,10 +41,10 @@ function New-SDPHostGroupMapping {
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "host_groups" -ObjectID $hostGroupid.id -nestedObject
 
         if ($volumeName) {
-            $volumeid = Get-SDPVolume -name $volumeName
+            $volumeid = Get-SDPVolume -name $volumeName -k2context $k2context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
         } elseif ($snapshotName) {
-            $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName
+            $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName -k2context $k2context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeid.id -nestedObject
         } else {
             $message = "Please supply either a -volumeName or -snapshotName"

@@ -55,14 +55,14 @@ function Get-SDPHostMapping {
         # special ops
 
         if ($volumeName) {
-            $volumeObj = Get-SDPVolume -name $volumeName
+            $volumeObj = Get-SDPVolume -name $volumeName -k2context $k2context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeObj.id -nestedObject
             $PSBoundParameters.volume = $volumePath 
             $PSBoundParameters.remove('volumeName') | Out-Null
         }
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName
+            $hostObj = Get-SDPHost -name $hostName -k2context $k2context
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
             $PSBoundParameters.host = $hostPath 
             $PSBoundParameters.remove('hostName') | Out-Null

@@ -32,7 +32,7 @@ function Remove-SDPVolume {
         # Special Ops
 
         if ($name) {
-            $volname = Get-SDPVolume -name $name
+            $volname = Get-SDPVolume -name $name -k2context $k2context
             if (!$volname) {
                 return "No volume with name $name exists."
             } elseif (($volname | measure-object).count -gt 1) {

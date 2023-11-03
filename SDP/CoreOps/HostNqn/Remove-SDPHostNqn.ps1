@@ -33,7 +33,7 @@ function Remove-SDPHostNqn {
 
     process {
 
-        $hostObject = Get-SDPHostNqn -hostName $hostName
+        $hostObject = Get-SDPHostNqn -hostName $hostName -k2context $k2context
 
         ## Make the call
         $endpointURI = $endpoint + '/' + $hostObject.id

@@ -42,13 +42,13 @@ function New-SDPVolume {
 
         if ($volumeGroupId) {
             Write-Verbose "Working with Volume Group id $volumeGroupId"
-            $vgstats = Get-SDPVolumeGroup -id $volumeGroupId
+            $vgstats = Get-SDPVolumeGroup -id $volumeGroupId -k2context $k2context
             if (!$vgstats) {
                 Return "No volumegroup with ID $volumeGroupId exists."
             } 
         } elseif ($VolumeGroupName) {
             Write-Verbose "Working with Volume Group name $VolumeGroupName"
-            $vgstats = Get-SDPVolumeGroup -name $VolumeGroupName
+            $vgstats = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
             if (!$vgstats) {
                 Return "No volumegroup named $VolumeGroupName exists."
             } 

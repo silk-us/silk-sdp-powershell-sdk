@@ -40,7 +40,7 @@ function Set-SDPHost {
             $o | Add-Member -MemberType NoteProperty -Name 'type' -Value $type
         }
         if ($hostGroupName) {
-            $hostGroup = Get-SDPHostGroup -name $hostGroupName
+            $hostGroup = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
             $opt = ConvertTo-SDPObjectPrefix -ObjectID $hostGroup.id -ObjectPath host_groups -nestedObject
             $o | Add-Member -MemberType NoteProperty -Name 'host_group' -Value $opt
         }

@@ -40,14 +40,14 @@ function New-SDPHost {
 
         if ($hostGroupId) {
             Write-Verbose "Working with host Group id $hostGroupId"
-            $hgstats = Get-SDPhostGroup -id $hostGroupId
+            $hgstats = Get-SDPhostGroup -id $hostGroupId -k2context $k2context
             $hgpath = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hgstats.id -nestedObject
             if (!$hgstats) {
                 Return "No hostgroup with ID $hostGroupId exists."
             } 
         } elseif ($hostGroupName) {
             Write-Verbose "Working with host Group name $hostGroupName"
-            $hgstats = Get-SDPhostGroup -name $hostGroupName
+            $hgstats = Get-SDPhostGroup -name $hostGroupName -k2context $k2context
             $hgpath = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hgstats.id -nestedObject
             if (!$hgstats) {
                 Return "No hostgroup named $hostGroupName exists."

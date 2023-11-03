@@ -39,7 +39,7 @@ function New-SDPReplicationPeerArray {
             return $Error[0]
         }
         
-        $results = Get-SDPReplicationPeerArray -name $name
+        $results = Get-SDPReplicationPeerArray -name $name -k2context $k2context
         return $results
     }
 }

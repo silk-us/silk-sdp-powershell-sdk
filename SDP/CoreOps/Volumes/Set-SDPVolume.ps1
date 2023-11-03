@@ -46,7 +46,7 @@ function Set-SDPVolume {
 
         if ($VolumeGroupName) {
             Write-Verbose "Working with Volume Group name $VolumeGroupName"
-            $vgstats = Get-SDPVolumeGroup -name $VolumeGroupName
+            $vgstats = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
             if (!$vgstats) {
                 Return "No volumegroup named $VolumeGroupName exists."
             } else {

@@ -79,7 +79,7 @@ function New-SDPReplicationSession {
         } catch {
             return $Error[0]
         }
-        $results = Get-SDPReplicationSessions -name $name
+        $results = Get-SDPReplicationSessions -name $name -k2context $k2context
         return $results
     }
 }

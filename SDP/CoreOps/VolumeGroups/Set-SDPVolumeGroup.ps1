@@ -7,7 +7,7 @@ function Set-SDPVolumeGroup {
         [string] $name,
         [parameter()]
         [int] $quotaInGB,
-        [parameter(Mandatory)]
+        [parameter()]
         [bool] $enableDeDuplication = $false,
         [parameter()]
         [string] $Description,
@@ -42,7 +42,7 @@ function Set-SDPVolumeGroup {
         }
         
         if ($capacityPolicy) {
-            $cappolstats = Get-SDPVgCapacityPolicies | Where-Object {$_.name -eq $capacityPolicy}
+            $cappolstats = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object {$_.name -eq $capacityPolicy}
             $cappol = ConvertTo-SDPObjectPrefix -ObjectID $cappolstats.id -ObjectPath vg_capacity_policies -nestedObject
         }
 

@@ -21,7 +21,7 @@ function New-SDPVolumeGroupSnapshot {
 
     process{
         ## Special Ops
-        $volumeGroupObject = Get-SDPVolumeGroup -name $volumeGroupName
+        $volumeGroupObject = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
         $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectPath 'volume_groups' -ObjectID $volumeGroupObject.id -nestedObject
 
         $retentionPolicyObject = Get-SDPRetentionPolicy -name $retentionPolicyName

@@ -18,13 +18,13 @@ function New-SDPReplicationVolume {
     process{
         ## Special Ops
 
-        $volumeId = Get-SDPVolume -name $volumeName
-        $sessionId = Get-SDPReplicationPeerArray -name $replicationSessionName
+        $volumeId = Get-SDPVolume -name $volumeName -k2context $k2context
+        $sessionId = Get-SDPReplicationPeerArray -name $replicationSessionName -k2context $k2context
 
-        $volumeId = Get-SDPVolume -name $volumeName
+        $volumeId = Get-SDPVolume -name $volumeName -k2context $k2context
         $volumeName = ConvertTo-SDPObjectPrefix -ObjectID $volumeId.id -ObjectPath 'volumes' -nestedObject
 
-        $sessionId = Get-SDPReplicationSessions -name $replicationSessionName
+        $sessionId = Get-SDPReplicationSessions -name $replicationSessionName -k2context $k2context
         $peerArrayPath = ConvertTo-SDPObjectPrefix -ObjectID $sessionId.id -ObjectPath 'replication/sessions' -nestedObject
 
         # Build the object
