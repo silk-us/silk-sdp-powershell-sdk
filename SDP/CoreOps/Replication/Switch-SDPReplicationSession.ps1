@@ -1,4 +1,4 @@
-function Start-SDPReplicationSession {
+function Switch-SDPReplicationSession {
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -16,8 +16,14 @@ function Start-SDPReplicationSession {
     process {
         $session = Get-SDPReplicationSessions -name $name -k2context $k2context
         if ($session) {
+            if ($session.state -ne 'suspended') {
+                $errormsg = 'Please ensure replication session is currently "suspended"'
+                return $errormsg | Write-Error
+            }
+
             $o = New-Object psobject
-            $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'in_sync'
+            $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'failed_over'
+            $o | Add-Member -MemberType NoteProperty -Name "restored_snapshot" -Value $session.latest_replicated_snapshot
 
             $body = $o
             $subendpoint = $endpoint + '/' + $session.id
@@ -28,13 +34,9 @@ function Start-SDPReplicationSession {
                 return $Error[0]
             }
             if ($wait) {
-                while ($session.state -ne 'in_sync') {
-                    while ($session.current_snapshot_progress -lt 100) {
-                        $activityString = "Starting replication session " + $name + " - " + $session.estimated_remaining_time + " secs"
-                        Write-Progress -PercentComplete $session.current_snapshot_progress -Activity $activityString
-                        Start-Sleep -Seconds 2
-                        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
-                    }
+                while ($session.state -ne 'failed_over') {
+                    $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+                    Start-Sleep -Seconds 2
                 }
             }
             $results = Get-SDPReplicationSessions -name $name -k2context $k2context

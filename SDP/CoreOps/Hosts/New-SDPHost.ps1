@@ -72,10 +72,10 @@ function New-SDPHost {
             return $Error[0]
         }
         
-        $results = Get-SDPHost -name $name
+        $results = Get-SDPHost -name $name -k2context $k2context
         while (!$results) {
             Write-Verbose " --> Waiting on host $name"
-            $results = Get-SDPHost -name $name
+            $results = Get-SDPHost -name $name -k2context $k2context
             Start-Sleep 1
         }
 

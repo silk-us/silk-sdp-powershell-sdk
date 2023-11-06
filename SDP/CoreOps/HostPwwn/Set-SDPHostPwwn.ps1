@@ -16,7 +16,7 @@ function Set-SDPHostPwwn {
     process{
         ## Special Ops
 
-        $hostid = Get-SDPHost -name $hostname
+        $hostid = Get-SDPHost -name $hostname -k2context $k2context
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath 'hosts' -ObjectID $hostid.id -nestedObject
 
         # Build the Object

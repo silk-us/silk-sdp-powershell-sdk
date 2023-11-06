@@ -74,7 +74,7 @@ function New-SDPVolumeGroup {
         $results = Get-SDPVolumeGroup -name $name -k2context $k2context
         while (!$results) {
             Write-Verbose " --> Waiting on volume group $name"
-            $results = Get-SDPVolumeGroup -name $name
+            $results = Get-SDPVolumeGroup -name $name -k2context $k2context
             Start-Sleep 1
         }
 

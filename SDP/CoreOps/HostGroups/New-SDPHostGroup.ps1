@@ -50,7 +50,7 @@ function New-SDPHostGroup {
             return $Error[0]
         }
         
-        $results = Get-SDPHostGroup -name $name
+        $results = Get-SDPHostGroup -name $name -k2context $k2context
         while (!$results) {
             Write-Verbose " --> Waiting on host group $name"
             $results = Get-SDPHostGroup -name $name -k2context $k2context

@@ -14,7 +14,7 @@ function Suspend-SDPReplicationSession {
     }
     
     process {
-        $session = Get-SDPReplicationSessions -name $name
+        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
         if ($session) {
             if ($session.state -ne 'in_sync') {
                 $errormsg = 'Please ensure replication session is currently "in_sync"'

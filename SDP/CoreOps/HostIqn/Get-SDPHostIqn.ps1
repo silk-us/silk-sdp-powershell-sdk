@@ -41,7 +41,7 @@ function Get-SDPHostIqn {
         # Special Ops
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName
+            $hostObj = Get-SDPHost -name $hostName -k2context $k2context
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
             $PSBoundParameters.host = $hostPath 
             $PSBoundParameters.remove('hostName') | Out-Null

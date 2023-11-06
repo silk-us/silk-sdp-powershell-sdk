@@ -35,7 +35,7 @@ function Remove-SDPHostGroup {
     process {
         # Special Ops
         if ($name -and !$id) {
-            $id = (Get-SDPHostGroup -name $name).id
+            $id = (Get-SDPHostGroup -name $name -k2context $k2context).id
         }
 
         # Make the call

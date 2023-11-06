@@ -17,10 +17,10 @@ function New-SDPVolumeView {
 
     process{
         ## Special Ops
-        $snapshotObject = Get-SDPVolumeGroupSnapshot -name $snapshotName
+        $snapshotObject = Get-SDPVolumeGroupSnapshot -name $snapshotName -k2context $k2context
         $snapshotPath = ConvertTo-SDPObjectPrefix -ObjectPath 'snapshots' -ObjectID $snapshotObject.id -nestedObject
 
-        $retentionPolicyObject = Get-SDPRetentionPolicy -name $retentionPolicyName
+        $retentionPolicyObject = Get-SDPRetentionPolicy -name $retentionPolicyName -k2context $k2context
         $retentionPolicyPath = ConvertTo-SDPObjectPrefix -ObjectPath 'retention_policies' -ObjectID $retentionPolicyObject.id -nestedObject
 
         $o = New-Object psobject

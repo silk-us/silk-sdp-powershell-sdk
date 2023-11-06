@@ -58,7 +58,7 @@ function New-SDPSystemNetIps {
             return $Error[0]
         }
 
-        $results = Get-SDPSystemNetIps -ip_address $ipAddress.IPAddressToString
+        $results = Get-SDPSystemNetIps -ip_address $ipAddress.IPAddressToString -k2context $k2context
 
         if ($results) {
             return $results

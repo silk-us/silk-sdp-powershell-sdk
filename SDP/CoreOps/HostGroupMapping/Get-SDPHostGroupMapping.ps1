@@ -52,14 +52,14 @@ function Get-SDPHostGroupMapping {
         # special ops
 
         if ($volumeName) {
-            $volumeObj = Get-SDPVolume -name $volumeName
+            $volumeObj = Get-SDPVolume -name $volumeName -k2context $k2context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeObj.id -nestedObject
             $PSBoundParameters.volume = $volumePath 
             $PSBoundParameters.remove('volumeName') | Out-Null
         }
 
         if ($hostGroupName) {
-            $hostGroupObj = Get-SDPHostGroup -name $hostGroupName
+            $hostGroupObj = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
             $hostGroupPath = ConvertTo-SDPObjectPrefix -ObjectPath "host_groups" -ObjectID $hostGroupObj.id -nestedObject
             $PSBoundParameters.host = $hostGroupPath 
             $PSBoundParameters.remove('hostGroupName') | Out-Null

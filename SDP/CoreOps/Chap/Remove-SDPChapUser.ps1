@@ -18,7 +18,7 @@ function Remove-SDPChapUser {
 
         # Special Ops
         if ($name) {
-            $id = (Get-SDPChapUser -name $name).id
+            $id = (Get-SDPChapUser -name $name -k2context $k2context).id
         }
         # Query 
 
