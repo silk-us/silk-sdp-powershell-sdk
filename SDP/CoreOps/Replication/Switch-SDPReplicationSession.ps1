@@ -16,11 +16,12 @@ function Switch-SDPReplicationSession {
     process {
         $session = Get-SDPReplicationSessions -name $name -k2context $k2context
         if ($session) {
+            <#
             if ($session.state -ne 'suspended') {
                 $errormsg = 'Please ensure replication session is currently "suspended"'
                 return $errormsg | Write-Error
             }
-
+            #>
             $o = New-Object psobject
             $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'failed_over'
             $o | Add-Member -MemberType NoteProperty -Name "restored_snapshot" -Value $session.latest_replicated_snapshot
@@ -29,7 +30,7 @@ function Switch-SDPReplicationSession {
             $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context 
             } catch {
                 return $Error[0]
             }

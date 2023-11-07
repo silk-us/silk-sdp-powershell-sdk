@@ -60,7 +60,7 @@ function Set-SDPReplicationSession {
             $endpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
+                $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context 
             } catch {
                 return $Error[0]
             }

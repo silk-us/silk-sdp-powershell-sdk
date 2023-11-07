@@ -28,7 +28,7 @@ function Stop-SDPReplicationSession {
             $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context 
             } catch {
                 return $Error[0]
             }

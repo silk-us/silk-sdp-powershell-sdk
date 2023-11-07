@@ -34,7 +34,7 @@ function New-SDPReplicationPeerArray {
         $body = $o
         
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context 
         } catch {
             return $Error[0]
         }
