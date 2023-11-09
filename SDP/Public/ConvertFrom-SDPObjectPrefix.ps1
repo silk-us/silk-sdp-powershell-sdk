@@ -13,9 +13,12 @@ function ConvertFrom-SDPObjectPrefix {
     $objectId = $object.ref.split('/')[$pathlength]
 
     $pathlength--
-    $objectPath = $object.ref.split('/')[1 .. $pathlength]
-    if ($objectPath.count -gt 1) {
+    
+    if ($pathlength -gt 1) {
+        $objectPath = $object.ref.split('/')[1 .. $pathlength]
         $objectPath = $objectPath | Join-String -Separator '/'
+    } else {
+        $objectPath = $object.ref.split('/')[1]
     }
     $o = New-Object psobject
     $o | Add-Member -MemberType NoteProperty -Name 'ObjectPath' -Value $objectPath
