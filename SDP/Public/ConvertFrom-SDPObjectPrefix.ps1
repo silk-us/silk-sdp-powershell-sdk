@@ -6,15 +6,25 @@ function ConvertFrom-SDPObjectPrefix {
         [switch] $getId
     )
 
-    if ($getID) {
-        $return = $object.ref.split('/')[2]
-        return $return
+    
+    $pathlength = $object.ref.Split('/').count
+    $pathlength-- 
+
+    $objectId = $object.ref.split('/')[$pathlength]
+
+    $pathlength--
+    $objectPath = $object.ref.split('/')[1 .. $pathlength]
+    if ($objectPath.count -gt 1) {
+        $objectPath = $objectPath | Join-String -Separator '/'
+    }
+    $o = New-Object psobject
+    $o | Add-Member -MemberType NoteProperty -Name 'ObjectPath' -Value $objectPath
+    $o | Add-Member -MemberType NoteProperty -Name 'ObjectId' -Value $objectId
+
+    if ($getId) {
+        return $objectId
     } else {
-        $objectPath = $object.ref.split('/')[1]
-        $objectId = $object.ref.split('/')[2]
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name 'ObjectPath' -Value $objectPath
-        $o | Add-Member -MemberType NoteProperty -Name 'ObjectId' -Value $objectId
         return $o
     }
+    
 }
