@@ -6,7 +6,8 @@ function New-SDPHostMapping {
         [parameter()]
         [string] $volumeName,
         [parameter()]
-        [string] $snapshotName,
+        [Alias('snapshotName')]
+        [string] $viewName,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -48,11 +49,11 @@ function New-SDPHostMapping {
         if ($volumeName) {
             $volumeid = Get-SDPVolume -name $volumeName -k2context $k2context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
-        } elseif ($snapshotName) {
-            $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName -k2context $k2context
+        } elseif ($viewName) {
+            $volumeid = Get-SDPVolumeGroupView -name $viewName -k2context $k2context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeid.id -nestedObject
         } else {
-            $message = "Please supply either a -volumeName or -snapshotName"
+            $message = "Please supply either a -volumeName or -viewName"
             return $message | Write-error
         }
 

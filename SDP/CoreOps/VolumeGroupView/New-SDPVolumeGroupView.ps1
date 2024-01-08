@@ -1,4 +1,4 @@
-function New-SDPVolumeView {
+function New-SDPVolumeGroupView {
     param(
         [parameter(Mandatory)]
         [string] $name,
@@ -12,7 +12,6 @@ function New-SDPVolumeView {
     )
 
     begin {
-        Write-Verbose "this cmdlet is being replaced by New-SDPVolumeGroupView in a future release." -Verbose
         $endpoint = 'snapshots'
     }
 

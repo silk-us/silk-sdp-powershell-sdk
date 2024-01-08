@@ -1,4 +1,4 @@
-function Get-SDPVolumeGroupSnapshot {
+function Get-SDPVolumeGroupView {
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias("pipeName")]
@@ -77,7 +77,7 @@ function Get-SDPVolumeGroupSnapshot {
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
         $newResults = @()
         foreach ($r in $results) {  
-            if ($r.source.ref -match '/volume_groups/') {
+            if ($r.source.ref -notmatch '/volume_groups/') {
                 $newResults += $r
             }
         }

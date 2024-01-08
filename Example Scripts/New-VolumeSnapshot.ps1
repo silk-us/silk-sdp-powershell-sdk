@@ -25,7 +25,7 @@ New-SDPVolumeGroupSnapshot -name $snapshotName -volumeGroupName $volumeGroupName
 # Create the View
 $viewName = $snapshotName + '-view'
 $fullSnapshotName = $volumeGroupName + ':' + $snapshotName
-Get-SDPVolumeGroupSnapshot -name $fullSnapshotName | New-SDPVolumeView -name $viewName -retentionPolicyName $retentionPolicyName
+Get-SDPVolumeGroupSnapshot -name $fullSnapshotName | New-SDPVolumeGroupView -name $viewName -retentionPolicyName $retentionPolicyName
 
 # Mount the view
 $fullSnapshotViewName = $volumeGroupName + ':' + $viewName
