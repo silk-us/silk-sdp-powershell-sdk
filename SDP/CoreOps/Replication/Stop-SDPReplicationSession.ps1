@@ -37,6 +37,7 @@ function Stop-SDPReplicationSession {
                     $session = Get-SDPReplicationSessions -name $name -k2context $k2context
                     Start-Sleep -Seconds 2
                 }
+                Write-Progress -Completed -Activity $activityString
             }
             $results = Get-SDPReplicationSessions -name $name -k2context $k2context
             return $results

@@ -1,4 +1,4 @@
-function Get-SDPVolumeGroupView {
+function Get-SDPVolumeGroupViewSnapshot {
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias("pipeName")]
@@ -86,7 +86,7 @@ function Get-SDPVolumeGroupView {
         $newresults = @()
         foreach ($r in $viewresults) {  
             $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
-            if ($viewResults.id -notcontains $ref.ObjectId) {
+            if ($viewResults.id -contains $ref.ObjectId) {
                 $newResults += $r
             }
         }

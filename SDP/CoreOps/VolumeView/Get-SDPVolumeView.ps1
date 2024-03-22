@@ -36,6 +36,7 @@ function Get-SDPVolumeView {
     )
 
     begin {
+        Write-Verbose "the cmdlet SDPVolumeView has been replaced by Get-SDPVolumeGroupView  and will cease to work in a future release." -Verbose
         $endpoint = "volsnaps"
     }
 

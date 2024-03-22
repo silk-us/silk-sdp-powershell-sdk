@@ -12,7 +12,7 @@ function New-SDPVolumeView {
     )
 
     begin {
-        Write-Verbose "this cmdlet is being replaced by New-SDPVolumeGroupView in a future release." -Verbose
+        Write-Verbose "the cmdlet New-SDPVolumeView has been replaced by New-SDPVolumeGroupView and will cease to function in a future release." -Verbose
         $endpoint = 'snapshots'
     }
 

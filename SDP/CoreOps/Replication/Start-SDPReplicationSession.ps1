@@ -3,8 +3,8 @@ function Start-SDPReplicationSession {
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $name,
-        [parameter()]
-        [switch] $wait,
+        # [parameter()]
+        # [switch] $wait,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -27,6 +27,7 @@ function Start-SDPReplicationSession {
             } catch {
                 return $Error[0]
             }
+            <#
             if ($wait) {
                 while ($session.state -ne 'in_sync') {
                     while ($session.current_snapshot_progress -lt 100) {
@@ -35,8 +36,10 @@ function Start-SDPReplicationSession {
                         Start-Sleep -Seconds 2
                         $session = Get-SDPReplicationSessions -name $name -k2context $k2context
                     }
+                    Write-Progress -Completed -Activity $activityString
                 }
             }
+            #>
             $results = Get-SDPReplicationSessions -name $name -k2context $k2context
             return $results
         }

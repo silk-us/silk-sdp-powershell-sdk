@@ -14,6 +14,8 @@ function Set-SDPVolume {
         [parameter()]
         [switch] $ReadOnly,
         [parameter()]
+        [switch] $ReadWrite,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
     <#
@@ -79,6 +81,10 @@ function Set-SDPVolume {
 
         if ($ReadOnly) {
             $o | Add-Member -MemberType NoteProperty -Name read_only -Value $true
+        }
+
+        if ($ReadWrite) {
+            $o | Add-Member -MemberType NoteProperty -Name read_only -Value $false
         }
 
         $body = $o

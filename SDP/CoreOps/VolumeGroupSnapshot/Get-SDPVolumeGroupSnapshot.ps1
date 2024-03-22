@@ -77,7 +77,8 @@ function Get-SDPVolumeGroupSnapshot {
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
         $newResults = @()
         foreach ($r in $results) {  
-            if ($r.source.ref -match '/volume_groups/') {
+            $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
+            if ($ref.ObjectPath -eq 'volume_groups') {
                 $newResults += $r
             }
         }
