@@ -12,7 +12,7 @@
 RootModule = 'sdp.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.4.2'
+ModuleVersion = '1.4.5'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -30,7 +30,7 @@ Author = 'J.R. Phillips'
 Copyright = '(c) J.R. Phillips. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Powershell SDK for Kaminario / Silk cloud data platform.'
+Description = 'Powershell SDK for Silk (formerly Kaminario) cloud data platform.'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '4.0'
@@ -101,7 +101,7 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        ProjectUri = 'https://github.com/JayAreP/SDP'
+        ProjectUri = 'https://github.com/silk-us/silk-sdp-powershell-sdk'
 
         # A URL to an icon representing this module.
         # IconUri = ''

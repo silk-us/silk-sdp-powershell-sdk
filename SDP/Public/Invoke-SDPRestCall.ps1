@@ -24,7 +24,9 @@ function Invoke-SDPRestCall {
         [parameter()]
         [switch] $noLimit,
         [parameter()]
-        [switch] $fullResponse
+        [switch] $fullResponse,
+        [parameter()]
+        [int] $timeOut = 15
     )
 
     <#
@@ -120,14 +122,14 @@ function Invoke-SDPRestCall {
     if ($PSVersionTable.PSEdition -eq 'Core') {
         if ($body) {
             try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Body $bodyjson -Credential $restContext.credentials -SkipCertificateCheck -ContentType 'application/json' 
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Body $bodyjson -Credential $restContext.credentials -SkipCertificateCheck -ContentType 'application/json' -TimeoutSec $timeOut
             } catch {
                 $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
                 return $return | Write-Error
             }
         } else {
             try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -SkipCertificateCheck
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
             } catch {
                 $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
                 return $return | Write-Error
@@ -143,14 +145,14 @@ function Invoke-SDPRestCall {
         }
         if ($body) {
             try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Body $bodyjson -Credential $restContext.credentials -ContentType 'application/json' 
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Body $bodyjson -Credential $restContext.credentials -ContentType 'application/json' -TimeoutSec $timeOut
             } catch {
                 $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
                 return $return | Write-Error
             }
         } else {
             try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials 
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -TimeoutSec $timeOut
             } catch {
                 $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
                 return $return | Write-Error

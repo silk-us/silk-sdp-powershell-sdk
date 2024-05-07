@@ -6,6 +6,8 @@ function New-SDPHostMapping {
         [parameter()]
         [string] $volumeName,
         [parameter()]
+        [int] $lun,
+        [parameter()]
         [Alias('snapshotName')]
         [string] $viewName,
         [parameter()]
@@ -42,7 +44,7 @@ function New-SDPHostMapping {
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostid.id -nestedObject
 
         if ($hostid.host_) {
-            $message = "Host $hostName is a member of a host , please use New-SDPHostMapping for the parent  or select an uned host."
+            $message = "Host $hostName is a member of a host group, please use New-SDPHostMapping for the parent or select an unused host."
             Write-Error $message
         }
 
@@ -65,12 +67,16 @@ function New-SDPHostMapping {
 
         ## Make the call
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue -TimeOut 5
         } catch {
             return $Error[0]
         }
 
-        return $body
+        $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName
+        if ($lun) {
+            $response = Set-SDPHostMapping -id $response.id -lun $lun
+        }
+        return $response
         
     }
 }
