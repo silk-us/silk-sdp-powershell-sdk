@@ -18,6 +18,7 @@ Optional
 * `-connectivityType` - [string] - Set the desired host's connectivity type (Unused on Cloud SDP)
 
 Examples:
+
 Create a new host named `WinHost01` and set the host as a `Windows` host type. 
 ```PowerShell
 New-SDPHost -name WinHost01 -type Windows
