@@ -74,6 +74,7 @@ Optional
 
 
 Examples:
+
 Get a list of all hosts.
 ```PowerShell
 Get-SDPHost
@@ -96,6 +97,7 @@ optional
 * `-id` - [string] - `id` value of the desired host.  
 
 Examples:
+
 Remove the host named `WinHost01`
 ```PowerShell
 Remove-SDPHost -name WinHost01
