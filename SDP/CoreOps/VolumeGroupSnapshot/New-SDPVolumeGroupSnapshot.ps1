@@ -1,6 +1,6 @@
 function New-SDPVolumeGroupSnapshot {
     param(
-        [parameter(Mandatory)]
+        [parameter()]
         [string] $name,
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [alias('pipeName')]
@@ -23,6 +23,16 @@ function New-SDPVolumeGroupSnapshot {
 
     process{
         ## Special Ops
+
+        if ($name -and $replicationSession) {
+            Write-Verbose "You cannot specify a -name for replicated snapshots, -name parameter will not be applied." -Verbose
+        }
+
+        if (!$name -and !$replicationSession) {
+            $name = $volumeGroupName + '-' + [DateTimeOffset]::Now.ToUnixTimeSeconds()
+            Write-Verbose "No -name specified, using the name: $name" -Verbose
+        }
+        
         $volumeGroupObject = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
         $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectPath 'volume_groups' -ObjectID $volumeGroupObject.id -nestedObject
 
