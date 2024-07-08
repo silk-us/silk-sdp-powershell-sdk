@@ -15,7 +15,8 @@ Mandatory
 
 
 Examples:
-Set The IQN for a host named `WinHost01`
+
+Set The IQN for a host named `WinHost01`:
 
 ```PowerShell
 Set-SDPHostIQN -hostName WinHost01 -iqn iqn.1991-05.com.microsoft:winhost01
@@ -35,12 +36,13 @@ Optional
 * `-iqn` - [string] - The literal IQN string you wish to query for. 
 
 Examples:
-Query for the IQN for the host WinHost01. 
+
+Query for the IQN for the host WinHost01:
 ```PowerShell
 Get-SDPHostIQN -hostName WinHost01
 ```
 
-Query for the IQN for the host `WinHost01` via pipe. 
+Query for the IQN for the host `WinHost01` via pipe:
 ```PowerShell
 Get-SDPHost -name WinHost01 | Get-SDPHostIQN
 ```
@@ -56,12 +58,13 @@ Optional
 * `-hostName` - [string] - The desired host for which you want to remove an assigned IQN.  
 
 Examples:
-Removes any IQN assigned to the host `WinHost01`
+
+Removes any IQN assigned to the host `WinHost01`:
 ```PowerShell
 Remove-SDPHostIQN -hostName WinHost01
 ```
 
-Removes any IQN assigned to the host `WinHost01 via pipe`
+Removes any IQN assigned to the host `WinHost01` via pipe:
 ```PowerShell
 Get-SDPHost -name WinHost01 | Remove-SDPHostIQN 
 ```
