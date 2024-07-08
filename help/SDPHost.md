@@ -1,5 +1,7 @@
 # SDPHost
 
+SDP Host management functions. 
+
 ## New-SDPHost
 
 ```PowerShell
