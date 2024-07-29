@@ -106,8 +106,8 @@ Remove mapping for the mapping id `14`:
 Remove-SDPHostMapping -id 14
 ```
 
-Remove all host mappings for host `WinHost01`
+Remove all host mappings for host `WinHost01` via pipe:
 
 ```PowerShell
-Get-SDPHostMapping -hostName WinHost01 Remove-SDPHostMapping
+Get-SDPHostMapping -hostName WinHost01 | Remove-SDPHostMapping
 ```
