@@ -19,7 +19,7 @@ function New-SDPVolumeGroupSnapshot {
         $endpoint = 'snapshots'
     }
 
-    process{
+    process {
         ## Special Ops
         
         $volumeGroupObject = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
