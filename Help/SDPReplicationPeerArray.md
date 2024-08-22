@@ -9,7 +9,7 @@ New-SDPReplicationPeerArray [-name] <string> [-mgmt_host] <string> [-localCreden
 
 ### Special notes:
 
-This function uses convenetional PowerShell credential objects. You will need to generate a credential object such as:
+This function uses conventional PowerShell credential objects. You will need to generate a credential object such as:
 
 ```PowerShell
 $replicationCreds = Get-Credential
