@@ -6,8 +6,6 @@ function New-SDPHostMapping {
         [parameter()]
         [string] $volumeName,
         [parameter()]
-        [int] $lun,
-        [parameter()]
         [Alias('snapshotName')]
         [string] $viewName,
         [parameter()]
@@ -73,9 +71,6 @@ function New-SDPHostMapping {
         }
 
         $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName
-        if ($lun) {
-            $response = Set-SDPHostMapping -id $response.id -lun $lun
-        }
         return $response
         
     }

@@ -1,11 +1,11 @@
 function Set-SDPHostMapping {
     param(
         [parameter(ValueFromPipelineByPropertyName,Mandatory)]
-        [Alias('pipeId')]
         [string] $id,
         [parameter()]
         [string] $hostName,
         [parameter()]
+        [ValidateRange(1,254)]
         [int] $lun,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
@@ -14,7 +14,7 @@ function Set-SDPHostMapping {
 
     #>
     begin {
-        $endpoint = 'mappings'
+        $endpoint = 'mappings' + '/' + $id
     }
 
     process{
@@ -41,7 +41,7 @@ function Set-SDPHostMapping {
         $body = $o
 
         ## Make the call
-        $endpoint = $endpoint + '/' + $id
+        # $endpoint = $endpoint + '/' + $id
 
         try {
             Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue -TimeOut 5
