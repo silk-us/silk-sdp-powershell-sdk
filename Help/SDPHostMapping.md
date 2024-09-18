@@ -58,6 +58,14 @@ Move all mappings for `WinHost01` to `WinHost02` via pipe:
 Get-SDPHostMapping -hostName WinHost01 | Set-SDPHostMapping -hostName WinHost02
 ```
 
+Set the LUN for a specific existing mapping with an id of `15` to use the lun `66`. You can query for existing ids with `Get-SDPHostMapping`.
+
+```powershell
+Set-SDPHostMapping -id 15 -lun 66
+```
+
+
+
 ## Get-SDPHostMapping
 ```PowerShell
 Get-SDPHostMapping [[-hostName] <string>] [[-hostName] <int>] [[-lun] <int>] [[-unique_target] <bool>] [[-volumeName] <string>] [[-k2context] <string>] [-asSnapshot] [<CommonParameters>]
