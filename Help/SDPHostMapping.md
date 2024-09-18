@@ -4,7 +4,7 @@ SDP host mapping functions.
 
 ## New-SDPHostMapping
 ```PowerShell
-New-SDPHostMapping [-hostName] <string> [[-volumeName] <string>] [[-lun] <int>] [[-viewName] <string>] [[-k2context] <string>] [<CommonParameters>]
+New-SDPHostMapping [-hostName] <string> [[-volumeName] <string>] [[-viewName] <string>] [[-k2context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -15,7 +15,6 @@ Mandatory
 Optional
 * `-volumeName` - [string] - Provide name for the desired volume you wish to map. 
 * `-viewName` - [string] - Provide name for the desired snapshot view you wish to map.
-* `-lun` - [int] - Configure a specific lun ID rather than letting the system use the next available. 
 
 Examples:
 
