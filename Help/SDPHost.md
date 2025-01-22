@@ -70,7 +70,7 @@ Get-SDPHost [[-name] <string>] [-host_group <string>] [-id <int>] [-type <string
 #### Parameters
 
 Optional
-* `-name` - [string] - Name value to set for the specified host.
+* `-name` - [string] - Name value to query for the specified host.
 * `-id` - [string] - `id` value of the desired host.  
 * `-host_group` -[string] - Host group name that contains the desired host. 
 

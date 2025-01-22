@@ -71,6 +71,9 @@ function Get-SDPHostGroupMapping {
         if ($asSnapshot) {
             $results = $results | Where-Object {$_.volume -match '/snapshots/'}
         } 
+
+        $results = $results | Where-Object {$_.host.ref -match '/host_groups/'}
+
         return $results
     }
 

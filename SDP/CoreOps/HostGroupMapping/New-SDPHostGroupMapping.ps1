@@ -41,7 +41,7 @@ function New-SDPHostGroupMapping {
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "host_groups" -ObjectID $hostGroupid.id -nestedObject
 
         if ($volumeName) {
-            $volumeid = Get-SDPVolume -name $volumeName -k2context $k2context -k2context $k2context
+            $volumeid = Get-SDPVolume -name $volumeName -k2context $k2context 
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
         } elseif ($snapshotName) {
             $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName -k2context $k2context

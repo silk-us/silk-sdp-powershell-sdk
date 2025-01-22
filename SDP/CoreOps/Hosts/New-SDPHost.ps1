@@ -1,3 +1,34 @@
+<#
+	.SYNOPSIS 
+    Create a new host object on the SDP.
+
+	.DESCRIPTION 
+    Create a new host object on the SDP.
+
+	.PARAMETER name
+	[string] - Provide name for the SDP Host object.
+
+	.PARAMETER type
+	[string] - Decalre the host type ('Windows', 'Linux', 'ESX')
+
+	.PARAMETER hostGroupName
+	[string] - Set the host's host group via 'name'. 
+
+	.PARAMETER hostGroupID
+	[string] - Set the host's host group via 'id'.
+
+	.PARAMETER connectivityType
+	[string] - Set the desired host's connectivity type (Unused on Cloud SDP)
+
+	.EXAMPLE
+	Create a new host named `WinHost01` and set the host as a `Windows` host type. 
+	New-SDPHost -name WinHost01 -type Windows
+
+	.EXAMPLE
+	Create a new host named `SQLHost01` and add it to a host group named `SQLCluster01`
+	New-SDPHost -name SQLHost01 -type Windows -hostGroupName SQLCluster01
+
+#>
 function New-SDPHost {
     param(
         [parameter(ValueFromPipelineByPropertyName)]

@@ -1,0 +1,24 @@
+<#
+    .SYNOPSIS
+    FUNCTION_NAME
+
+    .DESCRIPTION
+    This is the function to use to create an SDP with a Pv2 MNode type. To create a standard SDP, please use New-FLEXClusterSDP.
+
+    .PARAMETER name
+    [string] - Management IP or name for the Flex console.
+
+    .PARAMETER k2context
+    [string] - Specify a context
+    
+    .EXAMPLE
+    FUNCTION_NAME -cnodes 2 -mnodeSize P5
+    This will do a thing
+
+    .EXAMPLE
+    FUNCTION_NAME -cnodes 3 -mnodeSize P20 -readCacheEnabled
+    This will do a thing
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>

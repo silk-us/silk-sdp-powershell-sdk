@@ -1,3 +1,34 @@
+<#
+	.SYNOPSIS 
+    Set an existing host's properties. 
+
+	.DESCRIPTION 
+    Set an existing host's properties. 
+
+	.PARAMETER id
+	[string] - 'id' value of the desired host. This can be piped via 'Get-SDPHost'
+
+	.PARAMETER name
+	[string] - Name value to set for the specified host. 
+
+	.PARAMETER type
+	[string] - Decalre the host type ('Windows', 'Linux', 'ESX')
+
+	.PARAMETER hostGroupName
+	[string] - Set the host's host group via 'name'. 
+
+	.PARAMETER hostGroupID
+	[string] - Set the host's host group via 'id'.
+
+	.EXAMPLE
+	Set values for a host with the `id` of `20`.
+	Set-SDPHost -id 20 -Name WinHost02
+
+	.EXAMPLE
+	Rename a host named `WinHost01` to `WinHost02`. 
+	Get-SDPHost -name WinHost01 | Set-SDPHost -name WinHost02
+
+#>
 function Set-SDPHost {
     param(
         [parameter(ValueFromPipelineByPropertyName,Mandatory)]

@@ -70,7 +70,7 @@ function New-SDPHostMapping {
             return $Error[0]
         }
 
-        $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName
+        $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName -k2context $k2context
         return $response
         
     }

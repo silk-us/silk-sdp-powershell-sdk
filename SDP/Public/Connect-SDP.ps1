@@ -1,3 +1,28 @@
+<#
+    .SYNOPSIS
+    Connects you to an SDP instance. 
+
+    .DESCRIPTION
+    This is the function for establishing a session to an existing SDP.
+
+    .PARAMETER server
+    [string] - Management IP or name for the SDP console.
+
+    .PARAMETER credential
+    [PSCredential] - A credential object to use to provide authentication to the desired SDP.
+
+    .PARAMETER k2context
+    [string] - Specify a context
+    
+    .EXAMPLE
+    $creds = get-credential
+    Connect-SDP -Server 10.10.47.16 -Credentials $cred
+
+    This will connect you to an existing SDP. 
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
 function Connect-SDP {
     param(
         [parameter(Mandatory)]

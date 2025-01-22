@@ -72,7 +72,10 @@ function Get-SDPHostMapping {
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
         if ($asSnapshot) {
             $results = $results | Where-Object {$_.volume -match '/snapshots/'}
-        } 
+        }
+
+        $results = $results | Where-Object {$_.host.ref -notmatch '/host_groups/'}
+
         return $results
     }
 
