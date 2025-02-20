@@ -47,20 +47,20 @@ function New-SDPVolumeGroup {
         ## Build the object
 
         $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name name -Value $name
+        $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
         if ($quota) {
-            $o | Add-Member -MemberType NoteProperty -Name quota -Value $size
+            $o | Add-Member -MemberType NoteProperty -Name "quota" -Value $size
         } else {
-            $o | Add-Member -MemberType NoteProperty -Name quota -Value 0
+            $o | Add-Member -MemberType NoteProperty -Name "quota" -Value 0
         }
         if ($Description) {
-            $o | Add-Member -MemberType NoteProperty -Name description -Value $Description
+            $o | Add-Member -MemberType NoteProperty -Name "description" -Value $Description
         }
         if ($capacityPolicy) {
-            $o | Add-Member -MemberType NoteProperty -Name capacity_policy -Value $cappol
+            $o | Add-Member -MemberType NoteProperty -Name "capacity_policy" -Value $cappol
         }
         if ($enableDeDuplication) {
-            $o | Add-Member -MemberType NoteProperty -Name is_dedupe -Value $true
+            $o | Add-Member -MemberType NoteProperty -Name "is_dedup" -Value $true
         }
         
         $body = $o

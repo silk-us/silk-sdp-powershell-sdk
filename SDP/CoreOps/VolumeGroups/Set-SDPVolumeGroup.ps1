@@ -8,8 +8,6 @@ function Set-SDPVolumeGroup {
         [parameter()]
         [int] $quotaInGB,
         [parameter()]
-        [bool] $enableDeDuplication = $false,
-        [parameter()]
         [string] $Description,
         [parameter()]
         [string] $capacityPolicy,
