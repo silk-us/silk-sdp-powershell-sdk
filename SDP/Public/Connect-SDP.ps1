@@ -30,6 +30,10 @@ function Connect-SDP {
         [parameter(Mandatory)]
         [System.Management.Automation.PSCredential] $credentials,
         [parameter()]
+        [switch] $throttleCorrection,
+        [parameter()]
+        [switch] $resolve,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
     <#
@@ -41,6 +45,12 @@ function Connect-SDP {
 
         .PARAMETER server
         The SDP management IP or DNS name. 
+
+        .PARAMETER throttleCorrection
+        Switch to help correct API overruns. Use this if you are experiencing "slow down" messages in pipelines. 
+
+        .PARAMETER resolve
+        Switch for automatically resolving .ref paths.
 
         .PARAMETER credentials
         A standard PowerShell credential object (System.Management.Automation.PSCredential)
@@ -59,6 +69,11 @@ function Connect-SDP {
         Connect-SDP -credentials $creds -server 172.16.2.13 -k2context TestDev
         This connects ad-hoc to a Kaminario appliace using a conventional powershell credential object under a specific context,
         for later issuing commands to a specific K2 appliance  (Get-SDPVolumeGroup -k2context TestDev)
+
+        .EXAMPLE 
+        Connect-SDP -credentials $creds -server 10.10.1.20 -throttleCorrection
+        This connects ad-hoc to a Kaminario appliace using a conventional powershell credential object under a default global context. It enforces a throttle reduction of 
+        1 second between API requests and responses. 
     
     #>
 
@@ -67,6 +82,8 @@ function Connect-SDP {
     $o = New-Object psobject
     $o | Add-Member -MemberType NoteProperty -Name 'credentials' -Value $credentials
     $o | Add-Member -MemberType NoteProperty -Name 'K2Endpoint' -Value $server
+    $o | Add-Member -MemberType NoteProperty -Name 'throttleCorrection' -Value $throttleCorrection
+    $o | Add-Member -MemberType NoteProperty -Name 'resolve' -Value $resolve
 
     Set-Variable -Name $k2context -Value $o -Scope Global
 

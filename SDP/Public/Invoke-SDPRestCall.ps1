@@ -206,5 +206,8 @@ function Invoke-SDPRestCall {
             $o | Add-Member -MemberType NoteProperty -Name 'pipeName' -Value $o.name
         }
     }
+    if ($restContext.throttleCorrection.IsPresent) {
+        Start-Sleep -Seconds 1
+    }
     return $results
 }

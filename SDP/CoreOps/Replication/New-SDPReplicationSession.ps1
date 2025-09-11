@@ -1,3 +1,19 @@
+<#
+    .SYNOPSIS
+
+    .EXAMPLE 
+    New-SDPReplicationSession -name testrep -volumeGroupName retest01 -replicationPeerName K2-5405 -retentionPolicyName Replication_Retention -externalRetentionPolicyName Replication_Retention -RPO 1200
+
+    .DESCRIPTION
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://www.github.com/JayAreP/K2RF/
+
+#>
+
 function New-SDPReplicationSession {
     param(
         [parameter(Mandatory)]
@@ -12,27 +28,14 @@ function New-SDPReplicationSession {
         [string] $externalRetentionPolicyName,
         [parameter()]
         [switch] $mapped,
+        [parameter()]
+        [string] $replicationVolumeGroupName,
         [parameter(Mandatory)]
         [int] $RPO,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
 
-    <#
-        .SYNOPSIS
-
-        .EXAMPLE 
-        New-SDPReplicationSession -name testrep -volumeGroupName retest01 -replicationPeerName K2-5405 -retentionPolicyName Replication_Retention -externalRetentionPolicyName Replication_Retention -RPO 1200
-
-        .DESCRIPTION
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://www.github.com/JayAreP/K2RF/
-
-    #>
 
     begin {
         $endpoint = 'replication/sessions'
@@ -68,6 +71,10 @@ function New-SDPReplicationSession {
         } else {
             $o | Add-Member -MemberType NoteProperty -Name "target_exposure" -Value 'Read Only'
         }
+        if ($replicationVolumeGroupName) {
+            $o | Add-Member -MemberType NoteProperty -Name "replication_peer_volume_group_name" -Value $replicationVolumeGroupName
+        } 
+       
 
 
         # Make the call 

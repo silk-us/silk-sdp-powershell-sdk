@@ -22,7 +22,7 @@ function New-SDPReplicationVolume {
         $sessionId = Get-SDPReplicationPeerArray -name $replicationSessionName -k2context $k2context
 
         $volumeId = Get-SDPVolume -name $volumeName -k2context $k2context
-        $volumeName = ConvertTo-SDPObjectPrefix -ObjectID $volumeId.id -ObjectPath 'volumes' -nestedObject 
+        $volumeObj = ConvertTo-SDPObjectPrefix -ObjectID $volumeId.id -ObjectPath 'volumes' -nestedObject 
 
         $sessionId = Get-SDPReplicationSessions -name $replicationSessionName -k2context $k2context
         $peerArrayPath = ConvertTo-SDPObjectPrefix -ObjectID $sessionId.id -ObjectPath 'replication/sessions' -nestedObject
@@ -30,7 +30,7 @@ function New-SDPReplicationVolume {
         # Build the object
         $o = New-Object psobject
         $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
-        $o | Add-Member -MemberType NoteProperty -Name "local_volume" -Value $volumeName
+        $o | Add-Member -MemberType NoteProperty -Name "local_volume" -Value $volumeObj
         $o | Add-Member -MemberType NoteProperty -Name "replication_session" -Value $peerArrayPath
 
         # Make the call 
