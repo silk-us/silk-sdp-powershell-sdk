@@ -77,6 +77,7 @@ function Get-SDPHostMapping {
         $results = $results | Where-Object {$_.host.ref -notmatch '/host_groups/'}
 
         return $results
+
     }
 
 }

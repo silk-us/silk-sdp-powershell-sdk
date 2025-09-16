@@ -23,7 +23,7 @@ function Start-SDPReplicationSession {
             $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context 
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context -timeOut 60
             } catch {
                 return $Error[0]
             }

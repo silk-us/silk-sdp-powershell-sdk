@@ -10,7 +10,7 @@
     Authored by J.R. Phillips (GitHub: JayAreP)
 
     .LINK
-    https://www.github.com/JayAreP/K2RF/
+    https://github.com/silk-us/silk-sdp-powershell-sdk
 
 #>
 
@@ -32,6 +32,8 @@ function New-SDPReplicationSession {
         [string] $replicationVolumeGroupName,
         [parameter(Mandatory)]
         [int] $RPO,
+        [parameter()]
+        [bool] $autoConfigurePeerVolumes = $true,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -65,7 +67,7 @@ function New-SDPReplicationSession {
         $o | Add-Member -MemberType NoteProperty -Name "local_volume_group" -Value $volumeGroupPath
         $o | Add-Member -MemberType NoteProperty -Name "retention_policy" -Value $retentionPolicypath
         $o | Add-Member -MemberType NoteProperty -Name "external_retention_policy" -Value $externalRetentionPolicypath
-        $o | Add-Member -MemberType NoteProperty -Name "auto_configure_peer_volumes" -Value $true
+        $o | Add-Member -MemberType NoteProperty -Name "auto_configure_peer_volumes" -Value $autoConfigurePeerVolumes
         if ($mapped) {
             $o | Add-Member -MemberType NoteProperty -Name "target_exposure" -Value 'Mapped - Not Exposed'
         } else {
