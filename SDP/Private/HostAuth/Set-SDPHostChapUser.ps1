@@ -40,9 +40,9 @@ function Set-SDPHostChapUser {
 
         $body = $o
 
-        $endpoint = $endpoint + '/' + $sdpHost.id
+        $endpointURI = $endpoint + '/' + $sdpHost.id
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context 
+        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
         return $results
     }
 

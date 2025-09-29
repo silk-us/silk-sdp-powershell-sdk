@@ -46,9 +46,9 @@ function Add-SDPHostChapUser {
         
         $body = $o
 
-        $endpoint = $endpoint + '/' + $hostObj.id
+        $endpointURI = $endpoint + '/' + $hostObj.id
         ## Make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context 
+        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
         return $results
     }
 

@@ -32,8 +32,8 @@ function Set-SDPChapUser {
         $o | Add-Member -MemberType NoteProperty -Name 'new_username' -Value $username
         $o | Add-Member -MemberType NoteProperty -Name 'new_password' -Value $password
 
-        $endpoint = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $o -k2context $k2context
+        $endpointURI = $endpoint + '/' + $id
+        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $o -k2context $k2context
 
         return $results
 

@@ -14,7 +14,7 @@ function Set-SDPHostMapping {
 
     #>
     begin {
-        $endpoint = 'mappings' + '/' + $id
+        $endpoint = 'mappings' 
     }
 
     process{
@@ -41,10 +41,10 @@ function Set-SDPHostMapping {
         $body = $o
 
         ## Make the call
-        # $endpoint = $endpoint + '/' + $id
+        $endpointURI = $endpoint + '/' + $id
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue -TimeOut 5
+            Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue -TimeOut 5
         } catch {
             return $Error[0]
         }

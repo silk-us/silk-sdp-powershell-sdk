@@ -22,8 +22,8 @@ function Remove-SDPChapUser {
         }
         # Query 
 
-        $endpoint = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method DELETE -k2context $k2context
+        $endpointURI = $endpoint + '/' + $id
+        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
 
         return $results
     }
