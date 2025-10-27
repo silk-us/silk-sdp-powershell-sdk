@@ -1,3 +1,21 @@
+<#
+    .SYNOPSIS
+    Configures an IP address for a specific interface
+
+    .EXAMPLE 
+    Get-SDPSystemNetPorts -name c-node02_dataport01 | New-SDPSystemNetIps -ipAddress 10.100.5.2 -subnetMask 255.255.255.0 -service iscsi
+
+    .DESCRIPTION
+    This function will configure an IP for a desired NetPort. The allowed service types are going to be 'iscsi' and 'replication'. This function accepts piped input from the Get-SDPSystemNetPorts function. 
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://www.github.com/JayAreP/K2RF/
+
+#>
+
 function New-SDPSystemNetIps {
     param(
         [parameter(Mandatory)]
@@ -13,24 +31,6 @@ function New-SDPSystemNetIps {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-        Configures an IP address for a specific interface
-
-        .EXAMPLE 
-        Get-SDPSystemNetPorts -name c-node02_dataport01 | New-SDPSystemNetIps -ipAddress 10.100.5.2 -subnetMask 255.255.255.0 -service iscsi
-
-        .DESCRIPTION
-        This function will configure an IP for a desired NetPort. The allowed service types are going to be 'iscsi' and 'replication'. This function accepts piped input from the Get-SDPSystemNetPorts function. 
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://www.github.com/JayAreP/K2RF/
-
-    #>
-    
 
     begin {
         $endpoint = "system/net_ips"

@@ -1,3 +1,19 @@
+<#
+    .SYNOPSIS
+    Gather the requested event information.
+
+    .EXAMPLE
+    Get-SDPEvents -EventId 28
+
+    This will return all DELETE_VOLUME operations and their corresponding event information. 
+            
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 class sdpevent {
     [string] $event_id
     [string] $id
@@ -34,21 +50,6 @@ function Get-SDPEvents {
         [string] $k2context = 'k2rfconnection'
     )
 
-    <#
-        .SYNOPSIS
-        Gather the requested event information.
-
-        .EXAMPLE
-        Get-SDPEvents -EventId 28
-
-        This will return all DELETE_VOLUME operations and their corresponding event information. 
-                
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-    #>
     begin {
         $endpoint = 'events'
     }

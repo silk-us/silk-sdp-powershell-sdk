@@ -23,6 +23,7 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Connect-SDP {
     param(
         [parameter(Mandatory)]
@@ -36,46 +37,6 @@ function Connect-SDP {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-        Connect to a Kaminario K2 appliance. 
-
-        .DESCRIPTION
-        Connect to a Kaminario K2 appliance. 
-
-        .PARAMETER server
-        The SDP management IP or DNS name. 
-
-        .PARAMETER throttleCorrection
-        Switch to help correct API overruns. Use this if you are experiencing "slow down" messages in pipelines. 
-
-        .PARAMETER resolve
-        Switch for automatically resolving .ref paths.
-
-        .PARAMETER credentials
-        A standard PowerShell credential object (System.Management.Automation.PSCredential)
-
-        .INPUTS
-        Connect-SDP does not accept piped inputs. 
-
-        .OUTPUTS
-        Returns the SDP 'system/state' endpoint information. 
-
-        .EXAMPLE 
-        Connect-SDP -credentials $creds -server 10.10.1.20
-        This connects ad-hoc to a Kaminario appliace using a conventional powershell credential object under a default global context.
-
-        .EXAMPLE
-        Connect-SDP -credentials $creds -server 172.16.2.13 -k2context TestDev
-        This connects ad-hoc to a Kaminario appliace using a conventional powershell credential object under a specific context,
-        for later issuing commands to a specific K2 appliance  (Get-SDPVolumeGroup -k2context TestDev)
-
-        .EXAMPLE 
-        Connect-SDP -credentials $creds -server 10.10.1.20 -throttleCorrection
-        This connects ad-hoc to a Kaminario appliace using a conventional powershell credential object under a default global context. It enforces a throttle reduction of 
-        1 second between API requests and responses. 
-    
-    #>
 
     # $K2header = New-SDPAPIHeader -Credential $credentials
 

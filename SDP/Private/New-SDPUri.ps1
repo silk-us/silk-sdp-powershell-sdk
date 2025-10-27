@@ -1,3 +1,13 @@
+<#
+    .SYNOPSIS 
+    Helper function for auto-generating an appropriate URI string for the Kaminario K2 Powershell SDK.
+    
+    .EXAMPLE
+    New-SDPURI -endpoint volume_groups
+    
+    This will return the full URI (https://{k2appliance}/api/v2/volume_groups) for the specified endpoint. 
+#>
+
 function New-SDPURI {
     param(
         [parameter(Mandatory)]
@@ -5,16 +15,6 @@ function New-SDPURI {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-
-    <#
-        .SYNOPSIS 
-        Helper function for auto-generating an appropriate URI string for the Kaminario K2 Powershell SDK.
-        
-        .EXAMPLE
-        New-SDPURI -endpoint volume_groups
-        
-        This will return the full URI (https://{k2appliance}/api/v2/volume_groups) for the specified endpoint. 
-    #>
 
     # trim front and rear / marks if needed
 

@@ -1,3 +1,23 @@
+<#
+    .SYNOPSIS 
+    Custom rest call for Kaminario K2 platform 
+
+    .EXAMPLE
+    (after logging into a K2)
+    Invoke-SDPRestCall -endpoint volume_groups -method GET
+    This will return the .hits return for the https://{k2Server}/api/v2/volume_groups API endpoint using the method GET.
+
+    .EXAMPLE
+    Invoke-SDPRestCall -endpoint volume -method PATCH -body $body -k2context TestDev
+    This will render the .hits return for the https://{k2Server}/api/v2/volumes API endpoint. 
+            
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Invoke-SDPRestCall {
     param(
         [parameter(Mandatory)]
@@ -28,26 +48,6 @@ function Invoke-SDPRestCall {
         [parameter()]
         [int] $timeOut = 15
     )
-
-    <#
-        .SYNOPSIS 
-        Custom rest call for Kaminario K2 platform 
-
-        .EXAMPLE
-        (after logging into a K2)
-        Invoke-SDPRestCall -endpoint volume_groups -method GET
-        This will return the .hits return for the https://{k2Server}/api/v2/volume_groups API endpoint using the method GET.
-
-        .EXAMPLE
-        Invoke-SDPRestCall -endpoint volume -method PATCH -body $body -k2context TestDev
-        This will render the .hits return for the https://{k2Server}/api/v2/volumes API endpoint. 
-                
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-    #>
 
     # Delcare the serviced API endpoint.
 
