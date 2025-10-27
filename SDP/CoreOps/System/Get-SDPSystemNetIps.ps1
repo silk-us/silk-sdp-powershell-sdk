@@ -1,34 +1,41 @@
+    <#
+        .SYNOPSIS
+        Function for querying SDP system network IPs
+
+        .EXAMPLE 
+        Get-SDPSystemNetIps 
+
+        .EXAMPLE 
+        Get-SDPSystemNetPorts | Where-Object {$_.name -match "dataport01"} | Get-SDPSystemNetIps
+
+        .NOTES
+        Authored by J.R. Phillips (GitHub: JayAreP)
+
+        .LINK
+        https://github.com/silk-us/silk-sdp-powershell-sdk
+
+    #>
+
 function Get-SDPSystemNetIps {
     param(
-        [parameter()]
-        [int] $id,
-        [parameter()]
-        [Alias("IpAddress")]
-        [string] $ip_address,
-        [parameter()]
-        [Alias("NetworkMask")]
-        [string] $network_mask,
-        [parameter()]
-        [Alias("NetPort")]
-        [string] $net_port,
-        [parameter()]
-        [Alias("NetPortchannel")]
-        [string] $net_portchannel,
-        [parameter()]
-        [Alias("NetVlan")]
-        [string] $net_vlan,
-        [parameter()]
-        [Alias("WanPort")]
-        [string] $wan_port,
+        [parameter(ValueFromPipelineByPropertyName)]
+        [Alias('id')]
+        [string] $portID,
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
-    $endpoint = "system/net_ips"
 
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "system/net_ips"
     }
-    return $results
+    
+    process {
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context
+        if ($portID) {
+            $ref = ConvertTo-SDPObjectPrefix -ObjectID $portID -ObjectPath 'system/net_ports'
+            $results = $results | Where-Object {$_.net_port.ref -contains $ref}
+        }
+        
+        return $results
+    }
 }

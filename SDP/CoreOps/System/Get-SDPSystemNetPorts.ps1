@@ -1,41 +1,32 @@
+<#
+    .SYNOPSIS
+    Function for querying SDP system network ports
+
+    .EXAMPLE 
+    Get-SDPSystemNetPorts
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+
+#>
+
 function Get-SDPSystemNetPorts {
     param(
         [parameter()]
-        [Alias("AutoNegotiation")]
-        [string] $auto_negotiation,
-        [parameter()]
-        [Alias("ContainedIn")]
-        [string] $contained_in,
-        [parameter()]
-        [Alias("FlowControl")]
-        [string] $flow_control,
+        [Alias("PortType")]
+        [ValidateSet('dataport','mgmtport','ib')]
+        [string] $port_type,
         [parameter()]
         [int] $id,
-        [parameter()]
-        [Alias("IsFru")]
-        [bool] $is_fru,
-        [parameter()]
-        [Alias("LinkState")]
-        [string] $link_state,
-        [parameter()]
-        [Alias("MacAddr")]
-        [string] $mac_addr,
-        [parameter()]
-        [string] $mtu,
         [parameter()]
         [string] $name,
         [parameter()]
         [int] $pipeId,
         [parameter()]
         [string] $pipeName,
-        [parameter()]
-        [Alias("PortType")]
-        [string] $port_type,
-        [parameter()]
-        [string] $server,
-        [parameter()]
-        [Alias("SpeedState")]
-        [string] $speed_state,
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
