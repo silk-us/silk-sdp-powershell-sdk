@@ -1,20 +1,20 @@
-    <#
-        .SYNOPSIS
-        Function for querying SDP system network IPs
+<#
+    .SYNOPSIS
+    Function for querying SDP system network IPs
 
-        .EXAMPLE 
-        Get-SDPSystemNetIps 
+    .EXAMPLE 
+    Get-SDPSystemNetIps 
 
-        .EXAMPLE 
-        Get-SDPSystemNetPorts | Where-Object {$_.name -match "dataport01"} | Get-SDPSystemNetIps
+    .EXAMPLE 
+    Get-SDPSystemNetPorts | Where-Object {$_.name -match "dataport01"} | Get-SDPSystemNetIps
 
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
 
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
 
-    #>
+#>
 
 function Get-SDPSystemNetIps {
     param(

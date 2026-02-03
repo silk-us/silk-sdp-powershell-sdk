@@ -1,3 +1,46 @@
+<#
+    .SYNOPSIS
+    Creates a new volume group on the SDP.
+
+    .DESCRIPTION
+    Creates a new volume group on the Silk Data Pod. Volume groups are containers for volumes that share capacity policies, quotas, and snapshot schedules.
+
+    .PARAMETER name
+    The name for the new volume group.
+
+    .PARAMETER quotaInGB
+    Optional capacity quota for the volume group in gigabytes. Set to 0 for unlimited quota.
+
+    .PARAMETER enableDeDuplication
+    Enables deduplication for all volumes in this volume group.
+
+    .PARAMETER Description
+    Optional description for the volume group.
+
+    .PARAMETER capacityPolicy
+    Name of the capacity policy to apply to this volume group.
+
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    New-SDPVolumeGroup -name "VG01"
+    Creates a basic volume group named "VG01" with no quota.
+
+    .EXAMPLE
+    New-SDPVolumeGroup -name "VG02" -quotaInGB 5000 -enableDeDuplication
+    Creates a volume group with a 5TB quota and deduplication enabled.
+
+    .EXAMPLE
+    New-SDPVolumeGroup -name "VG03" -capacityPolicy "Policy01" -Description "Production volumes"
+    Creates a volume group with a capacity policy and description.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
 function New-SDPVolumeGroup {
     param(
         [parameter(Mandatory)]
@@ -13,20 +56,6 @@ function New-SDPVolumeGroup {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-
-        .EXAMPLE 
-
-        .DESCRIPTION
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://www.github.com/JayAreP/K2RF/
-
-    #>
     begin {
         $endpoint = "volume_groups"
     }

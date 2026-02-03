@@ -1,3 +1,94 @@
+<#
+    .SYNOPSIS
+    Retrieves volume group views (snapshot exposures) from the SDP.
+
+    .DESCRIPTION
+    Queries for volume group views on the Silk Data Pod. Views are exposed/mounted snapshots that can be mapped to hosts for read access.
+
+    .PARAMETER volumeGroupName
+    Filter views by volume group name. Accepts piped input from Get-SDPVolumeGroup.
+
+    .PARAMETER description
+    Filter views by description text.
+
+    .PARAMETER generation_number
+    Filter by generation number of the view.
+
+    .PARAMETER id
+    The unique identifier of the view.
+
+    .PARAMETER iscsi_tgt_converted_name
+    Filter by iSCSI target converted name.
+
+    .PARAMETER is_application_consistent
+    Filter by application consistency flag.
+
+    .PARAMETER is_auto_deleteable
+    Filter by auto-deleteable flag.
+
+    .PARAMETER is_deleted
+    Include deleted views in results.
+
+    .PARAMETER is_exist_on_peer
+    Filter by existence on replication peer.
+
+    .PARAMETER is_exposable
+    Filter by exposable flag.
+
+    .PARAMETER is_external
+    Filter by external view flag.
+
+    .PARAMETER is_originating_from_peer
+    Filter by views originating from replication peer.
+
+    .PARAMETER last_exposed_time
+    Filter by last time view was exposed.
+
+    .PARAMETER name
+    The name of the view to retrieve.
+
+    .PARAMETER replication_session
+    Filter by replication session.
+
+    .PARAMETER retention_policy
+    Filter by retention policy name.
+
+    .PARAMETER short_name
+    Filter by short name of the view.
+
+    .PARAMETER triggered_by
+    Filter by what triggered the view creation.
+
+    .PARAMETER volsnaps_provisioned_capacity
+    Filter by provisioned capacity.
+
+    .PARAMETER volume_group
+    Filter by volume group reference.
+
+    .PARAMETER wwn
+    Filter by World Wide Name.
+
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    Get-SDPVolumeGroupView
+    Retrieves all volume group views from the SDP.
+
+    .EXAMPLE
+    Get-SDPVolumeGroupView -name "VG01-View01"
+    Retrieves the view named "VG01-View01".
+
+    .EXAMPLE
+    Get-SDPVolumeGroup -name "VG01" | Get-SDPVolumeGroupView
+    Retrieves all views for volume group "VG01".
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
 function Get-SDPVolumeGroupView {
     param(
         [parameter(ValueFromPipelineByPropertyName)]

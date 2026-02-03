@@ -1,3 +1,37 @@
+<#
+    .SYNOPSIS
+    Deletes a volume group from the SDP.
+
+    .DESCRIPTION
+    Removes an existing volume group from the Silk Data Pod. The volume group must not contain any volumes.
+
+    .PARAMETER id
+    The unique identifier of the volume group to remove. Accepts piped input from Get-SDPVolumeGroup.
+
+    .PARAMETER name
+    The name of the volume group to remove.
+
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    Remove-SDPVolumeGroup -name "VG01"
+    Removes the volume group named "VG01".
+
+    .EXAMPLE
+    Get-SDPVolumeGroup -name "VG01" | Remove-SDPVolumeGroup
+    Removes a volume group using piped input.
+
+    .EXAMPLE
+    Remove-SDPVolumeGroup -id 15
+    Removes the volume group with ID 15.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
 function Remove-SDPVolumeGroup {
     param(
         [parameter(ValueFromPipelineByPropertyName)]
@@ -8,20 +42,6 @@ function Remove-SDPVolumeGroup {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-
-        .EXAMPLE 
-
-        .DESCRIPTION
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://www.github.com/JayAreP/K2RF/
-
-    #>
     
     begin {
         $endpoint = "volume_groups"

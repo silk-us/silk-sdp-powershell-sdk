@@ -1,3 +1,52 @@
+<#
+    .SYNOPSIS
+    Modifies properties of an existing volume.
+
+    .DESCRIPTION
+    Updates configuration settings for an existing volume on the Silk Data Pod. Can modify name, size, description, volume group assignment, and read-only status.
+
+    .PARAMETER id
+    The unique identifier of the volume to modify. Accepts piped input from Get-SDPVolume.
+
+    .PARAMETER name
+    New name for the volume.
+
+    .PARAMETER sizeInGB
+    New size for the volume in gigabytes. Volume size can only be increased, not decreased.
+
+    .PARAMETER Description
+    New description for the volume.
+
+    .PARAMETER VolumeGroupName
+    Move the volume to a different volume group by specifying the volume group name.
+
+    .PARAMETER ReadOnly
+    Sets the volume to read-only mode.
+
+    .PARAMETER ReadWrite
+    Sets the volume to read-write mode.
+
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    Set-SDPVolume -id 123 -sizeInGB 200
+    Expands the volume with ID 123 to 200GB.
+
+    .EXAMPLE
+    Get-SDPVolume -name "Vol01" | Set-SDPVolume -name "Vol01-Renamed"
+    Renames a volume using piped input.
+
+    .EXAMPLE
+    Set-SDPVolume -id 123 -ReadOnly
+    Sets the volume to read-only mode.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
 function Set-SDPVolume {
     param(
         [parameter(ValueFromPipelineByPropertyName, Mandatory)]
@@ -18,20 +67,6 @@ function Set-SDPVolume {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-
-        .EXAMPLE 
-
-        .DESCRIPTION
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://www.github.com/JayAreP/K2RF/
-
-    #>
     begin {
         $endpoint = "volumes"
     }

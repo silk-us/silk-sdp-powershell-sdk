@@ -27,7 +27,7 @@ function New-SDPHostGroupMapping {
         Authored by J.R. Phillips (GitHub: JayAreP)
 
         .LINK
-        https://www.github.com/JayAreP/K2RF/
+        https://github.com/silk-us/silk-sdp-powershell-sdk
 
     #>
     begin {

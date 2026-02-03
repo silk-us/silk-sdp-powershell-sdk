@@ -1,3 +1,52 @@
+<#
+    .SYNOPSIS
+    Creates a new volume on the SDP.
+
+    .DESCRIPTION
+    Creates a new block storage volume within a specified volume group on the Silk Data Pod.
+
+    .PARAMETER name
+    The name for the new volume.
+
+    .PARAMETER sizeInGB
+    The size of the volume in gigabytes.
+
+    .PARAMETER VolumeGroupName
+    The name of the volume group where the volume will be created.
+
+    .PARAMETER volumeGroupId
+    The ID of the volume group where the volume will be created. Accepts piped input from Get-SDPVolumeGroup.
+
+    .PARAMETER VMWare
+    Enables VMware support for the volume (VMFS optimizations).
+
+    .PARAMETER Description
+    Optional description for the volume.
+
+    .PARAMETER ReadOnly
+    Creates the volume as read-only.
+
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    New-SDPVolume -name "Vol01" -sizeInGB 100 -VolumeGroupName "VG01"
+    Creates a 100GB volume named "Vol01" in volume group "VG01".
+
+    .EXAMPLE
+    New-SDPVolume -name "VMWareVol" -sizeInGB 500 -VolumeGroupName "VG01" -VMWare
+    Creates a 500GB VMware-optimized volume.
+
+    .EXAMPLE
+    Get-SDPVolumeGroup -name "VG01" | New-SDPVolume -name "Vol02" -sizeInGB 200
+    Creates a volume using piped volume group input.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
 function New-SDPVolume {
     param(
         [parameter(Mandatory)]
@@ -18,20 +67,6 @@ function New-SDPVolume {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-
-        .EXAMPLE 
-
-        .DESCRIPTION
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://www.github.com/JayAreP/K2RF/
-
-    #>
     begin {
         $endpoint = "volumes"
     }
