@@ -113,9 +113,13 @@ function Invoke-SDPRestCall {
         Write-Verbose $bodyjson
     }
 
-    # declare the requested context's credential information 
+    # declare the requested context's credential information
 
-    $restContext = Get-Variable -Scope Global -Name $k2context -ValueOnly
+    $restContext = Get-Variable -Scope Global -Name $k2context -ValueOnly -ErrorAction SilentlyContinue
+    if (-not $restContext) {
+        Write-Error "No SDP session found for context '$k2context'. Run 'Connect-SDP' (or pass -k2context <name> if you connected with a custom context name)." -Category AuthenticationError
+        return
+    }
 
     # Make the call. 
 

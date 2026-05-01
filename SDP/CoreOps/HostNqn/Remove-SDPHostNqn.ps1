@@ -1,4 +1,25 @@
+<#
+    .SYNOPSIS
+    Remove an existing host Nqn.
+
+    .EXAMPLE
+    Remove-SDPHostNqn -hostName Host01
+
+    .EXAMPLE
+    Get-SDPHostNqn -hostName LinuxHost03 | Remove-SDPHostNqn
+
+    .DESCRIPTION
+    Use this function to remove an existing host Nqn using these examples. Accepts piped imput from Get-SDPHostNqn
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Remove-SDPHostNqn {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -6,26 +27,6 @@ function Remove-SDPHostNqn {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-        Remove an existing host Nqn. 
-
-        .EXAMPLE 
-        Remove-SDPHostNqn -id 123
-
-        .EXAMPLE 
-        Get-SDPHostNqn -hostName LinuxHost03 | Remove-SDPHostNqn 
-        
-        .DESCRIPTION
-        Use this function to remove an existing host Nqn using these examples. Accepts piped imput from Get-SDPHostNqn
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
 
     begin {
         $endpoint = 'host_nqns'
@@ -33,11 +34,13 @@ function Remove-SDPHostNqn {
 
     process {
 
-        $hostObject = Get-SDPHostNqn -hostName $hostName -k2context $k2context
+        # Special Ops — locate the NQN record by host.
 
-        ## Make the call
-        $endpointURI = $endpoint + '/' + $hostObject.id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
+        $hostNqn = Get-SDPHostNqn -hostName $hostName -k2context $k2context -doNotResolve
+
+        # Call
+
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostNqn.id)" -method DELETE -k2context $k2context
         return $results
     }
 }

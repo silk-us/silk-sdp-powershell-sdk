@@ -1,4 +1,29 @@
+<#
+    .SYNOPSIS
+    Retrieves replication peer volume groups.
+
+    .DESCRIPTION
+    Queries the SDP for peer volume groups visible across configured
+    replication sessions.
+
+    .PARAMETER doNotResolve
+    Skip ref-name resolution on the returned objects.
+
+    .PARAMETER k2context
+    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    Get-SDPReplicationPeerVolumeGroups
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPReplicationPeerVolumeGroups {
+    [CmdletBinding()]
     param(
         [parameter()]
         [Alias("CapacityState")]
@@ -31,15 +56,25 @@ function Get-SDPReplicationPeerVolumeGroups {
         [Alias("VolumesLogicalCapacity")]
         [int] $volumes_logical_capacity,
         [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = "k2rfconnection"
     )
 
-    $endpoint = "replication/peer_volume_groups"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "replication/peer_volume_groups"
     }
-    return $results
+
+    process {
+
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+            Add-SDPTypeName -TypeName 'SDPReplicationPeerVolumeGroup'
+
+        if ($doNotResolve) {
+            return $results
+        }
+        return ($results | Update-SDPRefObjects -k2context $k2context)
+    }
 }

@@ -1,15 +1,40 @@
+<#
+    .SYNOPSIS
+    Retrieves the current system expansion state from the SDP.
+
+    .DESCRIPTION
+    Queries the `system/expansion` endpoint.
+
+    .EXAMPLE
+    Get-SDPSystemExpansion
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPSystemExpansion {
+    [CmdletBinding()]
     param(
+        [parameter()]
+        [switch] $doNotResolve,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
 
-    $endpoint = "system/expansion"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "system/expansion"
     }
-    return $results
+
+    process {
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+            Add-SDPTypeName -TypeName 'SDPSystemExpansion'
+
+        if ($doNotResolve) { return $results }
+        return ($results | Update-SDPRefObjects -k2context $k2context)
+    }
 }

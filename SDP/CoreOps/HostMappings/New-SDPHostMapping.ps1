@@ -1,4 +1,41 @@
+<#
+    .SYNOPSIS
+    Map a host to an existing volume.
+
+    .DESCRIPTION
+    Maps a host to a qualifying volume or volume group view (snapshot).
+    Accepts piped input from Get-SDPHost.
+
+    .PARAMETER hostName
+    Name of the host to map. Accepts piped input from Get-SDPHost.
+
+    .PARAMETER volumeName
+    Name of the volume to expose to the host. Mutually exclusive with
+    -viewName.
+
+    .PARAMETER viewName
+    Name of the volume group view (snapshot) to expose. Mutually exclusive
+    with -volumeName.
+
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
+
+    .EXAMPLE
+    New-SDPHostMapping -hostName Host01 -volumeName Vol01
+
+    .EXAMPLE
+    Get-SDPHost -name Host01 | New-SDPHostMapping -volumeName Vol01
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function New-SDPHostMapping {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -11,67 +48,47 @@ function New-SDPHostMapping {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-        Map a host to an existing volume.     
 
-        .EXAMPLE 
-        New-SDPHostMapping -hostName Host01 -volumeName Vol01
-
-        .EXAMPLE 
-        Get-SDPHost -name Host01 | New-SDPHostMapping -volumeName Vol01
-
-        .DESCRIPTION
-        This function will map a host to any qualifying volume. Accepts piped into from Get-SDPHost
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
     begin {
         $endpoint = 'mappings'
     }
 
-    process{
-        ## Special Ops
-        
-        $hostid = Get-SDPHost -name $hostName -k2context $k2context
-        $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostid.id -nestedObject
+    process {
 
-        if ($hostid.host_) {
-            $message = "Host $hostName is a member of a host group, please use New-SDPHostMapping for the parent or select an unused host."
-            Write-Error $message
+        # Special Ops — resolve host and target (volume or view) to refs.
+
+        $hostObj = Get-SDPHost -name $hostName -k2context $k2context
+        $hostRef = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
+
+        if ($hostObj.host_) {
+            Write-Error "Host $hostName is a member of a host group, please use New-SDPHostMapping for the parent or select an unused host."
         }
 
         if ($volumeName) {
-            $volumeid = Get-SDPVolume -name $volumeName -k2context $k2context
-            $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
+            $volumeObj = Get-SDPVolume -name $volumeName -k2context $k2context
+            $volumeRef = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeObj.id -nestedObject
         } elseif ($viewName) {
-            $volumeid = Get-SDPVolumeGroupView -name $viewName -k2context $k2context
-            $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeid.id -nestedObject
+            $volumeObj = Get-SDPVolumeGroupView -name $viewName -k2context $k2context
+            $volumeRef = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeObj.id -nestedObject
         } else {
-            $message = "Please supply either a -volumeName or -viewName"
-            return $message | Write-error
+            return "Please supply either a -volumeName or -viewName" | Write-Error
         }
 
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name "host" -Value $hostPath
-        $o | Add-Member -MemberType NoteProperty -Name "volume" -Value $volumePath
+        # Build the request body
 
-        $body = $o
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name "host" -Value $hostRef
+        $body | Add-Member -MemberType NoteProperty -Name "volume" -Value $volumeRef
 
-        ## Make the call
+        # Call
+
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue -TimeOut 5
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue -TimeOut 5
         } catch {
             return $Error[0]
         }
 
         $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName -k2context $k2context
         return $response
-        
     }
 }

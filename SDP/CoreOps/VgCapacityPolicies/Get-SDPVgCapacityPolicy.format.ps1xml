@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPVgCapacityPolicy. See
+    Get-SDPVolume.format.ps1xml for the rationale on why a TableControl
+    is needed instead of just Update-TypeData -DefaultDisplayPropertySet.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPVgCapacityPolicy</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPVgCapacityPolicy</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader><Label>name</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>id</Label><Width>6</Width><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>full_threshold</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>warning_threshold</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>error_threshold</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>critical_threshold</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>num_snapshots</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>is_default</Label></TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>id</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>full_threshold</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>warning_threshold</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>error_threshold</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>critical_threshold</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>num_snapshots</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>is_default</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

@@ -12,7 +12,7 @@
 RootModule = 'sdp.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.18'
+ModuleVersion = '2.0.3'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -63,7 +63,7 @@ PowerShellVersion = '4.0'
 # TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-# FormatsToProcess = @()
+FormatsToProcess = @('SDP.format.ps1xml')
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 # NestedModules = @()
@@ -110,7 +110,7 @@ PrivateData = @{
         # ReleaseNotes = ''
 
         # Prerelease string of this module
-        # Prerelease = 'RC1'
+        Prerelease = 'RC1'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
         # RequireLicenseAcceptance = $false

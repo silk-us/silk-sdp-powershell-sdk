@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPVolSnap. Volsnaps have no name;
+    they're keyed by id and identified through the volume/snapshot refs.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPVolSnap</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPVolSnap</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader><Label>id</Label><Width>6</Width><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>volume_name</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>snapshot_name</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>provisioned_capacity</Label><Alignment>Right</Alignment></TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>id</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>volume_name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>snapshot_name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>provisioned_capacity</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

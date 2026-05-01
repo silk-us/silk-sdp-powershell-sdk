@@ -1,87 +1,168 @@
 <#
+    SDPVolumeGroupSnapshot — typed wrapper for a regular SDP snapshot
+    record (source = /volume_groups/X). View-snapshots from the
+    -asViewSnapshot path also wear this type since the API record shape
+    is identical.
+
+    `source`, `volume_group`, `retention_policy`, and `replication_session`
+    are ref-shaped; Update-SDPRefObjects attaches `*_name`
+    NoteProperties at runtime. `creationTime` is a computed [datetime]
+    derived from the raw `creation_time` int.
+#>
+
+class SDPVolumeGroupSnapshot {
+
+    # --- Identity / properties shown in the default table view ---
+    [string]   $name
+    [string]   $id
+    [string]   $short_name
+
+    # --- Lifecycle ---
+    [datetime] $creationTime
+    [int]      $creation_time
+    [int]      $data_creation_time
+    [int]      $last_exposed_time
+    [int]      $num_of_clones
+    [string]   $triggered_by
+
+    # --- Identity (additional) ---
+    [string]   $description
+    [string]   $iscsi_tgt_converted_name
+    [string]   $wwn
+    [int]      $generation_number
+
+    # --- Sizing ---
+    [long]     $volsnaps_provisioned_capacity
+
+    # --- Flags ---
+    [bool]     $is_application_consistent
+    [bool]     $is_auto_deleteable
+    [bool]     $is_deleted
+    [bool]     $is_exist_on_peer
+    [bool]     $is_exposable
+    [bool]     $is_external
+    [bool]     $is_locked_by_replication
+    [bool]     $is_originating_from_peer
+
+    # --- Refs (kept nested for Update-SDPRefObjects). ---
+    [psobject] $source
+    [psobject] $volume_group
+    [psobject] $retention_policy
+    [psobject] $replication_session
+
+    # Hidden context
+    hidden [string] $k2context
+
+    SDPVolumeGroupSnapshot() {}
+
+    SDPVolumeGroupSnapshot([psobject] $apiHit, [string] $k2context) {
+        $this.id                            = $apiHit.id
+        $this.name                          = $apiHit.name
+        $this.short_name                    = $apiHit.short_name
+        $this.description                   = $apiHit.description
+        $this.iscsi_tgt_converted_name      = $apiHit.iscsi_tgt_converted_name
+        $this.wwn                           = $apiHit.wwn
+        $this.generation_number             = $apiHit.generation_number
+        $this.creation_time                 = $apiHit.creation_time
+        $this.data_creation_time            = $apiHit.data_creation_time
+        $this.last_exposed_time             = $apiHit.last_exposed_time
+        $this.num_of_clones                 = $apiHit.num_of_clones
+        $this.triggered_by                  = $apiHit.triggered_by
+        $this.volsnaps_provisioned_capacity = $apiHit.volsnaps_provisioned_capacity
+        $this.is_application_consistent     = [bool] $apiHit.is_application_consistent
+        $this.is_auto_deleteable            = [bool] $apiHit.is_auto_deleteable
+        $this.is_deleted                    = [bool] $apiHit.is_deleted
+        $this.is_exist_on_peer              = [bool] $apiHit.is_exist_on_peer
+        $this.is_exposable                  = [bool] $apiHit.is_exposable
+        $this.is_external                   = [bool] $apiHit.is_external
+        $this.is_locked_by_replication      = [bool] $apiHit.is_locked_by_replication
+        $this.is_originating_from_peer      = [bool] $apiHit.is_originating_from_peer
+        $this.k2context                     = $k2context
+
+        if ($apiHit.creation_time) {
+            $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
+        }
+
+        if ($apiHit.source)              { $this.source              = $apiHit.source }
+        if ($apiHit.volume_group)        { $this.volume_group        = $apiHit.volume_group }
+        if ($apiHit.retention_policy)    { $this.retention_policy    = $apiHit.retention_policy }
+        if ($apiHit.replication_session) { $this.replication_session = $apiHit.replication_session }
+    }
+
+    # ---- Operational methods --------------------------------------------
+
+    [SDPVolumeGroupSnapshot] Refresh() {
+        return [SDPVolumeGroupSnapshot]::new(
+            (Get-SDPVolumeGroupSnapshot -id $this.id -k2context $this.k2context -doNotResolve),
+            $this.k2context)
+    }
+
+    [void] Delete() {
+        Remove-SDPVolumeGroupSnapshot -id $this.id -k2context $this.k2context | Out-Null
+    }
+
+    [string] ToString() {
+        return $this.name
+    }
+}
+
+Update-TypeData -TypeName 'SDPVolumeGroupSnapshot' `
+                -DefaultDisplayPropertySet 'name','id','source_name','retention_policy_name','creationTime','is_exposable' `
+                -Force
+
+
+<#
     .SYNOPSIS
-    Retrieves volume group snapshots from the SDP.
+    Retrieves volume group snapshots (and view-snapshots) from the SDP.
 
     .DESCRIPTION
-    Queries for volume group snapshots on the Silk Data Pod. Volume group snapshots are point-in-time copies of all volumes in a volume group.
+    All snapshots live at the /snapshots endpoint. They differ by what
+    `source` points at:
 
-    .PARAMETER volumeGroupName
-    Filter snapshots by volume group name. Accepts piped input from Get-SDPVolumeGroup.
+      * Regular snapshot — source = /volume_groups/X (default behavior)
+      * View-snapshot    — source = /snapshots/X where X is itself a view
 
-    .PARAMETER description
-    Filter snapshots by description text.
+    The `-asViewSnapshot` switch flips the post-fetch filter to return
+    view-snapshots instead of regular snapshots. Without the switch, the
+    function only returns snapshots whose source is a volume group.
 
-    .PARAMETER generation_number
-    Filter by generation number of the snapshot.
+    Use Get-SDPVolumeGroupView for views themselves (snapshot records
+    where `is_exposable=true` and source is a regular snapshot).
+
+    .PARAMETER name
+    Filter by full snapshot name (the `vg:short_name` form).
+
+    .PARAMETER short_name
+    Filter by short name only (the user-supplied portion).
 
     .PARAMETER id
     The unique identifier of the snapshot.
 
-    .PARAMETER iscsi_tgt_converted_name
-    Filter by iSCSI target converted name.
+    .PARAMETER volumeGroupName
+    Filter by volume group name. Accepts piped input from
+    Get-SDPVolumeGroup. Only meaningful for regular snapshots.
 
-    .PARAMETER is_application_consistent
-    Filter by application consistency flag.
+    .PARAMETER asViewSnapshot
+    Return view-snapshots instead of regular snapshots.
 
-    .PARAMETER is_auto_deleteable
-    Filter by auto-deleteable flag.
-
-    .PARAMETER is_deleted
-    Include deleted snapshots in results.
-
-    .PARAMETER is_exist_on_peer
-    Filter by existence on replication peer.
-
-    .PARAMETER is_exposable
-    Filter by exposable flag.
-
-    .PARAMETER is_external
-    Filter by external snapshot flag.
-
-    .PARAMETER is_originating_from_peer
-    Filter by snapshots originating from replication peer.
-
-    .PARAMETER last_exposed_time
-    Filter by last time snapshot was exposed.
-
-    .PARAMETER name
-    The name of the snapshot to retrieve.
-
-    .PARAMETER replication_session
-    Filter by replication session.
-
-    .PARAMETER retention_policy
-    Filter by retention policy name.
-
-    .PARAMETER short_name
-    Filter by short name of the snapshot.
-
-    .PARAMETER triggered_by
-    Filter by what triggered the snapshot (manual, scheduled, replication).
-
-    .PARAMETER volsnaps_provisioned_capacity
-    Filter by provisioned capacity.
-
-    .PARAMETER volume_group
-    Filter by volume group reference.
-
-    .PARAMETER wwn
-    Filter by World Wide Name.
+    .PARAMETER doNotResolve
+    Skip the auto-pipe through Update-SDPRefObjects. Returns raw API
+    objects.
 
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    K2 context name. Defaults to 'k2rfconnection'.
 
     .EXAMPLE
     Get-SDPVolumeGroupSnapshot
-    Retrieves all volume group snapshots from the SDP.
 
     .EXAMPLE
-    Get-SDPVolumeGroupSnapshot -name "VG01-Snap01"
-    Retrieves the snapshot named "VG01-Snap01".
+    Get-SDPVolumeGroupSnapshot -name "test-vg:test-snap"
 
     .EXAMPLE
-    Get-SDPVolumeGroup -name "VG01" | Get-SDPVolumeGroupSnapshot
-    Retrieves all snapshots for volume group "VG01".
+    Get-SDPVolumeGroup -name "test-vg" | Get-SDPVolumeGroupSnapshot
+
+    .EXAMPLE
+    Get-SDPVolumeGroupSnapshot -asViewSnapshot
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
@@ -89,7 +170,10 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Get-SDPVolumeGroupSnapshot {
+    [CmdletBinding()]
+    [OutputType([SDPVolumeGroupSnapshot])]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias("pipeName")]
@@ -151,29 +235,62 @@ function Get-SDPVolumeGroupSnapshot {
         [parameter()]
         [string] $wwn,
         [parameter()]
+        [switch] $asViewSnapshot,
+        [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
         $endpoint = "snapshots"
     }
-    
+
     process {
+
+        # Special Ops — translate volumeGroupName to a volume_group ref.
+
         if ($volumeGroupName) {
-            $volumeGroupid = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
-            $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $volumeGroupid.id -ObjectPath 'volume_groups' -nestedObject
+            $vg = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context -doNotResolve
+            $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $vg.id -ObjectPath 'volume_groups' -nestedObject
             $PSBoundParameters.remove('volumeGroupName') | Out-Null
             $PSBoundParameters.volume_group = $volumeGroupPath
         }
 
+        # Strip internal-only switches before passing to Invoke-SDPRestCall.
+        $PSBoundParameters.Remove('asViewSnapshot') | Out-Null
+        $PSBoundParameters.Remove('doNotResolve')  | Out-Null
+
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
-        $newResults = @()
-        foreach ($r in $results) {  
-            $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
-            if ($ref.ObjectPath -eq 'volume_groups') {
-                $newResults += $r
+
+        # Source-shape filter.
+
+        if ($asViewSnapshot) {
+            # View-snapshots: source is /snapshots/X AND X itself has source /snapshots/.
+            $snapSourced = foreach ($r in $results) {
+                $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
+                if ($ref.ObjectPath -eq 'snapshots') { $r }
+            }
+            $newResults = foreach ($r in $snapSourced) {
+                $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
+                if ($snapSourced.id -contains $ref.ObjectId) { $r }
+            }
+        } else {
+            # Default: regular snapshots — source = /volume_groups/.
+            $newResults = foreach ($r in $results) {
+                $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
+                if ($ref.ObjectPath -eq 'volume_groups') { $r }
             }
         }
-        return $newResults
-    }
 
+        $instances = foreach ($hit in $newResults) {
+            [SDPVolumeGroupSnapshot]::new($hit, $k2context)
+        }
+
+        if ($doNotResolve) {
+            $instances
+        } else {
+            $instances | Update-SDPRefObjects -k2context $k2context
+        }
+    }
 }

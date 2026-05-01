@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPHost.
+
+    See Get-SDPVolume.format.ps1xml for the rationale on why a TableControl
+    is needed instead of just Update-TypeData -DefaultDisplayPropertySet.
+
+    `host_group_name` is attached at runtime by Update-SDPRefObjects;
+    the cell renders empty when the pipeline has not run through the
+    resolver.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPHost</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPHost</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>id</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>type</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>host_group_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>volumes_count</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>id</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>type</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>host_group_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>volumes_count</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

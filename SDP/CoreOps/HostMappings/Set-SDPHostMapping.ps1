@@ -35,7 +35,9 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Set-SDPHostMapping {
+    [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName,Mandatory)]
         [string] $id,
@@ -47,43 +49,43 @@ function Set-SDPHostMapping {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
-        $endpoint = 'mappings' 
+        $endpoint = 'mappings'
     }
 
-    process{
-        ## Special Ops
+    process {
+
+        # Special Ops — resolve host name to a nested ref.
+
         if ($hostName) {
-            $hostid = Get-SDPHost -name $hostName -k2context $k2context
-            $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostid.id -nestedObject
+            $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+            $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
+
+            if ($hostObj.host_) {
+                Write-Error "Host $hostName is a member of a host group, please use New-SDPHostMapping for the parent or select an unused host."
+            }
         }
 
-        if ($hostid.host_) {
-            $message = "Host $hostName is a member of a host group, please use New-SDPHostMapping for the parent or select an unused host."
-            Write-Error $message
-        }
+        # Build the request body
 
-
-        $o = New-Object psobject
+        $body = New-Object psobject
         if ($hostName) {
-            $o | Add-Member -MemberType NoteProperty -Name "host" -Value $hostPath
+            $body | Add-Member -MemberType NoteProperty -Name "host" -Value $hostPath
         }
         if ($lun) {
-            $o | Add-Member -MemberType NoteProperty -Name "lun" -Value $lun
+            $body | Add-Member -MemberType NoteProperty -Name "lun" -Value $lun
         }
 
-        $body = $o
-
-        ## Make the call
-        $endpointURI = $endpoint + '/' + $id
+        # Call
 
         try {
-            Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context -erroraction silentlycontinue -TimeOut 5
+            Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context -ErrorAction SilentlyContinue -TimeOut 5
         } catch {
             return $Error[0]
         }
-        $response = Get-SDPHostMapping -lun $lun
+
+        $response = Get-SDPHostMapping -lun $lun -k2context $k2context
         return $response
-        
     }
 }

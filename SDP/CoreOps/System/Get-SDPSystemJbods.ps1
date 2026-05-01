@@ -1,4 +1,23 @@
+<#
+    .SYNOPSIS
+    Retrieves JBOD enclosure state from the SDP.
+
+    .DESCRIPTION
+    Queries the `system/jbods` endpoint. Filter by name, id, connectivity
+    state, FRU/phased-out flags, NDU state, etc.
+
+    .EXAMPLE
+    Get-SDPSystemJbods
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPSystemJbods {
+    [CmdletBinding()]
     param(
         [parameter()]
         [Alias("ConnectivityState")]
@@ -26,15 +45,22 @@ function Get-SDPSystemJbods {
         [Alias("NduState")]
         [string] $ndu_state,
         [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = "k2rfconnection"
     )
 
-    $endpoint = "system/jbods"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "system/jbods"
     }
-    return $results
+
+    process {
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+            Add-SDPTypeName -TypeName 'SDPSystemJbod'
+
+        if ($doNotResolve) { return $results }
+        return ($results | Update-SDPRefObjects -k2context $k2context)
+    }
 }

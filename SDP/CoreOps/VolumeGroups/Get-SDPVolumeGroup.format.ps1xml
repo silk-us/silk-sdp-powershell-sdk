@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPVolumeGroup.
+
+    See Get-SDPVolume.format.ps1xml for the rationale on why a TableControl
+    is needed instead of just Update-TypeData -DefaultDisplayPropertySet.
+
+    Volume groups have several ref-shaped properties that
+    Update-SDPRefObjects resolves into *_name NoteProperties at runtime:
+    capacity_policy, last_restored_from, replication_session,
+    replication_peer_volume_group, replication_rpo_history. All five
+    are included in the default columns; cells render empty when the
+    underlying ref is null on the resource.
+
+    If you find the default table too wide for your terminal, prune the
+    columns below — there's no functional impact.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPVolumeGroup</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPVolumeGroup</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>id</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>quotaInGB</Label>
+                        <Width>10</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>volumes_count</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>snapshots_count</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>capacity_state</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>capacity_policy_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>last_restored_from_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>replication_session_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>replication_peer_volume_group_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>replication_rpo_history_name</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>id</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>quotaInGB</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>volumes_count</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>snapshots_count</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>capacity_state</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>capacity_policy_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>last_restored_from_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>replication_session_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>replication_peer_volume_group_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>replication_rpo_history_name</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

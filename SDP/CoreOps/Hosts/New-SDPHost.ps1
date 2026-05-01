@@ -1,35 +1,46 @@
 <#
-	.SYNOPSIS 
+    .SYNOPSIS
     Create a new host object on the SDP.
 
-	.DESCRIPTION 
-    Create a new host object on the SDP.
+    .DESCRIPTION
+    Create a new host object on the SDP, optionally placed into an existing
+    host group at creation time.
 
-	.PARAMETER name
-	[string] - Provide name for the SDP Host object.
+    .PARAMETER name
+    Name for the new host.
 
-	.PARAMETER type
-	[string] - Decalre the host type ('Windows', 'Linux', 'ESX')
+    .PARAMETER type
+    Host type. Valid choices: Linux, Windows, ESX, AIX, Solaris.
 
-	.PARAMETER hostGroupName
-	[string] - Set the host's host group via 'name'. 
+    .PARAMETER hostGroupName
+    Optional host group to assign by name.
 
-	.PARAMETER hostGroupID
-	[string] - Set the host's host group via 'id'.
+    .PARAMETER hostGroupId
+    Optional host group to assign by ID. Accepts piped input from
+    Get-SDPHostGroup.
 
-	.PARAMETER connectivityType
-	[string] - Set the desired host's connectivity type (Unused on Cloud SDP)
+    .PARAMETER connectivityType
+    Optional connectivity type (FC, NVME, iSCSI). Unused on Cloud SDP.
 
-	.EXAMPLE
-	Create a new host named `WinHost01` and set the host as a `Windows` host type. 
-	New-SDPHost -name WinHost01 -type Windows
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
-	.EXAMPLE
-	Create a new host named `SQLHost01` and add it to a host group named `SQLCluster01`
-	New-SDPHost -name SQLHost01 -type Windows -hostGroupName SQLCluster01
+    .EXAMPLE
+    New-SDPHost -name WinHost01 -type Windows
 
+    .EXAMPLE
+    New-SDPHost -name SQLHost01 -type Windows -hostGroupName SQLCluster01
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function New-SDPHost {
+    [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -49,55 +60,56 @@ function New-SDPHost {
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
-    
+
     begin {
         $endpoint = "hosts"
     }
 
     process {
 
+        # Special Ops — resolve the optional target host group (by id or name).
+
         if ($hostGroupId) {
-            Write-Verbose "Working with host Group id $hostGroupId"
-            $hgstats = Get-SDPhostGroup -id $hostGroupId -k2context $k2context
-            $hgpath = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hgstats.id -nestedObject
-            if (!$hgstats) {
-                Return "No hostgroup with ID $hostGroupId exists."
-            } 
+            Write-Verbose "Working with host group id $hostGroupId"
+            $hostGroup = Get-SDPHostGroup -id $hostGroupId -k2context $k2context
+            if (!$hostGroup) {
+                return "No host group with ID $hostGroupId exists."
+            }
+            $hostGroupRef = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hostGroup.id -nestedObject
         } elseif ($hostGroupName) {
-            Write-Verbose "Working with host Group name $hostGroupName"
-            $hgstats = Get-SDPhostGroup -name $hostGroupName -k2context $k2context
-            $hgpath = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hgstats.id -nestedObject
-            if (!$hgstats) {
-                Return "No hostgroup named $hostGroupName exists."
-            } 
+            Write-Verbose "Working with host group name $hostGroupName"
+            $hostGroup = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
+            if (!$hostGroup) {
+                return "No host group named $hostGroupName exists."
+            }
+            $hostGroupRef = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hostGroup.id -nestedObject
         }
-    
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
-        $o | Add-Member -MemberType NoteProperty -Name 'type' -Value $type
-        $o | Add-Member -MemberType NoteProperty -Name "host_group" -Value $hgpath
+
+        # Build the request body
+
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
+        $body | Add-Member -MemberType NoteProperty -Name 'type' -Value $type
+        if ($hostGroupRef) {
+            $body | Add-Member -MemberType NoteProperty -Name 'host_group' -Value $hostGroupRef
+        }
         if ($connectivityType) {
-            $o | Add-Member -MemberType NoteProperty -Name "connectivity_type" -Value $connectivityType
+            $body | Add-Member -MemberType NoteProperty -Name 'connectivity_type' -Value $connectivityType
         }
 
-        # end special ops
+        # POST returns nothing on success — submit and then poll the GET
+        # until the new host appears.
 
-        $body = $o
-        
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
-        
-        $results = Get-SDPHost -name $name -k2context $k2context
-        while (!$results) {
-            Write-Verbose " --> Waiting on host $name"
-            $results = Get-SDPHost -name $name -k2context $k2context
-            Start-Sleep 1
+
+        $results = Wait-SDPObject -Activity $name -Get {
+            Get-SDPHost -name $name -k2context $k2context
         }
 
         return $results
     }
-
 }

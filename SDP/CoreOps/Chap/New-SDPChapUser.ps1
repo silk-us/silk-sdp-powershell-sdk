@@ -1,4 +1,32 @@
+<#
+    .SYNOPSIS
+    Creates a new CHAP user on the SDP.
+
+    .DESCRIPTION
+    Submits a CHAP host auth profile. The username/password pair is read
+    from the supplied PSCredential object.
+
+    .PARAMETER name
+    Friendly name for the CHAP user.
+
+    .PARAMETER chapCredentials
+    PSCredential carrying the CHAP username and password.
+
+    .PARAMETER k2context
+    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    New-SDPChapUser -name ChapUser01 -chapCredentials (Get-Credential)
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function New-SDPChapUser {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory)]
         [string] $name,
@@ -14,21 +42,22 @@ function New-SDPChapUser {
 
     process {
 
-        # Special Ops
-        
+        # Special Ops — pull the username/password off the PSCredential.
+
         $username = $chapCredentials.UserName
         $password = $chapCredentials.GetNetworkCredential().Password
 
-        # Query 
+        # Build the request body
 
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
-        $o | Add-Member -MemberType NoteProperty -Name 'username' -Value $username
-        $o | Add-Member -MemberType NoteProperty -Name 'password' -Value $password
-        $o | Add-Member -MemberType NoteProperty -Name 'type' -Value 'CHAP'
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
+        $body | Add-Member -MemberType NoteProperty -Name 'username' -Value $username
+        $body | Add-Member -MemberType NoteProperty -Name 'password' -Value $password
+        $body | Add-Member -MemberType NoteProperty -Name 'type' -Value 'CHAP'
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $o -k2context $k2context
+        # Call
 
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context
         return $results
     }
 }

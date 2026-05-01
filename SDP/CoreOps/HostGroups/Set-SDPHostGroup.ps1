@@ -1,4 +1,25 @@
+<#
+    .SYNOPSIS
+    Set any existing Host Group settings.
+
+    .EXAMPLE
+    Set-SDPHostGroup -id 4 -description "TestDev SQL hosts"
+
+    .EXAMPLE
+    Get-SDPHostGroup | where-object {$_.name -like "TestDev*"} | Set-SDPHostGroup -description "TestDev Host Groups"
+
+    .DESCRIPTION
+    Use this function to set any host group settings. This function accepts piped input from Get-SDPHostGroup.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Set-SDPHostGroup {
+    [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName,Mandatory)]
         [Alias('pipeId')]
@@ -14,56 +35,35 @@ function Set-SDPHostGroup {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-        Set any existing Host Group settings. 
 
-        .EXAMPLE 
-        Set-SDPHostGroup -id 4 -description "TestDev SQL hosts"
-
-        .EXAMPLE 
-        Get-SDPHostGroup | where-object {$_.name -like "TestDev*"} | Set-SDPHostGroup -description "TestDev Host Groups"
-
-        .DESCRIPTION    
-        Use this function to set any host group settings. This function accepts piped input from Get-SDPHostGroup. 
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
     begin {
         $endpoint = "host_groups"
     }
 
-    process{
-        $PSBoundParameters | ConvertTo-json | write-verbose
-        ## Special Ops
+    process {
+        $PSBoundParameters | ConvertTo-Json | Write-Verbose
 
-        $o = New-Object psobject
+        # Build the request body
+
+        $body = New-Object psobject
         if ($name) {
-            $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
+            $body | Add-Member -MemberType NoteProperty -Name "name" -Value $name
         }
         if ($description) {
-            $o | Add-Member -MemberType NoteProperty -Name "description" -Value $description
+            $body | Add-Member -MemberType NoteProperty -Name "description" -Value $description
         }
         if ($ConnectivityType) {
-            $o | Add-Member -MemberType NoteProperty -Name "connectivity_type" -Value $ConnectivityType
+            $body | Add-Member -MemberType NoteProperty -Name "connectivity_type" -Value $ConnectivityType
         }
-        if ($allowDifferentHostTypes -eq $false) {
-            $o | Add-Member -MemberType NoteProperty -Name "allow_different_host_types" -Value $false
-        } elseif ($allowDifferentHostTypes -eq $true) {
-            $o | Add-Member -MemberType NoteProperty -Name "allow_different_host_types" -Value $true
+        # $false is meaningful here — caller may explicitly want to clear
+        # the flag — so check ContainsKey rather than truthiness.
+        if ($PSBoundParameters.ContainsKey('allowDifferentHostTypes')) {
+            $body | Add-Member -MemberType NoteProperty -Name "allow_different_host_types" -Value $allowDifferentHostTypes
         }
 
+        # Call
 
-        $body = $o
-        
-        ## Make the call
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
         return $results
     }
 }

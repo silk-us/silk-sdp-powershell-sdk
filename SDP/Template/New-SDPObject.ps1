@@ -1,4 +1,5 @@
 function CMDLETNAME {
+    [CmdletBinding()]
     param(
         [parameter()]
         [string] $k2context = 'k2rfconnection'
@@ -8,28 +9,33 @@ function CMDLETNAME {
         $endpoint = ENDPOINTNAME
     }
 
-    process{
-        ## Special Ops
+    process {
 
-        $o = New-Object psobject
+        # Special Ops
+
+        # Build the request body
+
+        $body = New-Object psobject
         if ($name) {
-            $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
+            $body | Add-Member -MemberType NoteProperty -Name "name" -Value $name
         }
         if ($size) {
-            $o | Add-Member -MemberType NoteProperty -Name "size" -Value $size
+            $body | Add-Member -MemberType NoteProperty -Name "size" -Value $size
         }
 
-        # Make the call 
+        # Call — POST returns nothing on success; poll until the new object
+        # appears via its Get-SDP* equivalent.
 
-        $body = $o
-        
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
-        
-        return $body
+
+        $results = Wait-SDPObject -Activity $name -Get {
+            Get-SDPOBJECT -name $name -k2context $k2context
+        }
+
+        return $results
     }
 }
-

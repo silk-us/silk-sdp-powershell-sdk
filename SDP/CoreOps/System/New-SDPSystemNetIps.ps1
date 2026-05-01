@@ -1,31 +1,34 @@
 <#
     .SYNOPSIS
-    Configures an IP address for a specific interface
-
-    .EXAMPLE 
-    Get-SDPSystemNetPorts -name c-node02_dataport01 | New-SDPSystemNetIps -ipAddress 10.100.5.2 -subnetMask 255.255.255.0 -service iscsi
+    Configures an IP address on an SDP network port.
 
     .DESCRIPTION
-    This function will configure an IP for a desired NetPort. The allowed service types are going to be 'iscsi' and 'replication'. This function accepts piped input from the Get-SDPSystemNetPorts function. 
+    Assigns an IP and subnet mask to a specified NetPort and tags it
+    with a service type ('iscsi' or 'Replication'). Accepts piped input
+    from Get-SDPSystemNetPorts.
+
+    .EXAMPLE
+    Get-SDPSystemNetPorts -name c-node02_dataport01 |
+        New-SDPSystemNetIps -ipAddress 10.100.5.2 -subnetMask 255.255.255.0 -service iscsi
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
 
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
-
 #>
 
 function New-SDPSystemNetIps {
+    [CmdletBinding()]
     param(
-        [parameter(Mandatory)]
-        [IPAddress] $ipAddress, 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [IPAddress] $ipAddress,
+        [Parameter(Mandatory)]
         [IPAddress] $subnetMask,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
         [ValidateSet('iscsi','Replication', IgnoreCase = $false)]
         [string] $service,
-        [parameter(Mandatory,ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $interface,
         [parameter()]
@@ -36,23 +39,17 @@ function New-SDPSystemNetIps {
         $endpoint = "system/net_ips"
     }
 
-    process{
-        ## Special Ops
-
+    process {
         $interfacePath = ConvertTo-SDPObjectPrefix -ObjectPath 'system/net_ports' -ObjectID $interface -nestedObject
 
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name "ip_address" -Value $ipAddress.IPAddressToString
-        $o | Add-Member -MemberType NoteProperty -Name "network_mask" -Value $subnetMask.IPAddressToString
-        $o | Add-Member -MemberType NoteProperty -Name "service" -Value $service
-        $o | Add-Member -MemberType NoteProperty -Name "interface" -Value $interfacePath
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name "ip_address" -Value $ipAddress.IPAddressToString
+        $body | Add-Member -MemberType NoteProperty -Name "network_mask" -Value $subnetMask.IPAddressToString
+        $body | Add-Member -MemberType NoteProperty -Name "service" -Value $service
+        $body | Add-Member -MemberType NoteProperty -Name "interface" -Value $interfacePath
 
-        # Make the call 
-
-        $body = $o
-        
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
             Start-Sleep 1
         } catch {
             return $Error[0]
@@ -63,11 +60,8 @@ function New-SDPSystemNetIps {
         if ($results) {
             return $results
         } else {
-            $message = "Unable to assign IP $ipAddress to network interface. Please check the specified IP." 
+            $message = "Unable to assign IP $ipAddress to network interface. Please check the specified IP."
             return $message | Write-Error
         }
-        
-
     }
 }
-

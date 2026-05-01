@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPVolume.
+
+    Why this file exists: PowerShell's built-in formatter falls back to
+    Format-List when an object has more than 4 default-display properties.
+    Update-TypeData -DefaultDisplayPropertySet does NOT override that
+    rule. To force a table view with more than 4 columns, you have to
+    register a TableControl here.
+
+    Columns include the *_name properties that Update-SDPRefObjects
+    attaches to the object at runtime (volume_group_name,
+    replication_peer_volume_name). When Update-SDPRefObjects has not
+    been piped through, those cells render empty — no error.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPVolume</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPVolume</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>id</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>scsi_sn</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>sizeInGB</Label>
+                        <Width>10</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>creationTime</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>volume_group_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>replication_peer_volume_name</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>id</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>scsi_sn</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>sizeInGB</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>creationTime</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>volume_group_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>replication_peer_volume_name</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

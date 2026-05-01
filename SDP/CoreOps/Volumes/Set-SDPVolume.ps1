@@ -3,22 +3,27 @@
     Modifies properties of an existing volume.
 
     .DESCRIPTION
-    Updates configuration settings for an existing volume on the Silk Data Pod. Can modify name, size, description, volume group assignment, and read-only status.
+    Updates configuration settings for an existing volume on the Silk Data
+    Pod. Can modify name, size, description, volume group assignment, and
+    read-only status.
 
     .PARAMETER id
-    The unique identifier of the volume to modify. Accepts piped input from Get-SDPVolume.
+    The unique identifier of the volume to modify. Accepts piped input from
+    Get-SDPVolume.
 
     .PARAMETER name
     New name for the volume.
 
     .PARAMETER sizeInGB
-    New size for the volume in gigabytes. Volume size can only be increased, not decreased.
+    New size for the volume in gigabytes. Volume size can only be increased,
+    not decreased.
 
     .PARAMETER Description
     New description for the volume.
 
     .PARAMETER VolumeGroupName
-    Move the volume to a different volume group by specifying the volume group name.
+    Move the volume to a different volume group by specifying the volume
+    group name.
 
     .PARAMETER ReadOnly
     Sets the volume to read-only mode.
@@ -27,7 +32,8 @@
     Sets the volume to read-write mode.
 
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
     .EXAMPLE
     Set-SDPVolume -id 123 -sizeInGB 200
@@ -47,7 +53,9 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Set-SDPVolume {
+    [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [Alias('pipeId')]
@@ -67,6 +75,7 @@ function Set-SDPVolume {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
         $endpoint = "volumes"
     }
@@ -76,60 +85,44 @@ function Set-SDPVolume {
         # Special Ops
 
         if ($sizeInGB) {
-            [string]$size = ($sizeInGB * 1024 * 1024)
+            [string] $size = ($sizeInGB * 1024 * 1024)
             Write-Verbose "$sizeInGB GB converted to $size"
         }
 
-
         if ($VolumeGroupName) {
-            Write-Verbose "Working with Volume Group name $VolumeGroupName"
-            $vgstats = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
-            if (!$vgstats) {
-                Return "No volumegroup named $VolumeGroupName exists."
-            } else {
-                $vgpath = ConvertTo-SDPObjectPrefix -ObjectPath volume_groups -ObjectID $vgstats.id -nestedObject
+            Write-Verbose "Working with volume group name $VolumeGroupName"
+            $volumeGroup = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
+            if (!$volumeGroup) {
+                return "No volume group named $VolumeGroupName exists."
             }
+            $volumeGroupRef = ConvertTo-SDPObjectPrefix -ObjectPath volume_groups -ObjectID $volumeGroup.id -nestedObject
         }
-        
-        # Build the Object
-        
-        $o = New-Object psobject
+
+        # Build the request body
+
+        $body = New-Object psobject
         if ($name) {
-            $o | Add-Member -MemberType NoteProperty -Name name -Value $name
+            $body | Add-Member -MemberType NoteProperty -Name name -Value $name
         }
-
         if ($size) {
-            $o | Add-Member -MemberType NoteProperty -Name size -Value $size
+            $body | Add-Member -MemberType NoteProperty -Name size -Value $size
         }
-        
-        if ($vgpath) {
-            $o | Add-Member -MemberType NoteProperty -Name volume_group -Value $vgpath
+        if ($volumeGroupRef) {
+            $body | Add-Member -MemberType NoteProperty -Name volume_group -Value $volumeGroupRef
         }
-        
-        if ($VMWare) {
-            $o | Add-Member -MemberType NoteProperty -Name vmware_support -Value $true
-        }
-
         if ($Description) {
-            $o | Add-Member -MemberType NoteProperty -Name description -Value $Description
+            $body | Add-Member -MemberType NoteProperty -Name description -Value $Description
         }
-
         if ($ReadOnly) {
-            $o | Add-Member -MemberType NoteProperty -Name read_only -Value $true
+            $body | Add-Member -MemberType NoteProperty -Name read_only -Value $true
         }
-
         if ($ReadWrite) {
-            $o | Add-Member -MemberType NoteProperty -Name read_only -Value $false
+            $body | Add-Member -MemberType NoteProperty -Name read_only -Value $false
         }
-
-        $body = $o
 
         # Call
 
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
         return $results
     }
-
 }
-

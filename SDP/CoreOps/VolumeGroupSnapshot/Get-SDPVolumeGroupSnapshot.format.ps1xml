@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPVolumeGroupSnapshot. The same type
+    is emitted for view-snapshots returned via -asViewSnapshot.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPVolumeGroupSnapshot</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPVolumeGroupSnapshot</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader><Label>name</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>id</Label><Width>6</Width><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>source_name</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>retention_policy_name</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>creationTime</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>is_exposable</Label></TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>id</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>source_name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>retention_policy_name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>creationTime</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>is_exposable</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

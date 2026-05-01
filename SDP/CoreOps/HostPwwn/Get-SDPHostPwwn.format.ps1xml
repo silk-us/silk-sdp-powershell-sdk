@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPHostPwwn. PWWN records have no
+    `name` field — they're keyed by id and the PWWN string itself.
+    `host_name` is attached at runtime by Update-SDPRefObjects.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPHostPwwn</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPHostPwwn</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader><Label>id</Label><Width>6</Width><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>pwwn</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>host_name</Label></TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>id</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>pwwn</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>host_name</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

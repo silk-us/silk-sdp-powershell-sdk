@@ -1,37 +1,43 @@
 <#
-	.SYNOPSIS 
-    Set an existing host's properties. 
+    .SYNOPSIS
+    Modify an existing host's properties.
 
-	.DESCRIPTION 
-    Set an existing host's properties. 
+    .DESCRIPTION
+    Updates name, type, or host group assignment on an existing host.
 
-	.PARAMETER id
-	[string] - 'id' value of the desired host. This can be piped via 'Get-SDPHost'
+    .PARAMETER id
+    The unique identifier of the host. Accepts piped input from Get-SDPHost.
 
-	.PARAMETER name
-	[string] - Name value to set for the specified host. 
+    .PARAMETER name
+    New name for the host.
 
-	.PARAMETER type
-	[string] - Decalre the host type ('Windows', 'Linux', 'ESX')
+    .PARAMETER type
+    New host type. Valid choices: Linux, Windows, ESX, AIX, Solaris.
 
-	.PARAMETER hostGroupName
-	[string] - Set the host's host group via 'name'. 
+    .PARAMETER hostGroupName
+    Move the host into a different host group, by name.
 
-	.PARAMETER hostGroupID
-	[string] - Set the host's host group via 'id'.
+    .PARAMETER k2context
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
-	.EXAMPLE
-	Set values for a host with the `id` of `20`.
-	Set-SDPHost -id 20 -Name WinHost02
+    .EXAMPLE
+    Set-SDPHost -id 20 -name WinHost02
 
-	.EXAMPLE
-	Rename a host named `WinHost01` to `WinHost02`. 
-	Get-SDPHost -name WinHost01 | Set-SDPHost -name WinHost02
+    .EXAMPLE
+    Get-SDPHost -name WinHost01 | Set-SDPHost -name WinHost02
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
 
 function Set-SDPHost {
+    [CmdletBinding()]
     param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [Alias('pipeId')]
         [string] $id,
         [parameter()]
@@ -49,24 +55,31 @@ function Set-SDPHost {
         $endpoint = "hosts"
     }
 
-    process {        
-        $o = New-Object psobject
-        if ($name) {
-            $o | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
-        }
-        if ($type) {
-            $o | Add-Member -MemberType NoteProperty -Name 'type' -Value $type
-        }
+    process {
+
+        # Special Ops — resolve host group ref if a name was supplied.
+
         if ($hostGroupName) {
             $hostGroup = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
-            $opt = ConvertTo-SDPObjectPrefix -ObjectID $hostGroup.id -ObjectPath host_groups -nestedObject
-            $o | Add-Member -MemberType NoteProperty -Name 'host_group' -Value $opt
+            $hostGroupRef = ConvertTo-SDPObjectPrefix -ObjectID $hostGroup.id -ObjectPath host_groups -nestedObject
         }
 
-        $body = $o 
+        # Build the request body
 
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+        $body = New-Object psobject
+        if ($name) {
+            $body | Add-Member -MemberType NoteProperty -Name 'name' -Value $name
+        }
+        if ($type) {
+            $body | Add-Member -MemberType NoteProperty -Name 'type' -Value $type
+        }
+        if ($hostGroupRef) {
+            $body | Add-Member -MemberType NoteProperty -Name 'host_group' -Value $hostGroupRef
+        }
+
+        # Call
+
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
         return $results
     }
 }

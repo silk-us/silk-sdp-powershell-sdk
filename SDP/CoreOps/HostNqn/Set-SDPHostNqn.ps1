@@ -1,4 +1,25 @@
+<#
+    .SYNOPSIS
+    Assigns an NQN to a host.
+
+    .EXAMPLE
+    Set-SDPHostNqn -hostName Host01 -nqn nqn.2014-08.org.nvmexpress:uuid:0123456789ABCDEF
+
+    .EXAMPLE
+    Get-SDPHost -name Host01 | Set-SDPHostNqn -nqn nqn.2014-08.org.nvmexpress:uuid:0123456789ABCDEF
+
+    .DESCRIPTION
+    Set's the NQN for any host. Accepts piped input from Get-SDPHost.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Set-SDPHostNqn {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -8,48 +29,27 @@ function Set-SDPHostNqn {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
-    <#
-        .SYNOPSIS
-        Assigns an NQN to a host. 
 
-        .EXAMPLE 
-        Set-SDPHostNqn -hostName Host01 -Nqn Nqn.1998-01.com.vmware.iscsi:0123456789ABCDEF
-
-        .EXAMPLE 
-        Get-SDPHost -name Host01 | Set-SDPHostNqn -Nqn Nqn.1998-01.com.vmware.iscsi:0123456789ABCDEF
-
-        .DESCRIPTION
-        Set's the NQN for any host. Accepts piped input from Get-SDPHost. 
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
     begin {
         $endpoint = 'host_nqns'
     }
 
-    process{
-        ## Special Ops
+    process {
 
-        $hostid = Get-SDPHost -name $hostname -k2context $k2context
-        $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath 'hosts' -ObjectID $hostid.id -nestedObject
+        # Special Ops — resolve host name to a nested ref.
 
-        # Build the Object
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name "nqn" -Value $nqn
-        $o | Add-Member -MemberType NoteProperty -Name "host" -Value $hostPath
-        
-        $body = $o
+        $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+        $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath 'hosts' -ObjectID $hostObj.id -nestedObject
 
-        ## Make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context 
+        # Build the request body
+
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name "nqn" -Value $nqn
+        $body | Add-Member -MemberType NoteProperty -Name "host" -Value $hostPath
+
+        # Call
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context
         return $results
     }
-    
-    
 }
-

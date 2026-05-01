@@ -1,4 +1,32 @@
+<#
+    .SYNOPSIS
+    Retrieves replication peer arrays.
+
+    .DESCRIPTION
+    Queries the SDP for configured replication peer K2 arrays. All
+    parameters are optional filters that map to API query fields.
+
+    .PARAMETER doNotResolve
+    Skip ref-name resolution on the returned objects.
+
+    .PARAMETER k2context
+    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    Get-SDPReplicationPeerArray
+
+    .EXAMPLE
+    Get-SDPReplicationPeerArray -name K2-5405
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPReplicationPeerArray {
+    [CmdletBinding()]
     param(
         [parameter()]
         [Alias("BandwidthLimit")]
@@ -58,15 +86,28 @@ function Get-SDPReplicationPeerArray {
         [parameter()]
         [string] $username,
         [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = "k2rfconnection"
     )
 
-    $endpoint = "replication/peer_k2arrays"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "replication/peer_k2arrays"
     }
-    return $results
+
+    process {
+
+        # Strip internal-only switches before passing to the URI builder.
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        # Query
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+            Add-SDPTypeName -TypeName 'SDPReplicationPeerArray'
+
+        if ($doNotResolve) {
+            return $results
+        }
+        return ($results | Update-SDPRefObjects -k2context $k2context)
+    }
 }

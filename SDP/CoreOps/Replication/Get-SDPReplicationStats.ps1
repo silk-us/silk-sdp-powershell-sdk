@@ -25,14 +25,24 @@ function Get-SDPReplicationStats {
         [Alias("VolumeName")]
         [string] $volume_name,
         [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
     $endpoint = "replication/stats/volumes"
+
+    $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
     if ($PSBoundParameters.Keys.Contains('Verbose')) {
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
     } else {
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
     }
-    return $results
+
+    $results = $results | Add-SDPTypeName -TypeName 'SDPReplicationStat'
+
+    if ($doNotResolve) {
+        return $results
+    }
+    return ($results | Update-SDPRefObjects -k2context $k2context)
 }

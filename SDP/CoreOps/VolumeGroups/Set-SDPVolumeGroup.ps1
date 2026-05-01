@@ -3,37 +3,38 @@
     Modifies properties of an existing volume group.
 
     .DESCRIPTION
-    Updates configuration settings for an existing volume group on the Silk Data Pod. Can modify name, quota, description, and capacity policy.
+    Updates configuration settings for an existing volume group on the
+    Silk Data Pod. Can modify name, quota, description, and capacity
+    policy.
 
     .PARAMETER id
-    The unique identifier of the volume group to modify. Accepts piped input from Get-SDPVolumeGroup.
+    The unique identifier of the volume group to modify. Accepts piped
+    input from Get-SDPVolumeGroup.
 
     .PARAMETER name
     New name for the volume group.
 
     .PARAMETER quotaInGB
-    New capacity quota for the volume group in gigabytes. Set to 0 for unlimited quota.
+    New capacity quota in gigabytes. Pass 0 to set unlimited quota.
 
     .PARAMETER Description
     New description for the volume group.
 
     .PARAMETER capacityPolicy
-    Name of a new capacity policy to apply to this volume group.
+    Name of a capacity policy to apply to this volume group.
 
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
     .EXAMPLE
     Set-SDPVolumeGroup -id 15 -quotaInGB 10000
-    Sets the quota for volume group ID 15 to 10TB.
 
     .EXAMPLE
     Get-SDPVolumeGroup -name "VG01" | Set-SDPVolumeGroup -name "VG01-Renamed"
-    Renames a volume group using piped input.
 
     .EXAMPLE
     Set-SDPVolumeGroup -id 15 -capacityPolicy "NewPolicy"
-    Applies a new capacity policy to the volume group.
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
@@ -41,11 +42,13 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Set-SDPVolumeGroup {
+    [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
-        [array] $id,
+        [string] $id,
         [parameter()]
         [string] $name,
         [parameter()]
@@ -57,53 +60,45 @@ function Set-SDPVolumeGroup {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
         $endpoint = "volume_groups"
     }
 
     process {
+
         # Special Ops
 
-        if ($quotaInGB) {
-            [string]$size = ($quotaInGB * 1024 * 1024)
+        if ($PSBoundParameters.ContainsKey('quotaInGB')) {
+            [string] $quota = ($quotaInGB * 1024 * 1024)
         }
-        
+
         if ($capacityPolicy) {
-            $cappolstats = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object {$_.name -eq $capacityPolicy}
-            $cappol = ConvertTo-SDPObjectPrefix -ObjectID $cappolstats.id -ObjectPath vg_capacity_policies -nestedObject
+            $capacityPolicyObj = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object { $_.name -eq $capacityPolicy }
+            $capacityPolicyRef = ConvertTo-SDPObjectPrefix -ObjectID $capacityPolicyObj.id -ObjectPath vg_capacity_policies -nestedObject
         }
 
+        # Build the request body — only include fields the caller actually
+        # passed, so PATCH doesn't clobber unrelated values.
 
-        # Build the object
-
-        $o = New-Object psobject
+        $body = New-Object psobject
         if ($name) {
-            $o | Add-Member -MemberType NoteProperty -Name name -Value $name
+            $body | Add-Member -MemberType NoteProperty -Name name -Value $name
         }
-        if 
-        ($quotaInGB) {
-            $o | Add-Member -MemberType NoteProperty -Name quota -Value $size
-        } else {
-            $o | Add-Member -MemberType NoteProperty -Name quota -Value 0
+        if ($PSBoundParameters.ContainsKey('quotaInGB')) {
+            $body | Add-Member -MemberType NoteProperty -Name quota -Value $quota
         }
-        
         if ($Description) {
-            $o | Add-Member -MemberType NoteProperty -Name description -Value $Description
+            $body | Add-Member -MemberType NoteProperty -Name description -Value $Description
         }
-        if ($capacityPolicy) {
-            $o | Add-Member -MemberType NoteProperty -Name capacity_policy -Value $cappol
+        if ($capacityPolicyRef) {
+            $body | Add-Member -MemberType NoteProperty -Name capacity_policy -Value $capacityPolicyRef
         }
 
-        $o | Add-Member -MemberType NoteProperty -Name is_dedupe -Value $enableDeDuplication
+        # Call
 
-
-        $body = $o 
-
-        $endpointURI = $endpoint + '/' + $id
-
-        $endpointURI | write-verbose
-        
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+        Write-Verbose "$endpoint/$id"
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
         return $results
     }
 }

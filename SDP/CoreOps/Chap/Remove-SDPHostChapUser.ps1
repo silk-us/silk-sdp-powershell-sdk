@@ -1,51 +1,59 @@
+<#
+    .SYNOPSIS
+    Removes a CHAP user from a host.
+
+    .DESCRIPTION
+    Clears the CHAP user assignment on an existing host. Accepts piped
+    input from Get-SDPHost.
+
+    .PARAMETER hostName
+    The host name to clear the CHAP user from. Accepts pipeline input by
+    property name.
+
+    .PARAMETER k2context
+    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+
+    .EXAMPLE
+    Remove-SDPHostChapUser -hostName Host01
+
+    .EXAMPLE
+    Get-SDPHost -name Host01 | Remove-SDPHostChapUser
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Remove-SDPHostChapUser {
+    [CmdletBinding()]
     param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [Alias('pipeName')]
         [string] $hostName,
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
 
-        <#
-        .SYNOPSIS
-        Removess a CHAP user from a host. 
-
-        .EXAMPLE 
-        Remove-SDPHostChapUser -hostName Host01 
-
-        .EXAMPLE 
-        Get-SDPHost -name Host01 | Remove-SDPHostChapUser
-
-        .DESCRIPTION
-        Removes the Chap User for any host. Accepts piped input from Get-SDPHost. 
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
     begin {
         $endpoint = 'hosts'
     }
 
-    process{
-        ## Special Ops
+    process {
 
-        $hostObj = Get-SDPHost -name $hostName -k2context $k2context
-        
-        # Build the Object
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name "map_auth_profiles_names" -Value $null
-        
-        $body = $o
+        # Special Ops — resolve the host.
 
-        $endpointURI = $endpoint + '/' + $hostObj.id
-        ## Make the call
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+        $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+
+        # Build the request body
+
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name "map_auth_profiles_names" -Value $null
+
+        # Call
+
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -k2context $k2context
         return $results
     }
-
 }

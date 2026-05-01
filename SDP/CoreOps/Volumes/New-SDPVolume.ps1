@@ -3,7 +3,8 @@
     Creates a new volume on the SDP.
 
     .DESCRIPTION
-    Creates a new block storage volume within a specified volume group on the Silk Data Pod.
+    Creates a new block storage volume within a specified volume group on
+    the Silk Data Pod.
 
     .PARAMETER name
     The name for the new volume.
@@ -15,7 +16,8 @@
     The name of the volume group where the volume will be created.
 
     .PARAMETER volumeGroupId
-    The ID of the volume group where the volume will be created. Accepts piped input from Get-SDPVolumeGroup.
+    The ID of the volume group where the volume will be created. Accepts
+    piped input from Get-SDPVolumeGroup.
 
     .PARAMETER VMWare
     Enables VMware support for the volume (VMFS optimizations).
@@ -27,7 +29,8 @@
     Creates the volume as read-only.
 
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
     .EXAMPLE
     New-SDPVolume -name "Vol01" -sizeInGB 100 -VolumeGroupName "VG01"
@@ -47,7 +50,9 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function New-SDPVolume {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory)]
         [string] $name,
@@ -67,68 +72,66 @@ function New-SDPVolume {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
         $endpoint = "volumes"
     }
 
     process {
 
-        # Special Ops
+        # Special Ops — resolve the target volume group (by id or name)
 
         if ($volumeGroupId) {
-            Write-Verbose "Working with Volume Group id $volumeGroupId"
-            $vgstats = Get-SDPVolumeGroup -id $volumeGroupId -k2context $k2context
-            if (!$vgstats) {
-                Return "No volumegroup with ID $volumeGroupId exists."
-            } 
+            Write-Verbose "Working with volume group id $volumeGroupId"
+            $volumeGroup = Get-SDPVolumeGroup -id $volumeGroupId -k2context $k2context
+            if (!$volumeGroup) {
+                return "No volume group with ID $volumeGroupId exists."
+            }
         } elseif ($VolumeGroupName) {
-            Write-Verbose "Working with Volume Group name $VolumeGroupName"
-            $vgstats = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
-            if (!$vgstats) {
-                Return "No volumegroup named $VolumeGroupName exists."
-            } 
+            Write-Verbose "Working with volume group name $VolumeGroupName"
+            $volumeGroup = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
+            if (!$volumeGroup) {
+                return "No volume group named $VolumeGroupName exists."
+            }
         }
+
         try {
-            $vgid = $vgstats.id
-            Write-Verbose "Volume Group ID = $vgid"
-            $vgpath = ConvertTo-SDPObjectPrefix -ObjectPath volume_groups -ObjectID $vgstats.id -nestedObject
+            Write-Verbose "Volume group ID = $($volumeGroup.id)"
+            $volumeGroupRef = ConvertTo-SDPObjectPrefix -ObjectPath volume_groups -ObjectID $volumeGroup.id -nestedObject
         } catch {
             return "No volume_group discovered"
         }
 
-        ## Build the object
+        # Build the request body
 
-        [string]$size = ($sizeInGB * 1024 * 1024)
+        [string] $size = ($sizeInGB * 1024 * 1024)
         Write-Verbose "$sizeInGB GB converted to $size"
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
-        $o | Add-Member -MemberType NoteProperty -Name "size" -Value $size
-        $o | Add-Member -MemberType NoteProperty -Name "volume_group" -Value $vgpath
+
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name "name" -Value $name
+        $body | Add-Member -MemberType NoteProperty -Name "size" -Value $size
+        $body | Add-Member -MemberType NoteProperty -Name "volume_group" -Value $volumeGroupRef
         if ($VMWare) {
-            $o | Add-Member -MemberType NoteProperty -Name vmware_support -Value $true
+            $body | Add-Member -MemberType NoteProperty -Name vmware_support -Value $true
         }
         if ($Description) {
-            $o | Add-Member -MemberType NoteProperty -Name description -Value $Description
+            $body | Add-Member -MemberType NoteProperty -Name description -Value $Description
         }
         if ($ReadOnly) {
-            $o | Add-Member -MemberType NoteProperty -Name read_only -Value $true
+            $body | Add-Member -MemberType NoteProperty -Name read_only -Value $true
         }
 
-        # Call 
+        # POST returns nothing on success — submit and then poll the GET
+        # until the new volume appears.
 
-        $body = $o
-        
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
-        
-        $results = Get-SDPVolume -name $name -k2context $k2context
-        while (!$results) {
-            Write-Verbose " --> Waiting on volume $name"
-            $results = Get-SDPVolume -name $name -k2context $k2context
-            Start-Sleep 1
+
+        $results = Wait-SDPObject -Activity $name -Get {
+            Get-SDPVolume -name $name -k2context $k2context
         }
 
         return $results

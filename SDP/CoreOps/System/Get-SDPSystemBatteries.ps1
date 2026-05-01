@@ -1,4 +1,26 @@
+<#
+    .SYNOPSIS
+    Retrieves battery hardware state from the SDP.
+
+    .DESCRIPTION
+    Queries the `system/batteries` endpoint. Filter by name, id, charge
+    level state, connectivity state, FRU/phased-out flags, etc.
+
+    .EXAMPLE
+    Get-SDPSystemBatteries
+
+    .EXAMPLE
+    Get-SDPSystemBatteries -connectivity_state 'connected'
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPSystemBatteries {
+    [CmdletBinding()]
     param(
         [parameter()]
         [Alias("ChargeLevelState")]
@@ -26,15 +48,22 @@ function Get-SDPSystemBatteries {
         [Alias("NduState")]
         [string] $ndu_state,
         [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = "k2rfconnection"
     )
 
-    $endpoint = "system/batteries"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "system/batteries"
     }
-    return $results
+
+    process {
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+            Add-SDPTypeName -TypeName 'SDPSystemBattery'
+
+        if ($doNotResolve) { return $results }
+        return ($results | Update-SDPRefObjects -k2context $k2context)
+    }
 }

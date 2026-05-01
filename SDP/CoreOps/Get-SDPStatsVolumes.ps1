@@ -3,7 +3,8 @@
     Retrieves volume performance statistics from the SDP.
 
     .DESCRIPTION
-    Queries for volume performance metrics on the Silk Data Pod. Returns statistics including IOPS, latency, and throughput for volumes.
+    Queries for volume performance metrics on the Silk Data Pod. Returns
+    statistics including IOPS, latency, and throughput for volumes.
 
     .PARAMETER iops_avg
     Filter by average IOPS value.
@@ -38,8 +39,13 @@
     .PARAMETER volume_name
     Filter by volume name.
 
+    .PARAMETER doNotResolve
+    Skip the post-call ref-resolution pass. Stats records rarely carry
+    refs so this is mostly a no-op, but it's exposed for API uniformity.
+
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
     .EXAMPLE
     Get-SDPStatsVolumes
@@ -59,7 +65,9 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Get-SDPStatsVolumes {
+    [CmdletBinding()]
     param(
         [parameter()]
         [Alias("IopsAvg")]
@@ -86,20 +94,31 @@ function Get-SDPStatsVolumes {
         [Alias("ThroughputMax")]
         [string] $throughput_max,
         [parameter()]
-        [Alias("ContainedIn")]
         [int] $timestamp,
         [parameter()]
-        [Alias("ContainedIn")]
         [string] $volume,
         [parameter()]
         [Alias("VolumeName")]
         [string] $volume_name,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $k2context = 'k2rfconnection'
     )
 
-    $endpoint = "stats/volumes"
+    begin {
+        $endpoint = "stats/volumes"
+    }
 
-    $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
-    return $results
+    process {
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+            Add-SDPTypeName -TypeName 'SDPStatsVolume'
+
+        if ($doNotResolve) {
+            return $results
+        }
+        return ($results | Update-SDPRefObjects -k2context $k2context)
+    }
 }

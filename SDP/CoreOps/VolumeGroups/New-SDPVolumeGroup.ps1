@@ -3,13 +3,16 @@
     Creates a new volume group on the SDP.
 
     .DESCRIPTION
-    Creates a new volume group on the Silk Data Pod. Volume groups are containers for volumes that share capacity policies, quotas, and snapshot schedules.
+    Creates a new volume group on the Silk Data Pod. Volume groups are
+    containers for volumes that share capacity policies, quotas, and
+    snapshot schedules.
 
     .PARAMETER name
     The name for the new volume group.
 
     .PARAMETER quotaInGB
-    Optional capacity quota for the volume group in gigabytes. Set to 0 for unlimited quota.
+    Optional capacity quota for the volume group in gigabytes. Omit for
+    unlimited quota.
 
     .PARAMETER enableDeDuplication
     Enables deduplication for all volumes in this volume group.
@@ -21,19 +24,17 @@
     Name of the capacity policy to apply to this volume group.
 
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    Specifies the K2 context to use for authentication. Defaults to
+    'k2rfconnection'.
 
     .EXAMPLE
     New-SDPVolumeGroup -name "VG01"
-    Creates a basic volume group named "VG01" with no quota.
 
     .EXAMPLE
     New-SDPVolumeGroup -name "VG02" -quotaInGB 5000 -enableDeDuplication
-    Creates a volume group with a 5TB quota and deduplication enabled.
 
     .EXAMPLE
     New-SDPVolumeGroup -name "VG03" -capacityPolicy "Policy01" -Description "Production volumes"
-    Creates a volume group with a capacity policy and description.
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
@@ -41,7 +42,9 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function New-SDPVolumeGroup {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory)]
         [string] $name,
@@ -56,58 +59,57 @@ function New-SDPVolumeGroup {
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
         $endpoint = "volume_groups"
     }
-    
-    Process {
-        ## Special Ops
+
+    process {
+
+        # Special Ops
 
         if ($quotaInGB) {
-            [string]$size = ($quotaInGB * 1024 * 1024)
+            [string] $quota = ($quotaInGB * 1024 * 1024)
         }
-        
+
         if ($capacityPolicy) {
-            $cappolstats = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object {$_.name -eq $capacityPolicy}
-            $cappol = ConvertTo-SDPObjectPrefix -ObjectID $cappolstats.id -ObjectPath vg_capacity_policies -nestedObject
+            $capacityPolicyObj = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object { $_.name -eq $capacityPolicy }
+            $capacityPolicyRef = ConvertTo-SDPObjectPrefix -ObjectID $capacityPolicyObj.id -ObjectPath vg_capacity_policies -nestedObject
         }
 
+        # Build the request body
+        # Quota defaults to 0 (unlimited) when -quotaInGB isn't passed.
 
-        ## Build the object
-
-        $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
-        if ($quota) {
-            $o | Add-Member -MemberType NoteProperty -Name "quota" -Value $size
+        $body = New-Object psobject
+        $body | Add-Member -MemberType NoteProperty -Name "name" -Value $name
+        if ($quotaInGB) {
+            $body | Add-Member -MemberType NoteProperty -Name "quota" -Value $quota
         } else {
-            $o | Add-Member -MemberType NoteProperty -Name "quota" -Value 0
+            $body | Add-Member -MemberType NoteProperty -Name "quota" -Value 0
         }
         if ($Description) {
-            $o | Add-Member -MemberType NoteProperty -Name "description" -Value $Description
+            $body | Add-Member -MemberType NoteProperty -Name "description" -Value $Description
         }
-        if ($capacityPolicy) {
-            $o | Add-Member -MemberType NoteProperty -Name "capacity_policy" -Value $cappol
+        if ($capacityPolicyRef) {
+            $body | Add-Member -MemberType NoteProperty -Name "capacity_policy" -Value $capacityPolicyRef
         }
         if ($enableDeDuplication) {
-            $o | Add-Member -MemberType NoteProperty -Name "is_dedup" -Value $true
+            $body | Add-Member -MemberType NoteProperty -Name "is_dedup" -Value $true
         }
-        
-        $body = $o
+
+        # POST returns nothing on success — submit and then poll the GET
+        # until the new volume group appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
-        
-        $results = Get-SDPVolumeGroup -name $name -k2context $k2context
-        while (!$results) {
-            Write-Verbose " --> Waiting on volume group $name"
-            $results = Get-SDPVolumeGroup -name $name -k2context $k2context
-            Start-Sleep 1
+
+        $results = Wait-SDPObject -Activity $name -Get {
+            Get-SDPVolumeGroup -name $name -k2context $k2context
         }
 
         return $results
     }
-    
 }

@@ -1,87 +1,158 @@
 <#
+    SDPVolumeGroupView — typed wrapper for a Silk SDP view (snapshot
+    record with `is_exposable=true` whose source is a regular snapshot).
+
+    `source`, `volume_group`, `retention_policy`, and `replication_session`
+    are ref-shaped; Update-SDPRefObjects attaches `*_name`
+    NoteProperties at runtime. `creationTime` is a computed [datetime]
+    derived from the raw `creation_time` int.
+#>
+
+class SDPVolumeGroupView {
+
+    # --- Identity / properties shown in the default table view ---
+    [string]   $name
+    [string]   $id
+    [string]   $short_name
+
+    # --- Lifecycle ---
+    [datetime] $creationTime
+    [int]      $creation_time
+    [int]      $data_creation_time
+    [int]      $last_exposed_time
+    [int]      $num_of_clones
+    [string]   $triggered_by
+
+    # --- Identity (additional) ---
+    [string]   $description
+    [string]   $iscsi_tgt_converted_name
+    [string]   $wwn
+    [int]      $generation_number
+
+    # --- Sizing ---
+    [long]     $volsnaps_provisioned_capacity
+
+    # --- Flags ---
+    [bool]     $is_application_consistent
+    [bool]     $is_auto_deleteable
+    [bool]     $is_deleted
+    [bool]     $is_exist_on_peer
+    [bool]     $is_exposable
+    [bool]     $is_external
+    [bool]     $is_locked_by_replication
+    [bool]     $is_originating_from_peer
+
+    # --- Refs (kept nested for Update-SDPRefObjects). ---
+    [psobject] $source
+    [psobject] $volume_group
+    [psobject] $retention_policy
+    [psobject] $replication_session
+
+    # Hidden context
+    hidden [string] $k2context
+
+    SDPVolumeGroupView() {}
+
+    SDPVolumeGroupView([psobject] $apiHit, [string] $k2context) {
+        $this.id                            = $apiHit.id
+        $this.name                          = $apiHit.name
+        $this.short_name                    = $apiHit.short_name
+        $this.description                   = $apiHit.description
+        $this.iscsi_tgt_converted_name      = $apiHit.iscsi_tgt_converted_name
+        $this.wwn                           = $apiHit.wwn
+        $this.generation_number             = $apiHit.generation_number
+        $this.creation_time                 = $apiHit.creation_time
+        $this.data_creation_time            = $apiHit.data_creation_time
+        $this.last_exposed_time             = $apiHit.last_exposed_time
+        $this.num_of_clones                 = $apiHit.num_of_clones
+        $this.triggered_by                  = $apiHit.triggered_by
+        $this.volsnaps_provisioned_capacity = $apiHit.volsnaps_provisioned_capacity
+        $this.is_application_consistent     = [bool] $apiHit.is_application_consistent
+        $this.is_auto_deleteable            = [bool] $apiHit.is_auto_deleteable
+        $this.is_deleted                    = [bool] $apiHit.is_deleted
+        $this.is_exist_on_peer              = [bool] $apiHit.is_exist_on_peer
+        $this.is_exposable                  = [bool] $apiHit.is_exposable
+        $this.is_external                   = [bool] $apiHit.is_external
+        $this.is_locked_by_replication      = [bool] $apiHit.is_locked_by_replication
+        $this.is_originating_from_peer      = [bool] $apiHit.is_originating_from_peer
+        $this.k2context                     = $k2context
+
+        if ($apiHit.creation_time) {
+            $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
+        }
+
+        if ($apiHit.source)              { $this.source              = $apiHit.source }
+        if ($apiHit.volume_group)        { $this.volume_group        = $apiHit.volume_group }
+        if ($apiHit.retention_policy)    { $this.retention_policy    = $apiHit.retention_policy }
+        if ($apiHit.replication_session) { $this.replication_session = $apiHit.replication_session }
+    }
+
+    # ---- Operational methods --------------------------------------------
+
+    [SDPVolumeGroupView] Refresh() {
+        return [SDPVolumeGroupView]::new(
+            (Get-SDPVolumeGroupView -id $this.id -k2context $this.k2context -doNotResolve),
+            $this.k2context)
+    }
+
+    [void] Map([string] $hostName) {
+        New-SDPHostMapping -hostName $hostName -viewName $this.name -k2context $this.k2context | Out-Null
+    }
+
+    [void] Delete() {
+        Remove-SDPVolumeGroupView -id $this.id -k2context $this.k2context | Out-Null
+    }
+
+    [string] ToString() {
+        return $this.name
+    }
+}
+
+Update-TypeData -TypeName 'SDPVolumeGroupView' `
+                -DefaultDisplayPropertySet 'name','id','source_name','retention_policy_name','creationTime','is_exposable' `
+                -Force
+
+
+<#
     .SYNOPSIS
-    Retrieves volume group views (snapshot exposures) from the SDP.
+    Retrieves volume group views from the SDP.
 
     .DESCRIPTION
-    Queries for volume group views on the Silk Data Pod. Views are exposed/mounted snapshots that can be mapped to hosts for read access.
+    A view is a snapshot record with `is_exposable=true` whose source is
+    a regular snapshot. Views can be mapped to hosts as if they were
+    volume groups.
 
-    .PARAMETER volumeGroupName
-    Filter views by volume group name. Accepts piped input from Get-SDPVolumeGroup.
-
-    .PARAMETER description
-    Filter views by description text.
-
-    .PARAMETER generation_number
-    Filter by generation number of the view.
-
-    .PARAMETER id
-    The unique identifier of the view.
-
-    .PARAMETER iscsi_tgt_converted_name
-    Filter by iSCSI target converted name.
-
-    .PARAMETER is_application_consistent
-    Filter by application consistency flag.
-
-    .PARAMETER is_auto_deleteable
-    Filter by auto-deleteable flag.
-
-    .PARAMETER is_deleted
-    Include deleted views in results.
-
-    .PARAMETER is_exist_on_peer
-    Filter by existence on replication peer.
-
-    .PARAMETER is_exposable
-    Filter by exposable flag.
-
-    .PARAMETER is_external
-    Filter by external view flag.
-
-    .PARAMETER is_originating_from_peer
-    Filter by views originating from replication peer.
-
-    .PARAMETER last_exposed_time
-    Filter by last time view was exposed.
+    This function returns only views — it filters out regular snapshots
+    (whose source is a volume group) and view-snapshots (whose source is
+    itself a view).
 
     .PARAMETER name
-    The name of the view to retrieve.
-
-    .PARAMETER replication_session
-    Filter by replication session.
-
-    .PARAMETER retention_policy
-    Filter by retention policy name.
+    Filter by full view name (the `vg:short_name` form).
 
     .PARAMETER short_name
-    Filter by short name of the view.
+    Filter by short name only.
 
-    .PARAMETER triggered_by
-    Filter by what triggered the view creation.
+    .PARAMETER id
+    Unique identifier of the view.
 
-    .PARAMETER volsnaps_provisioned_capacity
-    Filter by provisioned capacity.
+    .PARAMETER volumeGroupName
+    Filter by parent volume group name. Accepts piped input from
+    Get-SDPVolumeGroup.
 
-    .PARAMETER volume_group
-    Filter by volume group reference.
-
-    .PARAMETER wwn
-    Filter by World Wide Name.
+    .PARAMETER doNotResolve
+    Skip the auto-pipe through Update-SDPRefObjects.
 
     .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    K2 context name. Defaults to 'k2rfconnection'.
 
     .EXAMPLE
     Get-SDPVolumeGroupView
-    Retrieves all volume group views from the SDP.
 
     .EXAMPLE
-    Get-SDPVolumeGroupView -name "VG01-View01"
-    Retrieves the view named "VG01-View01".
+    Get-SDPVolumeGroupView -name "test-vg:test-view"
 
     .EXAMPLE
-    Get-SDPVolumeGroup -name "VG01" | Get-SDPVolumeGroupView
-    Retrieves all views for volume group "VG01".
+    Get-SDPVolumeGroup -name "test-vg" | Get-SDPVolumeGroupView
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
@@ -89,7 +160,10 @@
     .LINK
     https://github.com/silk-us/silk-sdp-powershell-sdk
 #>
+
 function Get-SDPVolumeGroupView {
+    [CmdletBinding()]
+    [OutputType([SDPVolumeGroupView])]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias("pipeName")]
@@ -151,37 +225,49 @@ function Get-SDPVolumeGroupView {
         [parameter()]
         [string] $wwn,
         [parameter()]
+        [switch] $doNotResolve,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
+
     begin {
         $endpoint = "snapshots"
     }
-    
+
     process {
+
+        # Special Ops — translate volumeGroupName to a volume_group ref.
+
         if ($volumeGroupName) {
-            $volumeGroupid = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
-            $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $volumeGroupid.id -ObjectPath 'volume_groups' -nestedObject
+            $vg = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context -doNotResolve
+            $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $vg.id -ObjectPath 'volume_groups' -nestedObject
             $PSBoundParameters.remove('volumeGroupName') | Out-Null
             $PSBoundParameters.volume_group = $volumeGroupPath
         }
 
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
-        $viewResults = @()
-        foreach ($r in $results) {  
+
+        # Views: source is a /snapshots/ ref AND that source itself has
+        # source = /volume_groups/ (i.e. it's a regular snapshot, not a view).
+        $snapSourced = foreach ($r in $results) {
             $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
-            if ($ref.ObjectPath -eq 'snapshots') {
-                $viewResults += $r
-            }
+            if ($ref.ObjectPath -eq 'snapshots') { $r }
+        }
+        $views = foreach ($r in $snapSourced) {
+            $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
+            if ($snapSourced.id -notcontains $ref.ObjectId) { $r }
         }
 
-        $newresults = @()
-        foreach ($r in $viewresults) {  
-            $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
-            if ($viewResults.id -notcontains $ref.ObjectId) {
-                $newResults += $r
-            }
+        $instances = foreach ($hit in $views) {
+            [SDPVolumeGroupView]::new($hit, $k2context)
         }
-        return $newResults
+
+        if ($doNotResolve) {
+            $instances
+        } else {
+            $instances | Update-SDPRefObjects -k2context $k2context
+        }
     }
-
 }
