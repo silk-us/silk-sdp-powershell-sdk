@@ -1,0 +1,8 @@
+Help/_scriptTemplate.md
+Help/ConvertMDToHelp.ps1
+Help/parammd.ps1
+Help/parammdFull.ps1
+issues.md.old
+SDP/Public/test.json
+Test/Generate-TestFixtures.ps1
+Test/SDPTests.ps1
