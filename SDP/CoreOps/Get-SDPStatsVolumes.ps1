@@ -113,7 +113,7 @@ function Get-SDPStatsVolumes {
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |
             Add-SDPTypeName -TypeName 'SDPStatsVolume'
 
         if ($doNotResolve) {

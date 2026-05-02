@@ -106,8 +106,16 @@ class SDPVolumeGroup {
     }
 
     [SDPVolumeGroup] Refresh() {
-        $hit = Get-SDPVolumeGroup -id $this.id -k2context $this.k2context
-        return [SDPVolumeGroup]::new($hit, $this.k2context)
+        # Mutate $this in place so callers' existing references stay current.
+        $fresh = Get-SDPVolumeGroup -id $this.id -k2context $this.k2context
+        foreach ($p in $fresh.PSObject.Properties) {
+            if ($this.PSObject.Properties[$p.Name]) {
+                $this.($p.Name) = $p.Value
+            } else {
+                Add-Member -InputObject $this -NotePropertyName $p.Name -NotePropertyValue $p.Value -Force
+            }
+        }
+        return $this
     }
 
     [void] Delete() {
@@ -179,6 +187,7 @@ function Get-SDPVolumeGroup {
         [parameter()]
         [int] $id,
         [parameter(Position=1)]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter()]
         [Alias("ReplicationPeerVolumeGroup")]
@@ -195,7 +204,7 @@ function Get-SDPVolumeGroup {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         $instances = foreach ($hit in $results) {
             [SDPVolumeGroup]::new($hit, $k2context)

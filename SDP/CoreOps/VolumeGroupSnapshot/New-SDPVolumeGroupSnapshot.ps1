@@ -71,6 +71,7 @@ function New-SDPVolumeGroupSnapshot {
     [CmdletBinding(DefaultParameterSetName = 'VolumeGroup')]
     param(
         [parameter(Mandatory)]
+        [ValidateLength(0, 42)]
         [string] $name,
 
         [parameter(Mandatory, ParameterSetName = 'VolumeGroup', ValueFromPipelineByPropertyName)]

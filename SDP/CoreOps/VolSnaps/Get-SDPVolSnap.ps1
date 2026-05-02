@@ -120,6 +120,7 @@ function Get-SDPVolSnap {
         [parameter()]
         [int] $id,
         [parameter()]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter()]
         [switch] $doNotResolve,
@@ -134,7 +135,7 @@ function Get-SDPVolSnap {
     process {
 
         # Query
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -strictURI
 
         # Special Ops — client-side filter by source snapshot.
         if ($sourceId) {

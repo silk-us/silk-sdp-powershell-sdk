@@ -41,7 +41,7 @@ can also call instance methods directly. For example:
 $vol = Get-SDPVolume -name MyVol01
 $vol.Resize(500)              # set sizeInGB to 500
 $vol.Map('Host01')            # map to a host
-$vol.SetReadOnly()            # flip read_only
+$vol.Unmap('Host01')          # remove the host mapping
 $vol.Refresh()                # re-fetch latest state from the array
 $vol.Delete()                 # delete the volume
 ```

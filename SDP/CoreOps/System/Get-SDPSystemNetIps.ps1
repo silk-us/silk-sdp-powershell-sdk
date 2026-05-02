@@ -36,7 +36,7 @@ function Get-SDPSystemNetIps {
     }
 
     process {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -strictURI
 
         if ($portID) {
             $portRef = ConvertTo-SDPObjectPrefix -ObjectID $portID -ObjectPath 'system/net_ports'

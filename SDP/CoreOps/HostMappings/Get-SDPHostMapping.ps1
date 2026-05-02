@@ -129,7 +129,7 @@ function Get-SDPHostMapping {
         }
 
         # make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
         if ($asSnapshot) {
             $results = $results | Where-Object {$_.volume -match '/snapshots/'}
         }

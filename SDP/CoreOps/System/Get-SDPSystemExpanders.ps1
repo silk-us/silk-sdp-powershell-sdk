@@ -54,7 +54,7 @@ function Get-SDPSystemExpanders {
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |
             Add-SDPTypeName -TypeName 'SDPSystemExpander'
 
         if ($doNotResolve) { return $results }

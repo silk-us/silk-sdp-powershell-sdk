@@ -19,6 +19,7 @@ function New-SDPHostGroup {
     [CmdletBinding()]
     param(
         [parameter(Mandatory)]
+        [ValidateLength(0, 32)]
         [string] $name,
         [parameter()]
         [string] $description,

@@ -61,8 +61,16 @@ class SDPHost {
     }
 
     [SDPHost] Refresh() {
-        $hit = Get-SDPHost -id $this.id -k2context $this.k2context
-        return [SDPHost]::new($hit, $this.k2context)
+        # Mutate $this in place so callers' existing references stay current.
+        $fresh = Get-SDPHost -id $this.id -k2context $this.k2context
+        foreach ($p in $fresh.PSObject.Properties) {
+            if ($this.PSObject.Properties[$p.Name]) {
+                $this.($p.Name) = $p.Value
+            } else {
+                Add-Member -InputObject $this -NotePropertyName $p.Name -NotePropertyValue $p.Value -Force
+            }
+        }
+        return $this
     }
 
     [void] Delete() {
@@ -133,6 +141,7 @@ function Get-SDPHost {
         [parameter()]
         [int] $id,
         [parameter(Position=1)]
+        [ValidateLength(0, 32)]
         [string] $name,
         [parameter()]
         [string] $type,
@@ -153,7 +162,7 @@ function Get-SDPHost {
         }
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         $instances = foreach ($hit in $results) {
             [SDPHost]::new($hit, $k2context)

@@ -47,6 +47,7 @@ function New-SDPVolumeGroupView {
     [CmdletBinding()]
     param(
         [parameter(Mandatory)]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]

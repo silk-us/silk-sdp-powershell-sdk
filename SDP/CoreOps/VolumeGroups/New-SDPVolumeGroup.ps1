@@ -47,6 +47,7 @@ function New-SDPVolumeGroup {
     [CmdletBinding()]
     param(
         [parameter(Mandatory)]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter()]
         [int] $quotaInGB,

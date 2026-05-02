@@ -49,69 +49,94 @@ function Invoke-SDPRestCall {
         [int] $timeOut = 15
     )
 
-    # Delcare the serviced API endpoint.
+    # Construct the base URI. New-SDPURI returns a value ending in '?';
+    # strip it so we have a clean endpoint and can decide later whether
+    # to append a query string (legacy path) or pass query params via
+    # -Body to Invoke-RestMethod (strictURI path).
 
-    $endpointURI = New-SDPURI -endpoint $endpoint -k2context $k2context
-    if ($method -eq 'GET') {
-        if (!$noLimit) {
-            $limitURI = '__limit=' + $limit.ToString() + '&'
-            $endpointURI = $endpointURI + $limitURI
-        }
-    }
+    $endpointURI = (New-SDPURI -endpoint $endpoint -k2context $k2context).TrimEnd('?')
 
-    # Cleanup the parameter list and construct the URI with the argued parameters. (This removes system parameters, such as 'Verbose' and 'ErrorAction')
+    # Strip CommonParameters and k2context from the parameter list so we
+    # only walk user-supplied filters.
 
     if ($parameterList) {
         foreach ($p in [System.Management.Automation.PSCmdlet]::CommonParameters) {
-            $parameterList.Remove($p)
+            $parameterList.Remove($p) | Out-Null
         }
-        $parameterList.Remove('k2context')
+        $parameterList.Remove('k2context') | Out-Null
     }
 
-    if ($parameterList.Count -gt 0) {
-        Write-Verbose "-- REST Using following parameters --"
-        $parameterList | ConvertTo-Json -Depth 10 | write-verbose
-        if ($strictURI) {
-            $searchkeys = $parameterList.keys.split()
-            foreach ($p in $searchkeys) {
-                Write-Verbose "Working with key: $p"
-                $parseTarget = $parameterList[$p]
-                if ($parseTarget.ref) {
-                    Write-Verbose "$p is declares as REF... skipping URI"
-                } else {
-                    if ($parseTarget -is [int]) {
-                        if ($strictURIgte -contains $p) {
-                            $endpointURI = $endpointURI + $p + '__gt='+$parseTarget + '&'
-                        } elseif ($strictURIlte -contains $p) {
-                            $endpointURI = $endpointURI + $p + '__lt='+$parseTarget + '&'
-                        } else {
-                            $endpointURI = $endpointURI + $p + '__in='+$parseTarget + '&'
-                        }
-                    } elseif ($parseTarget -is [bool]) {
-                        $endpointURI = $endpointURI + $p + '='+$parseTarget + '&'
+    # Decide how to deliver query parameters.
+    #
+    # strictURI + GET: build a hashtable of operator-suffixed keys
+    # (name__in, id__gt, etc.) and pass it via -Body to Invoke-RestMethod.
+    # On a GET, Invoke-RestMethod auto-serializes a hashtable body to a
+    # URL-encoded query string - cleaner than the manual concatenation
+    # we used to do, and properly URL-encoded for free.
+    #
+    # Everything else (legacy GET, POST/PATCH/DELETE): keep the URL plain
+    # and append __limit the old way for compatibility with cmdlets that
+    # haven't been migrated to strictURI yet. They'll still post-fetch
+    # filter client-side below.
+
+    $queryParams = $null
+
+    if ($strictURI -and $method -eq 'GET') {
+        $queryParams = @{}
+        if (-not $noLimit) { $queryParams.Add('__limit', $limit) }
+
+        if ($parameterList -and $parameterList.Count -gt 0) {
+            Write-Verbose "-- REST (strictURI) using parameters --"
+            $parameterList | ConvertTo-Json -Depth 10 | Write-Verbose
+
+            foreach ($p in $parameterList.Keys) {
+                $value = $parameterList[$p]
+                if ($value.ref) {
+                    Write-Verbose "$p declared as REF; skipping URI"
+                    continue
+                }
+                if ($value -is [int]) {
+                    if ($strictURIgte -contains $p) {
+                        $queryParams.Add("${p}__gt", $value)
+                    } elseif ($strictURIlte -contains $p) {
+                        $queryParams.Add("${p}__lt", $value)
                     } else {
-                        if ($strictString) {
-                            $endpointURI = $endpointURI + $p + '='+$parseTarget + '&'
-                        } else {
-                            $endpointURI = $endpointURI + $p + '__contains='+$parseTarget + '&'
-                        }
+                        $queryParams.Add("${p}__in", $value)
                     }
+                } elseif ($value -is [bool]) {
+                    $queryParams.Add($p, $value)
+                } else {
+                    # Strings: __in is the new default. -strictString is retained
+                    # for back-compat but is now a no-op since __in == bare equality
+                    # for a single scalar value.
+                    $queryParams.Add("${p}__in", $value)
                 }
             }
+            Write-Verbose "-- REST (strictURI) using keylist --"
+            $queryParams | ConvertTo-Json -Depth 10 | Write-Verbose
+        }
+    } else {
+        # Legacy path: append __limit to URL for non-migrated cmdlets.
+        if ($method -eq 'GET' -and -not $noLimit) {
+            $endpointURI = $endpointURI + '?__limit=' + $limit
+        }
+        $endpointURI = New-URLEncode -URL $endpointURI -k2context $k2context
+
+        if ($parameterList -and $parameterList.Count -gt 0) {
+            Write-Verbose "-- REST using parameters (post-fetch filter) --"
+            $parameterList | ConvertTo-Json -Depth 10 | Write-Verbose
         }
     }
 
-    # Clean up the final URI.
+    # JSON body for POST/PATCH.
 
-    $endpointURI = $endpointURI.Substring(0,$endpointURI.Length-1)
-    $endpointURI = New-URLEncode -URL $endpointURI -k2context $k2context
-
-    Write-Verbose "Invoke-SDPRestCall --> Requesting $method from $endpointURI <--- Final URI"
     if ($body) {
         $bodyjson = $body | ConvertTo-Json -Depth 10
         Write-Verbose "-- REST Using following JSON body --"
         Write-Verbose $bodyjson
     }
+
+    Write-Verbose "Invoke-SDPRestCall --> Requesting $method from $endpointURI <--- Final URI"
 
     # declare the requested context's credential information
 
@@ -121,26 +146,75 @@ function Invoke-SDPRestCall {
         return
     }
 
-    # Make the call. 
+    # Make the call.
+    #
+    # Two failure modes need disambiguation in the catch:
+    #   1. HTTP 2xx with empty body and Content-Type: application/json. Invoke-
+    #      RestMethod's deserializer throws on empty-body JSON. The operation
+    #      actually succeeded; we should swallow the throw and return $null.
+    #   2. HTTP 4xx/5xx, with or without a body. The operation actually failed
+    #      and the caller needs to know - even when the server didn't bother
+    #      to include a JSON error_msg.
+    # The resolver inspects $_.Exception.Response.StatusCode to tell them apart.
+
+    $resolveRestException = {
+        param($errorRecord)
+
+        $statusCode = $null
+        if ($errorRecord.Exception.Response) {
+            try { $statusCode = [int]$errorRecord.Exception.Response.StatusCode } catch { }
+        }
+
+        # Case 1: HTTP success, deserializer choked on empty body.
+        if ($statusCode -and $statusCode -ge 200 -and $statusCode -lt 300) {
+            Write-Verbose "Invoke-RestMethod threw on empty-body HTTP $statusCode; treating as success."
+            return $true
+        }
+
+        # Case 2: real failure. Build the most informative message we can.
+        $detailMsg = $errorRecord.ErrorDetails.Message
+        $msg = $null
+        if (-not [string]::IsNullOrWhiteSpace($detailMsg)) {
+            try {
+                $parsed = $detailMsg | ConvertFrom-Json -ErrorAction Stop
+                if ($parsed.error_msg) { $msg = $parsed.error_msg } else { $msg = $detailMsg }
+            } catch {
+                $msg = $detailMsg
+            }
+        }
+        if (-not $msg) {
+            if ($statusCode) {
+                $msg = "API request failed with HTTP $statusCode and no response body."
+            } else {
+                $msg = $errorRecord.Exception.Message
+            }
+        }
+        Write-Error $msg
+        return $false
+    }
 
     if ($PSVersionTable.PSEdition -eq 'Core') {
         if ($body) {
             try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Body $bodyjson -Credential $restContext.credentials -SkipCertificateCheck -ContentType 'application/json' -TimeoutSec $timeOut
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $bodyjson -ContentType 'application/json' -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
             } catch {
-                $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
-                return $return | Write-Error
+                if (& $resolveRestException $_) { $results = $null } else { return }
+            }
+        } elseif ($queryParams) {
+            try {
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $queryParams -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
+            } catch {
+                if (& $resolveRestException $_) { $results = $null } else { return }
             }
         } else {
             try {
                 $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
             } catch {
-                $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
-                return $return | Write-Error
+                if (& $resolveRestException $_) { $results = $null } else { return }
             }
         }
     } elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
-        if ([System.Net.ServicePointManager]::CertificatePolicy -notlike 'TrustAllCertsPolicy') { 
+        if ([System.Net.ServicePointManager]::CertificatePolicy -notlike 'TrustAllCertsPolicy') {
             Write-Verbose "Correcting certificate policy"
             Unblock-CertificatePolicy
         }
@@ -149,17 +223,21 @@ function Invoke-SDPRestCall {
         }
         if ($body) {
             try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Body $bodyjson -Credential $restContext.credentials -ContentType 'application/json' -TimeoutSec $timeOut
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $bodyjson -ContentType 'application/json' -Credential $restContext.credentials -TimeoutSec $timeOut
             } catch {
-                $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
-                return $return | Write-Error
+                if (& $resolveRestException $_) { $results = $null } else { return }
+            }
+        } elseif ($queryParams) {
+            try {
+                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $queryParams -Credential $restContext.credentials -TimeoutSec $timeOut
+            } catch {
+                if (& $resolveRestException $_) { $results = $null } else { return }
             }
         } else {
             try {
                 $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -TimeoutSec $timeOut
             } catch {
-                $return = (($_.ErrorDetails.Message | ConvertFrom-Json).error_msg)
-                return $return | Write-Error
+                if (& $resolveRestException $_) { $results = $null } else { return }
             }
         }
     }

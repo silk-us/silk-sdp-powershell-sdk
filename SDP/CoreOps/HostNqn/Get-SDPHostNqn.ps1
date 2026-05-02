@@ -114,7 +114,7 @@ function Get-SDPHostNqn {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         $instances = foreach ($hit in $results) {
             [SDPHostNqn]::new($hit, $k2context)

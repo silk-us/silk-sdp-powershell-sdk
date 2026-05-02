@@ -50,7 +50,6 @@ class SDPVolume {
     [psobject] $volume_group
 
     # --- Flags ---
-    [bool]     $read_only
     [bool]     $vmware_support
     [bool]     $is_dedup
     [bool]     $is_new
@@ -79,7 +78,6 @@ class SDPVolume {
         $this.size                     = $apiHit.size
         $this.logical_capacity         = $apiHit.logical_capacity
         $this.snapshots_logical_capacity = $apiHit.snapshots_logical_capacity
-        $this.read_only                = [bool] $apiHit.read_only
         $this.vmware_support           = [bool] $apiHit.vmware_support
         $this.is_dedup                 = [bool] $apiHit.is_dedup
         $this.is_new                   = [bool] $apiHit.is_new
@@ -111,7 +109,9 @@ class SDPVolume {
 
     [SDPVolume] Resize([int] $newSizeInGB) {
         Set-SDPVolume -id $this.id -sizeInGB $newSizeInGB -k2context $this.k2context | Out-Null
-        return $this.Refresh()
+        $this.sizeInGB = $newSizeInGB
+        $this.size     = $newSizeInGB * 1024 * 1024
+        return $this
     }
 
     [void] Map([string] $hostName) {
@@ -124,15 +124,18 @@ class SDPVolume {
     }
 
     [SDPVolume] Refresh() {
-        return (Get-SDPVolume -id $this.id -k2context $this.k2context)
-    }
-
-    [void] SetReadOnly() {
-        Set-SDPVolume -id $this.id -ReadOnly -k2context $this.k2context | Out-Null
-    }
-
-    [void] SetReadWrite() {
-        Set-SDPVolume -id $this.id -ReadWrite -k2context $this.k2context | Out-Null
+        # Mutate $this in place so callers' existing references stay current.
+        # Copy declared properties via assignment; carry over Update-SDPRefObjects
+        # NoteProperties (volume_group_name, etc.) via Add-Member -Force.
+        $fresh = Get-SDPVolume -id $this.id -k2context $this.k2context
+        foreach ($p in $fresh.PSObject.Properties) {
+            if ($this.PSObject.Properties[$p.Name]) {
+                $this.($p.Name) = $p.Value
+            } else {
+                Add-Member -InputObject $this -NotePropertyName $p.Name -NotePropertyValue $p.Value -Force
+            }
+        }
+        return $this
     }
 
     [void] Delete() {
@@ -210,6 +213,7 @@ function Get-SDPVolume {
         [parameter()]
         [int] $id,
         [parameter(Position=1)]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter()]
         [Alias("VmwareSupport")]
@@ -243,7 +247,7 @@ function Get-SDPVolume {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         # Emit typed objects so the default view + class methods kick in.
 

@@ -94,7 +94,7 @@ function Update-SDPRefObjects {
             $propertyName = $prop + '_name'
             $object | Add-Member -MemberType NoteProperty -Name $propertyName -Value $objectName -Force
         }
-
+        # Start-Sleep -Seconds 1 # throttle for API friendliness
         return $object
     }
 }

@@ -213,6 +213,7 @@ function Get-SDPVolumeGroupSnapshot {
         [Alias("LastExposedTime")]
         [string] $last_exposed_time,
         [parameter()]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter()]
         [Alias("ReplicationSession")]
@@ -261,7 +262,7 @@ function Get-SDPVolumeGroupSnapshot {
         $PSBoundParameters.Remove('asViewSnapshot') | Out-Null
         $PSBoundParameters.Remove('doNotResolve')  | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         # Source-shape filter.
 

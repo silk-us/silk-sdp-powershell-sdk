@@ -4,8 +4,7 @@
 
     .DESCRIPTION
     Updates configuration settings for an existing volume on the Silk Data
-    Pod. Can modify name, size, description, volume group assignment, and
-    read-only status.
+    Pod. Can modify name, size, description, and volume group assignment.
 
     .PARAMETER id
     The unique identifier of the volume to modify. Accepts piped input from
@@ -25,12 +24,6 @@
     Move the volume to a different volume group by specifying the volume
     group name.
 
-    .PARAMETER ReadOnly
-    Sets the volume to read-only mode.
-
-    .PARAMETER ReadWrite
-    Sets the volume to read-write mode.
-
     .PARAMETER k2context
     Specifies the K2 context to use for authentication. Defaults to
     'k2rfconnection'.
@@ -42,10 +35,6 @@
     .EXAMPLE
     Get-SDPVolume -name "Vol01" | Set-SDPVolume -name "Vol01-Renamed"
     Renames a volume using piped input.
-
-    .EXAMPLE
-    Set-SDPVolume -id 123 -ReadOnly
-    Sets the volume to read-only mode.
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
@@ -68,10 +57,6 @@ function Set-SDPVolume {
         [string] $Description,
         [parameter()]
         [string] $VolumeGroupName,
-        [parameter()]
-        [switch] $ReadOnly,
-        [parameter()]
-        [switch] $ReadWrite,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -112,12 +97,6 @@ function Set-SDPVolume {
         }
         if ($Description) {
             $body | Add-Member -MemberType NoteProperty -Name description -Value $Description
-        }
-        if ($ReadOnly) {
-            $body | Add-Member -MemberType NoteProperty -Name read_only -Value $true
-        }
-        if ($ReadWrite) {
-            $body | Add-Member -MemberType NoteProperty -Name read_only -Value $false
         }
 
         # Call

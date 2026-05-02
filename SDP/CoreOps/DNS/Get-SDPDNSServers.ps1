@@ -35,7 +35,7 @@ function Get-SDPDNSServers {
     process {
 
         try {
-            $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -ErrorAction SilentlyContinue | Select-Object dns_*
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -strictURI -ErrorAction SilentlyContinue | Select-Object dns_*
         } catch {
             return $Error[0]
         }

@@ -25,9 +25,6 @@
     .PARAMETER Description
     Optional description for the volume.
 
-    .PARAMETER ReadOnly
-    Creates the volume as read-only.
-
     .PARAMETER k2context
     Specifies the K2 context to use for authentication. Defaults to
     'k2rfconnection'.
@@ -55,6 +52,7 @@ function New-SDPVolume {
     [CmdletBinding()]
     param(
         [parameter(Mandatory)]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter(Mandatory)]
         [int] $sizeInGB,
@@ -67,8 +65,6 @@ function New-SDPVolume {
         [switch] $VMWare,
         [parameter()]
         [string] $Description,
-        [parameter()]
-        [switch] $ReadOnly,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -116,9 +112,6 @@ function New-SDPVolume {
         }
         if ($Description) {
             $body | Add-Member -MemberType NoteProperty -Name description -Value $Description
-        }
-        if ($ReadOnly) {
-            $body | Add-Member -MemberType NoteProperty -Name read_only -Value $true
         }
 
         # POST returns nothing on success — submit and then poll the GET

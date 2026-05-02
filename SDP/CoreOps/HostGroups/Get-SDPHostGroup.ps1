@@ -82,6 +82,7 @@ function Get-SDPHostGroup {
         [parameter()]
         [int] $id,
         [parameter(position=1)]
+        [ValidateLength(0, 32)]
         [string] $name,
         [parameter()]
         [switch] $doNotResolve,
@@ -95,7 +96,7 @@ function Get-SDPHostGroup {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         $instances = foreach ($hit in $results) {
             [SDPHostGroup]::new($hit, $k2context)

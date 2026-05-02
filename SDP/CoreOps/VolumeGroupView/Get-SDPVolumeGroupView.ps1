@@ -203,6 +203,7 @@ function Get-SDPVolumeGroupView {
         [Alias("LastExposedTime")]
         [string] $last_exposed_time,
         [parameter()]
+        [ValidateLength(0, 42)]
         [string] $name,
         [parameter()]
         [Alias("ReplicationSession")]
@@ -247,7 +248,7 @@ function Get-SDPVolumeGroupView {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
 
         # Views: source is a /snapshots/ ref AND that source itself has
         # source = /volume_groups/ (i.e. it's a regular snapshot, not a view).

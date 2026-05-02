@@ -34,7 +34,6 @@
                     <TableColumnHeader><Label>sizeInGB</Label><Width>10</Width><Alignment>Right</Alignment></TableColumnHeader>
                     <TableColumnHeader><Label>creationTime</Label></TableColumnHeader>
                     <TableColumnHeader><Label>scsi_sn</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>read_only</Label></TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries><TableRowEntry><TableColumnItems>
                     <TableColumnItem><PropertyName>id</PropertyName></TableColumnItem>
@@ -43,7 +42,6 @@
                     <TableColumnItem><PropertyName>sizeInGB</PropertyName></TableColumnItem>
                     <TableColumnItem><PropertyName>creationTime</PropertyName></TableColumnItem>
                     <TableColumnItem><PropertyName>scsi_sn</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>read_only</PropertyName></TableColumnItem>
                 </TableColumnItems></TableRowEntry></TableRowEntries>
             </TableControl>
         </View>

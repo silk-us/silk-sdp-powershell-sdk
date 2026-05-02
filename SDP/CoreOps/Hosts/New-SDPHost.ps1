@@ -50,6 +50,7 @@ function New-SDPHost {
         [Alias('pipeId')]
         [string] $hostGroupId,
         [parameter(Mandatory)]
+        [ValidateLength(0, 32)]
         [string] $name,
         [parameter(Mandatory)]
         [ValidateSet('Linux','Windows','ESX','AIX','Solaris',IgnoreCase = $false)]
