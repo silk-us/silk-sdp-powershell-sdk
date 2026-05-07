@@ -69,6 +69,10 @@
 function Get-SDPStatsVolumes {
     [CmdletBinding()]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPVolume class. Validated to [SDPVolume] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter()]
         [Alias("IopsAvg")]
         [string] $iops_avg,
@@ -111,6 +115,19 @@ function Get-SDPStatsVolumes {
     }
 
     process {
+
+        if ($InputObject -and $InputObject -isnot [SDPVolume]) {
+            throw "Get-SDPStatsVolumes accepts pipeline input only from SDPVolume; got [$($InputObject.GetType().FullName)]."
+        }
+        # When piped an SDPVolume, derive volume_name + inherit context.
+        if ($InputObject) {
+            $volume_name = $InputObject.name
+            $PSBoundParameters.volume_name = $volume_name
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+        $PSBoundParameters.Remove('InputObject') | Out-Null
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |

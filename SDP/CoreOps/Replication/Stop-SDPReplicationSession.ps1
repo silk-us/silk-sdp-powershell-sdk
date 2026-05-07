@@ -1,4 +1,5 @@
 function Stop-SDPReplicationSession {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -6,13 +7,15 @@ function Stop-SDPReplicationSession {
         [parameter()]
         [switch] $wait,
         [parameter()]
+        [switch] $Force,
+        [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
 
     begin {
         $endpoint = 'replication/sessions'
     }
-    
+
     process {
         $session = Get-SDPReplicationSessions -name $name -k2context $k2context
         if ($session) {
@@ -20,27 +23,32 @@ function Stop-SDPReplicationSession {
                 $errormsg = 'Please ensure replication session is currently "suspended"'
                 return $errormsg | Write-Error
             }
-            
-            $o = New-Object psobject
-            $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'idle'
 
-            $body = $o
-            $subendpoint = $endpoint + '/' + $session.id
-
-            try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context 
-            } catch {
-                return $Error[0]
+            if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+                $ConfirmPreference = 'None'
             }
-            if ($wait) {
-                while ($session.state -ne 'idle') {
-                    $session = Get-SDPReplicationSessions -name $name -k2context $k2context
-                    Start-Sleep -Seconds 2
+            if ($PSCmdlet.ShouldProcess("SDPReplicationSession name=$name", 'Stop (transition to idle)')) {
+                $o = New-Object psobject
+                $o | Add-Member -MemberType NoteProperty -Name "state" -Value 'idle'
+
+                $body = $o
+                $subendpoint = $endpoint + '/' + $session.id
+
+                try {
+                    $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context
+                } catch {
+                    return $Error[0]
                 }
-                Write-Progress -Completed -Activity $activityString
+                if ($wait) {
+                    while ($session.state -ne 'idle') {
+                        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+                        Start-Sleep -Seconds 2
+                    }
+                    Write-Progress -Completed -Activity $activityString
+                }
+                $results = Get-SDPReplicationSessions -name $name -k2context $k2context
+                return $results
             }
-            $results = Get-SDPReplicationSessions -name $name -k2context $k2context
-            return $results
         }
     }
 }

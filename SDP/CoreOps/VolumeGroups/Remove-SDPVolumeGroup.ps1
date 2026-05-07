@@ -34,13 +34,19 @@
 #>
 
 function Remove-SDPVolumeGroup {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPVolumeGroup class. Validated to [SDPVolumeGroup] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
         [parameter()]
         [string] $name,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -50,6 +56,16 @@ function Remove-SDPVolumeGroup {
     }
 
     process {
+
+        if ($InputObject -and $InputObject -isnot [SDPVolumeGroup]) {
+            throw "Remove-SDPVolumeGroup accepts pipeline input only from SDPVolumeGroup; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
 
         # Special Ops — resolve name to id when no id was passed.
 
@@ -66,8 +82,13 @@ function Remove-SDPVolumeGroup {
 
         # Call
 
-        Write-Verbose "Removing volume group with id $id"
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPVolumeGroup id=$id", 'Remove')) {
+            Write-Verbose "Removing volume group with id $id"
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

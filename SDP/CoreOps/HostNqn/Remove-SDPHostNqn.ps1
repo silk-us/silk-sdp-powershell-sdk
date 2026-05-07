@@ -19,11 +19,13 @@
 #>
 
 function Remove-SDPHostNqn {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $hostName,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -40,7 +42,12 @@ function Remove-SDPHostNqn {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostNqn.id)" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHostNqn hostName=$hostName id=$($hostNqn.id)", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostNqn.id)" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

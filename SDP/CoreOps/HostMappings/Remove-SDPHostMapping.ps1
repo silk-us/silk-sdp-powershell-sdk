@@ -19,11 +19,17 @@
 #>
 
 function Remove-SDPHostMapping {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPHostMapping class. Validated to [SDPHostMapping] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -34,9 +40,24 @@ function Remove-SDPHostMapping {
 
     process {
 
+        if ($InputObject -and $InputObject -isnot [SDPHostMapping]) {
+            throw "Remove-SDPHostMapping accepts pipeline input only from SDPHostMapping; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHostMapping id=$id", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

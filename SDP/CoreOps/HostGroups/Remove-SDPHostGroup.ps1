@@ -19,13 +19,19 @@
 #>
 
 function Remove-SDPHostGroup {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPHostGroup class. Validated to [SDPHostGroup] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
         [parameter()]
         [string] $name,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -36,6 +42,16 @@ function Remove-SDPHostGroup {
 
     process {
 
+        if ($InputObject -and $InputObject -isnot [SDPHostGroup]) {
+            throw "Remove-SDPHostGroup accepts pipeline input only from SDPHostGroup; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+
         # Special Ops — resolve name to id when no id was passed.
 
         if ($name -and !$id) {
@@ -45,7 +61,12 @@ function Remove-SDPHostGroup {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHostGroup id=$id", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

@@ -175,6 +175,10 @@ function Get-SDPVolumeGroupSnapshot {
     [CmdletBinding()]
     [OutputType([SDPVolumeGroupSnapshot])]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPVolumeGroup class. Validated to [SDPVolumeGroup] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias("pipeName")]
         [string] $volumeGroupName,
@@ -248,6 +252,19 @@ function Get-SDPVolumeGroupSnapshot {
     }
 
     process {
+
+        if ($InputObject -and $InputObject -isnot [SDPVolumeGroup]) {
+            throw "Get-SDPVolumeGroupSnapshot accepts pipeline input only from SDPVolumeGroup; got [$($InputObject.GetType().FullName)]."
+        }
+        # When piped an SDPVolumeGroup, write the volume_group ref directly
+        # (skip the name → id lookup) and inherit context.
+        if ($InputObject) {
+            $PSBoundParameters.volume_group = ConvertTo-SDPObjectPrefix -ObjectID $InputObject.id -ObjectPath 'volume_groups' -nestedObject
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+        $PSBoundParameters.Remove('InputObject') | Out-Null
 
         # Special Ops — translate volumeGroupName to a volume_group ref.
 

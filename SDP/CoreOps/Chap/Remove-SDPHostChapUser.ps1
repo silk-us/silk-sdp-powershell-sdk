@@ -27,11 +27,13 @@
 #>
 
 function Remove-SDPHostChapUser {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(ValueFromPipelineByPropertyName, Mandatory)]
         [Alias('pipeName')]
         [string] $hostName,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
@@ -53,7 +55,12 @@ function Remove-SDPHostChapUser {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHost hostName=$hostName CHAP user", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -k2context $k2context
+            return $results
+        }
     }
 }

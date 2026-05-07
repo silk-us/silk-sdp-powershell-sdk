@@ -28,11 +28,17 @@
 #>
 
 function Remove-SDPVolumeGroupSnapshot {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
-        [parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPVolumeGroupSnapshot class. Validated at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
+        [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -42,8 +48,26 @@ function Remove-SDPVolumeGroupSnapshot {
     }
 
     process {
-        Write-Verbose "Removing snapshot with id $id"
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($InputObject -and $InputObject -isnot [SDPVolumeGroupSnapshot]) {
+            throw "Remove-SDPVolumeGroupSnapshot accepts pipeline input only from SDPVolumeGroupSnapshot; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+        if (-not $id) {
+            throw "Remove-SDPVolumeGroupSnapshot requires an -id (or piped SDPVolumeGroupSnapshot)."
+        }
+
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPVolumeGroupSnapshot id=$id", 'Remove')) {
+            Write-Verbose "Removing snapshot with id $id"
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

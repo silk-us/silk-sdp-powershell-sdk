@@ -34,13 +34,19 @@
 #>
 
 function Remove-SDPHost {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPHost class. Validated to [SDPHost] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
         [parameter(Position=1)]
         [string] $name,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -50,12 +56,27 @@ function Remove-SDPHost {
     }
 
     process {
+        if ($InputObject -and $InputObject -isnot [SDPHost]) {
+            throw "Remove-SDPHost accepts pipeline input only from SDPHost; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+
         if ($name) {
             $id = (Get-SDPHost -name $name -k2context $k2context).id
         }
 
-        Write-Verbose "Removing host with id $id"
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHost id=$id", 'Remove')) {
+            Write-Verbose "Removing host with id $id"
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

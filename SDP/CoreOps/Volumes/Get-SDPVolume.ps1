@@ -208,6 +208,10 @@ function Get-SDPVolume {
     [CmdletBinding()]
     [OutputType([SDPVolume])]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPVolumeGroup class. Validated to [SDPVolumeGroup] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter()]
         [string] $description,
         [parameter()]
@@ -233,6 +237,18 @@ function Get-SDPVolume {
     }
 
     process {
+
+        if ($InputObject -and $InputObject -isnot [SDPVolumeGroup]) {
+            throw "Get-SDPVolume accepts pipeline input only from SDPVolumeGroup; got [$($InputObject.GetType().FullName)]."
+        }
+        # When piped an SDPVolumeGroup, derive volume_group filter + inherit context.
+        if ($InputObject) {
+            $volume_group = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+        $PSBoundParameters.Remove('InputObject') | Out-Null
 
         # Special Ops
 

@@ -27,11 +27,13 @@
 #>
 
 function Remove-SDPVolumeGroupView {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = 'k2rfconnection'
     )
@@ -41,8 +43,13 @@ function Remove-SDPVolumeGroupView {
     }
 
     process {
-        Write-Verbose "Removing view with id $id"
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPVolumeGroupView id=$id", 'Remove')) {
+            Write-Verbose "Removing view with id $id"
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

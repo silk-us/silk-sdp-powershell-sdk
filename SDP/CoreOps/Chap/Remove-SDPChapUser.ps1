@@ -29,7 +29,7 @@
 #>
 
 function Remove-SDPChapUser {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -37,6 +37,8 @@ function Remove-SDPChapUser {
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [int] $id,
+        [parameter()]
+        [switch] $Force,
         [parameter()]
         [string] $k2context = "k2rfconnection"
     )
@@ -55,7 +57,12 @@ function Remove-SDPChapUser {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPChapUser id=$id", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            return $results
+        }
     }
 }

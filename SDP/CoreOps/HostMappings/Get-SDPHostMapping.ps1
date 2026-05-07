@@ -79,6 +79,10 @@ function Get-SDPHostMapping {
     [CmdletBinding()]
     [OutputType([SDPHostMapping])]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPHost class. Validated to [SDPHost] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $hostName,
@@ -104,6 +108,18 @@ function Get-SDPHostMapping {
     }
 
     process {
+        if ($InputObject -and $InputObject -isnot [SDPHost]) {
+            throw "Get-SDPHostMapping accepts pipeline input only from SDPHost; got [$($InputObject.GetType().FullName)]."
+        }
+        # When piped an SDPHost, derive hostName + inherit context.
+        if ($InputObject) {
+            $hostName = $InputObject.name
+            if (-not $PSBoundParameters.ContainsKey('k2context')) {
+                $k2context = $InputObject.k2context
+            }
+        }
+        $PSBoundParameters.Remove('InputObject') | Out-Null
+
         # parameter cleanup — strip internal-only switches before passing
         # PSBoundParameters into the URI builder.
         if ($asSnapshot) {
