@@ -44,8 +44,8 @@ class sdpsystemstats {
     Skip ref resolution. Stats records typically have no refs, so this is
     here for SDK consistency.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPSystemStats -resolution 1h -dataPoints 24
@@ -74,7 +74,7 @@ function Get-SDPSystemStats {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -113,7 +113,7 @@ function Get-SDPSystemStats {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI -strictString -noLimit
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI -strictString -noLimit
 
         $eventArray = @()
 
@@ -138,6 +138,6 @@ function Get-SDPSystemStats {
         }
 
         if ($doNotResolve) { return $eventArray }
-        return ($eventArray | Update-SDPRefObjects -k2context $k2context)
+        return ($eventArray | Update-SDPRefObjects -context $context)
     }
 }

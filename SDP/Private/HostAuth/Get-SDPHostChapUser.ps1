@@ -3,7 +3,7 @@ function Get-SDPHostChapUser {
         [parameter()]
         [int] $id,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
     <#
         .SYNOPSIS
@@ -24,7 +24,7 @@ function Get-SDPHostChapUser {
     }
     
     process {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
         return $results
     }
 

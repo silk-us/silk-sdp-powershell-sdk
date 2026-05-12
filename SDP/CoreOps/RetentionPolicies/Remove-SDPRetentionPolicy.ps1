@@ -10,9 +10,9 @@
     The unique identifier of the retention policy to remove. Accepts
     piped input from Get-SDPRetentionPolicy.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPRetentionPolicy -id 5
@@ -42,7 +42,7 @@ function Remove-SDPRetentionPolicy {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -55,8 +55,8 @@ function Remove-SDPRetentionPolicy {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
 
@@ -65,7 +65,7 @@ function Remove-SDPRetentionPolicy {
         }
         if ($PSCmdlet.ShouldProcess("SDPRetentionPolicy id=$id", 'Remove')) {
             Write-Verbose "Removing retention policy with id $id"
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

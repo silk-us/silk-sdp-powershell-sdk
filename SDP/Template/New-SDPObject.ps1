@@ -2,7 +2,7 @@ function CMDLETNAME {
     [CmdletBinding()]
     param(
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -27,13 +27,13 @@ function CMDLETNAME {
         # appears via its Get-SDP* equivalent.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $name -Get {
-            Get-SDPOBJECT -name $name -k2context $k2context
+            Get-SDPOBJECT -name $name -context $context
         }
 
         return $results

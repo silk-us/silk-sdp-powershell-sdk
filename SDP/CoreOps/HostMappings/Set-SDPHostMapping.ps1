@@ -14,8 +14,8 @@
     .PARAMETER lun
     Change the LUN number for the mapping. Valid range is 1-254.
 
-    .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    Specifies the K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Set-SDPHostMapping -id 123 -lun 5
@@ -47,7 +47,7 @@ function Set-SDPHostMapping {
         [ValidateRange(1,254)]
         [int] $lun,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -59,7 +59,7 @@ function Set-SDPHostMapping {
         # Special Ops — resolve host name to a nested ref.
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+            $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
 
             if ($hostObj.host_) {
@@ -80,12 +80,12 @@ function Set-SDPHostMapping {
         # Call
 
         try {
-            Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context -ErrorAction SilentlyContinue -TimeOut 5
+            Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -context $context -ErrorAction SilentlyContinue -TimeOut 5
         } catch {
             return $Error[0]
         }
 
-        $response = Get-SDPHostMapping -lun $lun -k2context $k2context
+        $response = Get-SDPHostMapping -lun $lun -context $context
         return $response
     }
 }

@@ -11,8 +11,8 @@
     The unique identifier of the snapshot to remove. Accepts piped input
     from Get-SDPVolumeGroupSnapshot, Get-SDPVolumeGroupView, etc.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPVolumeGroupSnapshot -id 41
@@ -40,7 +40,7 @@ function Remove-SDPVolumeGroupSnapshot {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -53,8 +53,8 @@ function Remove-SDPVolumeGroupSnapshot {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
         if (-not $id) {
@@ -66,7 +66,7 @@ function Remove-SDPVolumeGroupSnapshot {
         }
         if ($PSCmdlet.ShouldProcess("SDPVolumeGroupSnapshot id=$id", 'Remove')) {
             Write-Verbose "Removing snapshot with id $id"
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

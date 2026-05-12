@@ -27,7 +27,7 @@ function Set-SDPHostNqn {
         [parameter(Mandatory)]
         [string] $nqn,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -38,7 +38,7 @@ function Set-SDPHostNqn {
 
         # Special Ops — resolve host name to a nested ref.
 
-        $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+        $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath 'hosts' -ObjectID $hostObj.id -nestedObject
 
         # Build the request body
@@ -49,7 +49,7 @@ function Set-SDPHostNqn {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         return $results
     }
 }

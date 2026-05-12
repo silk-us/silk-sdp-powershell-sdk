@@ -13,9 +13,9 @@
     .PARAMETER name
     The name of the volume group to remove.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPVolumeGroup -name "VG01"
@@ -48,7 +48,7 @@ function Remove-SDPVolumeGroup {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -62,15 +62,15 @@ function Remove-SDPVolumeGroup {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
 
         # Special Ops — resolve name to id when no id was passed.
 
         if ($name) {
-            $volumeGroup = Get-SDPVolumeGroup -name $name -k2context $k2context
+            $volumeGroup = Get-SDPVolumeGroup -name $name -context $context
             if (!$volumeGroup) {
                 return "No volume group with name $name exists."
             } elseif (($volumeGroup | Measure-Object).Count -gt 1) {
@@ -87,7 +87,7 @@ function Remove-SDPVolumeGroup {
         }
         if ($PSCmdlet.ShouldProcess("SDPVolumeGroup id=$id", 'Remove')) {
             Write-Verbose "Removing volume group with id $id"
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

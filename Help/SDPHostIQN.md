@@ -4,7 +4,7 @@ SDP Host IQN management functions.
 
 ## Set-SDPHostIQN
 ```PowerShell
-Set-SDPHostIqn [-hostName] <string> [-iqn] <string> [[-k2context] <string>] [<CommonParameters>]
+Set-SDPHostIqn [-hostName] <string> [-iqn] <string> [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -25,7 +25,7 @@ Set-SDPHostIQN -hostName WinHost01 -iqn iqn.1991-05.com.microsoft:winhost01
 
 ## Get-SDPHostIQN
 ```PowerShell
-Get-SDPHostIqn [[-hostName] <string>] [[-id] <int>] [[-iqn] <string>] [[-k2context] <string>] [<CommonParameters>]
+Get-SDPHostIqn [[-hostName] <string>] [[-id] <int>] [[-iqn] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -49,7 +49,7 @@ Get-SDPHost -name WinHost01 | Get-SDPHostIQN
 
 ## Remove-SDPHostIQN
 ```PowerShell
-Remove-SDPHostIqn [-hostName] <string> [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPHostIqn [-hostName] <string> [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

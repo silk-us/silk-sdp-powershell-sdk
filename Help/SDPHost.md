@@ -5,7 +5,7 @@ SDP Host management functions.
 ## New-SDPHost
 
 ```PowerShell
-New-SDPHost [[-hostGroupName] <string>] [[-hostGroupId] <string>] [-name] <string> [-type] {Linux | Windows | ESX} [[-connectivityType] {FC | NVME | iSCSI}] [[-k2context] <string>] [<CommonParameters>]
+New-SDPHost [[-hostGroupName] <string>] [[-hostGroupId] <string>] [-name] <string> [-type] {Linux | Windows | ESX} [[-connectivityType] {FC | NVME | iSCSI}] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -32,7 +32,7 @@ New-SDPHost -name SQLHost01 -type Windows -hostGroupName SQLCluster01
 
 ## Set-SDPHost
 ```PowerShell
-Set-SDPHost [-id] <string> [[-hostGroupName] <string>] [[-name] <string>] [[-type] {Linux | Windows | ESX}] [[-k2context] <string>] [<CommonParameters>]
+Set-SDPHost [-id] <string> [[-hostGroupName] <string>] [[-name] <string>] [[-type] {Linux | Windows | ESX}] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -64,7 +64,7 @@ Get-SDPHost -name WinHost01 | Set-SDPHost -type Linux
 
 ## Get-SDPHost
 ```PowerShell
-Get-SDPHost [[-name] <string>] [-host_group <string>] [-id <int>] [-type <string>] [-k2context <string>] [<CommonParameters>]
+Get-SDPHost [[-name] <string>] [-host_group <string>] [-id <int>] [-type <string>] [-context <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -89,7 +89,7 @@ Get-SDPHost -name WinHost01
 
 ## Remove-SDPHost
 ```PowerShell
-Remove-SDPHost [[-name] <string>] [-id <string>] [-k2context <string>] [<CommonParameters>]
+Remove-SDPHost [[-name] <string>] [-id <string>] [-context <string>] [<CommonParameters>]
 ```
 
 #### Parameters

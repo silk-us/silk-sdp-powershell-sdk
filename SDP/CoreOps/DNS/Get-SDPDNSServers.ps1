@@ -6,8 +6,8 @@
     Pulls the DNS server fields out of the SDP partial system parameters
     endpoint. Returns just the dns_* properties.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPDNSServers
@@ -25,7 +25,7 @@ function Get-SDPDNSServers {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -35,7 +35,7 @@ function Get-SDPDNSServers {
     process {
 
         try {
-            $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -strictURI -ErrorAction SilentlyContinue | Select-Object dns_*
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context -strictURI -ErrorAction SilentlyContinue | Select-Object dns_*
         } catch {
             return $Error[0]
         }
@@ -45,6 +45,6 @@ function Get-SDPDNSServers {
         if ($doNotResolve) {
             return $results
         }
-        return ($results | Update-SDPRefObjects -k2context $k2context)
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

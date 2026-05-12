@@ -36,9 +36,9 @@
     .PARAMETER doNotResolve
     Skip the post-call ref-resolution pass. Returns raw API records.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Get-SDPEvents -EventId 28
@@ -74,7 +74,7 @@ function Get-SDPEvents {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -90,7 +90,7 @@ function Get-SDPEvents {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI -strictURIgte timestamp
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI -strictURIgte timestamp
 
         # Project each raw record into a flat psobject and convert the
         # Unix timestamp to a DateTime for human readability.
@@ -116,6 +116,6 @@ function Get-SDPEvents {
         if ($doNotResolve) {
             return $events
         }
-        return ($events | Update-SDPRefObjects -k2context $k2context)
+        return ($events | Update-SDPRefObjects -context $context)
     }
 }

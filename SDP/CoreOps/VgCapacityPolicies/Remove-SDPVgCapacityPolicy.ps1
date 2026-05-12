@@ -11,7 +11,7 @@ function Remove-SDPVgCapacityPolicy {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     ## Special Ops
@@ -25,8 +25,8 @@ function Remove-SDPVgCapacityPolicy {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
 
@@ -36,7 +36,7 @@ function Remove-SDPVgCapacityPolicy {
         }
         if ($PSCmdlet.ShouldProcess("SDPVgCapacityPolicy id=$id", 'Remove')) {
             $endpointURI = $endpoint + '/' + $id
-            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -context $context
             return $results
         }
     }

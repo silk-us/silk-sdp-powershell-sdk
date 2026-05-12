@@ -25,9 +25,9 @@
     .PARAMETER Description
     Optional description for the volume.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     New-SDPVolume -name "Vol01" -sizeInGB 100 -VolumeGroupName "VG01"
@@ -66,7 +66,7 @@ function New-SDPVolume {
         [parameter()]
         [string] $Description,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -79,13 +79,13 @@ function New-SDPVolume {
 
         if ($volumeGroupId) {
             Write-Verbose "Working with volume group id $volumeGroupId"
-            $volumeGroup = Get-SDPVolumeGroup -id $volumeGroupId -k2context $k2context
+            $volumeGroup = Get-SDPVolumeGroup -id $volumeGroupId -context $context
             if (!$volumeGroup) {
                 return "No volume group with ID $volumeGroupId exists."
             }
         } elseif ($VolumeGroupName) {
             Write-Verbose "Working with volume group name $VolumeGroupName"
-            $volumeGroup = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
+            $volumeGroup = Get-SDPVolumeGroup -name $VolumeGroupName -context $context
             if (!$volumeGroup) {
                 return "No volume group named $VolumeGroupName exists."
             }
@@ -118,13 +118,13 @@ function New-SDPVolume {
         # until the new volume appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $name -Get {
-            Get-SDPVolume -name $name -k2context $k2context
+            Get-SDPVolume -name $name -context $context
         }
 
         return $results

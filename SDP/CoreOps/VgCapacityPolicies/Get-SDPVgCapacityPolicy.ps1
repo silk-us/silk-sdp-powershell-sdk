@@ -24,11 +24,11 @@ class SDPVgCapacityPolicy {
     [bool]   $is_default
 
     # Hidden context for instance-method calls.
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPVgCapacityPolicy() {}
 
-    SDPVgCapacityPolicy([psobject] $apiHit, [string] $k2context) {
+    SDPVgCapacityPolicy([psobject] $apiHit, [string] $context) {
         $this.id                          = $apiHit.id
         $this.name                        = $apiHit.name
         $this.full_threshold              = $apiHit.full_threshold
@@ -38,19 +38,19 @@ class SDPVgCapacityPolicy {
         $this.snapshot_overhead_threshold = $apiHit.snapshot_overhead_threshold
         $this.num_snapshots               = $apiHit.num_snapshots
         $this.is_default                  = [bool] $apiHit.is_default
-        $this.k2context                   = $k2context
+        $this.context                   = $context
     }
 
     # ---- Operational methods --------------------------------------------
 
     [SDPVgCapacityPolicy] Refresh() {
         return [SDPVgCapacityPolicy]::new(
-            (Get-SDPVgCapacityPolicy -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPVgCapacityPolicy -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
-        Remove-SDPVgCapacityPolicy -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPVgCapacityPolicy -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -105,9 +105,9 @@ Update-TypeData -TypeName 'SDPVgCapacityPolicy' `
     Skip the auto-pipe through Update-SDPRefObjects. Returns raw API
     objects (no class wrapping).
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Get-SDPVgCapacityPolicy
@@ -155,7 +155,7 @@ function Get-SDPVgCapacityPolicy {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -164,16 +164,16 @@ function Get-SDPVgCapacityPolicy {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPVgCapacityPolicy]::new($hit, $k2context)
+            [SDPVgCapacityPolicy]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

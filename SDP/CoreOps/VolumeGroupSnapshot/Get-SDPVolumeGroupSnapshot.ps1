@@ -51,11 +51,11 @@ class SDPVolumeGroupSnapshot {
     [psobject] $replication_session
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPVolumeGroupSnapshot() {}
 
-    SDPVolumeGroupSnapshot([psobject] $apiHit, [string] $k2context) {
+    SDPVolumeGroupSnapshot([psobject] $apiHit, [string] $context) {
         $this.id                            = $apiHit.id
         $this.name                          = $apiHit.name
         $this.short_name                    = $apiHit.short_name
@@ -77,7 +77,7 @@ class SDPVolumeGroupSnapshot {
         $this.is_external                   = [bool] $apiHit.is_external
         $this.is_locked_by_replication      = [bool] $apiHit.is_locked_by_replication
         $this.is_originating_from_peer      = [bool] $apiHit.is_originating_from_peer
-        $this.k2context                     = $k2context
+        $this.context                     = $context
 
         if ($apiHit.creation_time) {
             $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
@@ -93,12 +93,12 @@ class SDPVolumeGroupSnapshot {
 
     [SDPVolumeGroupSnapshot] Refresh() {
         return [SDPVolumeGroupSnapshot]::new(
-            (Get-SDPVolumeGroupSnapshot -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPVolumeGroupSnapshot -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
-        Remove-SDPVolumeGroupSnapshot -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPVolumeGroupSnapshot -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -149,8 +149,8 @@ Update-TypeData -TypeName 'SDPVolumeGroupSnapshot' `
     Skip the auto-pipe through Update-SDPRefObjects. Returns raw API
     objects.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPVolumeGroupSnapshot
@@ -244,7 +244,7 @@ function Get-SDPVolumeGroupSnapshot {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -260,8 +260,8 @@ function Get-SDPVolumeGroupSnapshot {
         # (skip the name → id lookup) and inherit context.
         if ($InputObject) {
             $PSBoundParameters.volume_group = ConvertTo-SDPObjectPrefix -ObjectID $InputObject.id -ObjectPath 'volume_groups' -nestedObject
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
         $PSBoundParameters.Remove('InputObject') | Out-Null
@@ -269,7 +269,7 @@ function Get-SDPVolumeGroupSnapshot {
         # Special Ops — translate volumeGroupName to a volume_group ref.
 
         if ($volumeGroupName) {
-            $vg = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context -doNotResolve
+            $vg = Get-SDPVolumeGroup -name $volumeGroupName -context $context -doNotResolve
             $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $vg.id -ObjectPath 'volume_groups' -nestedObject
             $PSBoundParameters.remove('volumeGroupName') | Out-Null
             $PSBoundParameters.volume_group = $volumeGroupPath
@@ -279,7 +279,7 @@ function Get-SDPVolumeGroupSnapshot {
         $PSBoundParameters.Remove('asViewSnapshot') | Out-Null
         $PSBoundParameters.Remove('doNotResolve')  | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         # Source-shape filter.
 
@@ -302,13 +302,13 @@ function Get-SDPVolumeGroupSnapshot {
         }
 
         $instances = foreach ($hit in $newResults) {
-            [SDPVolumeGroupSnapshot]::new($hit, $k2context)
+            [SDPVolumeGroupSnapshot]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

@@ -22,9 +22,9 @@
     .PARAMETER connectivityType
     Optional connectivity type (FC, NVME, iSCSI). Unused on Cloud SDP.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     New-SDPHost -name WinHost01 -type Windows
@@ -59,7 +59,7 @@ function New-SDPHost {
         [ValidateSet('FC','NVME','iSCSI',IgnoreCase = $false)]
         [string] $connectivityType,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -72,14 +72,14 @@ function New-SDPHost {
 
         if ($hostGroupId) {
             Write-Verbose "Working with host group id $hostGroupId"
-            $hostGroup = Get-SDPHostGroup -id $hostGroupId -k2context $k2context
+            $hostGroup = Get-SDPHostGroup -id $hostGroupId -context $context
             if (!$hostGroup) {
                 return "No host group with ID $hostGroupId exists."
             }
             $hostGroupRef = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $hostGroup.id -nestedObject
         } elseif ($hostGroupName) {
             Write-Verbose "Working with host group name $hostGroupName"
-            $hostGroup = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
+            $hostGroup = Get-SDPHostGroup -name $hostGroupName -context $context
             if (!$hostGroup) {
                 return "No host group named $hostGroupName exists."
             }
@@ -102,13 +102,13 @@ function New-SDPHost {
         # until the new host appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $name -Get {
-            Get-SDPHost -name $name -k2context $k2context
+            Get-SDPHost -name $name -context $context
         }
 
         return $results

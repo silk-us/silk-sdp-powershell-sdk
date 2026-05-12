@@ -32,7 +32,7 @@ function New-SDPSystemNetIps {
         [Alias('pipeId')]
         [string] $interface,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -49,13 +49,13 @@ function New-SDPSystemNetIps {
         $body | Add-Member -MemberType NoteProperty -Name "interface" -Value $interfacePath
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
             Start-Sleep 1
         } catch {
             return $Error[0]
         }
 
-        $results = Get-SDPSystemNetIps -ip_address $ipAddress.IPAddressToString -k2context $k2context
+        $results = Get-SDPSystemNetIps -ip_address $ipAddress.IPAddressToString -context $context
 
         if ($results) {
             return $results

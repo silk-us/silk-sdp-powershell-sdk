@@ -33,7 +33,7 @@ function Remove-SDPHostGroup {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -47,15 +47,15 @@ function Remove-SDPHostGroup {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
 
         # Special Ops — resolve name to id when no id was passed.
 
         if ($name -and !$id) {
-            $hostGroup = Get-SDPHostGroup -name $name -k2context $k2context -doNotResolve
+            $hostGroup = Get-SDPHostGroup -name $name -context $context -doNotResolve
             $id = $hostGroup.id
         }
 
@@ -65,7 +65,7 @@ function Remove-SDPHostGroup {
             $ConfirmPreference = 'None'
         }
         if ($PSCmdlet.ShouldProcess("SDPHostGroup id=$id", 'Remove')) {
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

@@ -26,7 +26,7 @@
     on (e.g. the volume name). Cosmetic only.
 
     .EXAMPLE
-    Wait-SDPObject -Get { Get-SDPVolume -name $name -k2context $k2context } -Activity $name
+    Wait-SDPObject -Get { Get-SDPVolume -name $name -context $context } -Activity $name
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)

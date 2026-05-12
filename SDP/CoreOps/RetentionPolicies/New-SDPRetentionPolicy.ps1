@@ -22,9 +22,9 @@
     .PARAMETER hours
     Number of hours to retain snapshots.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     New-SDPRetentionPolicy -name "Daily7" -snapshotCount 7 -weeks 0 -days 7 -hours 0
@@ -51,7 +51,7 @@ function New-SDPRetentionPolicy {
         [parameter(Mandatory)]
         [int] $hours,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -74,13 +74,13 @@ function New-SDPRetentionPolicy {
         # until the new policy appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $name -Get {
-            Get-SDPRetentionPolicy -name $name -k2context $k2context
+            Get-SDPRetentionPolicy -name $name -context $context
         }
 
         return $results

@@ -4,8 +4,8 @@
 
     .DESCRIPTION
     Establishes a session to an existing SDP. The credential and endpoint are
-    stored in a global variable named by -k2context (default
-    'k2rfconnection') so subsequent SDP cmdlets can pick them up. The session
+    stored in a global variable named by -context (default
+    'sdpconnection') so subsequent SDP cmdlets can pick them up. The session
     only lives for the current PowerShell process.
 
     .PARAMETER server
@@ -23,7 +23,7 @@
     Reserved for future use; currently passed through onto the session
     object for downstream cmdlets to inspect.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Name of the global session variable. Override only when you need to
     connect to multiple SDPs simultaneously.
 
@@ -50,7 +50,7 @@ function Connect-SDP {
         [parameter()]
         [switch] $resolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     $session = New-Object psobject
@@ -59,9 +59,9 @@ function Connect-SDP {
     $session | Add-Member -MemberType NoteProperty -Name 'throttleCorrection' -Value $throttleCorrection
     $session | Add-Member -MemberType NoteProperty -Name 'resolve' -Value $resolve
 
-    Set-Variable -Name $k2context -Value $session -Scope Global
+    Set-Variable -Name $context -Value $session -Scope Global
 
-    $results = Invoke-SDPRestCall -endpoint 'system/state' -method GET -k2context $k2context
+    $results = Invoke-SDPRestCall -endpoint 'system/state' -method GET -context $context
 
     return $results
 }

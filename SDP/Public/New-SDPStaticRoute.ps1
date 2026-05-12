@@ -14,9 +14,9 @@
     .PARAMETER gatewayIp
     The gateway IP address used to reach the destination subnet.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     New-SDPStaticRoute -destinationSubnetIp 10.10.0.0 -destinationSubnetMask 255.255.0.0 -gatewayIp 192.168.1.1
@@ -38,7 +38,7 @@ function New-SDPStaticRoute {
         [parameter(Mandatory)]
         [IPAddress] $gatewayIp,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -56,7 +56,7 @@ function New-SDPStaticRoute {
         # Make the call
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }

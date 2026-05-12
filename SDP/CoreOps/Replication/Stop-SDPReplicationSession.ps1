@@ -9,7 +9,7 @@ function Stop-SDPReplicationSession {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -17,7 +17,7 @@ function Stop-SDPReplicationSession {
     }
 
     process {
-        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+        $session = Get-SDPReplicationSessions -name $name -context $context
         if ($session) {
             if ($session.state -ne 'suspended') {
                 $errormsg = 'Please ensure replication session is currently "suspended"'
@@ -35,18 +35,18 @@ function Stop-SDPReplicationSession {
                 $subendpoint = $endpoint + '/' + $session.id
 
                 try {
-                    $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context
+                    $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -context $context
                 } catch {
                     return $Error[0]
                 }
                 if ($wait) {
                     while ($session.state -ne 'idle') {
-                        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+                        $session = Get-SDPReplicationSessions -name $name -context $context
                         Start-Sleep -Seconds 2
                     }
                     Write-Progress -Completed -Activity $activityString
                 }
-                $results = Get-SDPReplicationSessions -name $name -k2context $k2context
+                $results = Get-SDPReplicationSessions -name $name -context $context
                 return $results
             }
         }

@@ -34,11 +34,11 @@ class SDPVolSnap {
     [psobject] $source
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPVolSnap() {}
 
-    SDPVolSnap([psobject] $apiHit, [string] $k2context) {
+    SDPVolSnap([psobject] $apiHit, [string] $context) {
         $this.id                       = $apiHit.id
         $this.name                     = $apiHit.name
         $this.short_name               = $apiHit.short_name
@@ -48,7 +48,7 @@ class SDPVolSnap {
         $this.creation_time            = $apiHit.creation_time
         $this.is_deleted               = [bool] $apiHit.is_deleted
         $this.is_exposable             = [bool] $apiHit.is_exposable
-        $this.k2context                = $k2context
+        $this.context                = $context
 
         if ($apiHit.creation_time) {
             $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
@@ -62,8 +62,8 @@ class SDPVolSnap {
 
     [SDPVolSnap] Refresh() {
         return [SDPVolSnap]::new(
-            (Get-SDPVolSnap -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPVolSnap -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [string] ToString() {
@@ -94,8 +94,8 @@ class SDPVolSnap {
     .PARAMETER doNotResolve
     Skip the auto-pipe through Update-SDPRefObjects.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPVolSnap
@@ -125,7 +125,7 @@ function Get-SDPVolSnap {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -135,7 +135,7 @@ function Get-SDPVolSnap {
     process {
 
         # Query
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context -strictURI
 
         # Special Ops — client-side filter by source snapshot.
         if ($sourceId) {
@@ -144,13 +144,13 @@ function Get-SDPVolSnap {
         }
 
         $instances = foreach ($hit in $results) {
-            [SDPVolSnap]::new($hit, $k2context)
+            [SDPVolSnap]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

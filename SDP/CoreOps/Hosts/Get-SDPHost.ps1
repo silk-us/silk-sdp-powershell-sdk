@@ -26,18 +26,18 @@ class SDPHost {
     [int]      $views_count
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPHost() {}
 
-    SDPHost([psobject] $apiHit, [string] $k2context) {
+    SDPHost([psobject] $apiHit, [string] $context) {
         $this.id               = $apiHit.id
         $this.name             = $apiHit.name
         $this.type             = $apiHit.type
         $this.is_part_of_group = [bool] $apiHit.is_part_of_group
         $this.views_count      = $apiHit.views_count
         $this.volumes_count    = $apiHit.volumes_count
-        $this.k2context        = $k2context
+        $this.context        = $context
 
         if ($apiHit.host_group) {
             $this.host_group = $apiHit.host_group
@@ -47,22 +47,22 @@ class SDPHost {
     # ---- Operational methods --------------------------------------------
 
     [void] MapVolume([string] $volumeName) {
-        New-SDPHostMapping -hostName $this.name -volumeName $volumeName -k2context $this.k2context | Out-Null
+        New-SDPHostMapping -hostName $this.name -volumeName $volumeName -context $this.context | Out-Null
     }
 
     [void] UnmapVolume([string] $volumeName) {
-        Get-SDPHostMapping -hostName $this.name -volumeName $volumeName -k2context $this.k2context |
-            Remove-SDPHostMapping -k2context $this.k2context | Out-Null
+        Get-SDPHostMapping -hostName $this.name -volumeName $volumeName -context $this.context |
+            Remove-SDPHostMapping -context $this.context | Out-Null
     }
 
     [SDPHost] AssignToGroup([string] $hostGroupName) {
-        Set-SDPHost -id $this.id -hostGroupName $hostGroupName -k2context $this.k2context | Out-Null
+        Set-SDPHost -id $this.id -hostGroupName $hostGroupName -context $this.context | Out-Null
         return $this.Refresh()
     }
 
     [SDPHost] Refresh() {
         # Mutate $this in place so callers' existing references stay current.
-        $fresh = Get-SDPHost -id $this.id -k2context $this.k2context
+        $fresh = Get-SDPHost -id $this.id -context $this.context
         foreach ($p in $fresh.PSObject.Properties) {
             if ($this.PSObject.Properties[$p.Name]) {
                 $this.($p.Name) = $p.Value
@@ -74,7 +74,7 @@ class SDPHost {
     }
 
     [void] Delete() {
-        Remove-SDPHost -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPHost -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -108,9 +108,9 @@ Update-TypeData -TypeName 'SDPHost' `
     Filter hosts by host group name or ID. Accepts piped input from
     Get-SDPHostGroup.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Get-SDPHost
@@ -148,7 +148,7 @@ function Get-SDPHost {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -162,16 +162,16 @@ function Get-SDPHost {
         }
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPHost]::new($hit, $k2context)
+            [SDPHost]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

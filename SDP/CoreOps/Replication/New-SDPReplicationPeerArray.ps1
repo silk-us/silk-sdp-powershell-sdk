@@ -10,7 +10,7 @@ function New-SDPReplicationPeerArray {
         [parameter(Mandatory)]
         [System.Management.Automation.PSCredential] $remoteCredential,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -34,12 +34,12 @@ function New-SDPReplicationPeerArray {
         $body = $o
         
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context 
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
         } catch {
             return $Error[0]
         }
         
-        $results = Get-SDPReplicationPeerArray -name $name -k2context $k2context
+        $results = Get-SDPReplicationPeerArray -name $name -context $context
         return $results
     }
 }

@@ -17,9 +17,9 @@
     .PARAMETER doNotResolve
     Skip the post-call ref-resolution pass. Returns raw API records.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
@@ -41,7 +41,7 @@ function Get-SDPHostFcPorts {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -56,12 +56,12 @@ function Get-SDPHostFcPorts {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
             Add-SDPTypeName -TypeName 'SDPHostFcPort'
 
         if ($doNotResolve) {
             return $results
         }
-        return ($results | Update-SDPRefObjects -k2context $k2context)
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

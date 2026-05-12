@@ -9,9 +9,9 @@
     .PARAMETER id
     The unique identifier of the static route to remove.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPStaticRoute -id 4
@@ -35,7 +35,7 @@ function Remove-SDPStaticRoute {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -47,7 +47,7 @@ function Remove-SDPStaticRoute {
             $ConfirmPreference = 'None'
         }
         if ($PSCmdlet.ShouldProcess("SDPStaticRoute id=$id", 'Remove')) {
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

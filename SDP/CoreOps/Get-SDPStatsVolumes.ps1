@@ -43,9 +43,9 @@
     Skip the post-call ref-resolution pass. Stats records rarely carry
     refs so this is mostly a no-op, but it's exposed for API uniformity.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Get-SDPStatsVolumes
@@ -107,7 +107,7 @@ function Get-SDPStatsVolumes {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -123,19 +123,19 @@ function Get-SDPStatsVolumes {
         if ($InputObject) {
             $volume_name = $InputObject.name
             $PSBoundParameters.volume_name = $volume_name
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
         $PSBoundParameters.Remove('InputObject') | Out-Null
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
             Add-SDPTypeName -TypeName 'SDPStatsVolume'
 
         if ($doNotResolve) {
             return $results
         }
-        return ($results | Update-SDPRefObjects -k2context $k2context)
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

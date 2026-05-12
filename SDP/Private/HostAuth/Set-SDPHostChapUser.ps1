@@ -5,7 +5,7 @@ function Set-SDPHostChapUser {
         [parameter(Mandatory)]
         [string] $chapUser,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
     <#
         .SYNOPSIS
@@ -27,10 +27,10 @@ function Set-SDPHostChapUser {
     
     process {
         # Grab host
-        $sdpHost = Get-SDPHost -name $hostName -k2context $k2context
+        $sdpHost = Get-SDPHost -name $hostName -context $context
 
         # Grab chap user
-        $sdpChapuser = Get-SDPChapUser -name $chapUser -k2context $k2context
+        $sdpChapuser = Get-SDPChapUser -name $chapUser -context $context
 
         # Create body
         $o = New-Object psobject
@@ -42,7 +42,7 @@ function Set-SDPHostChapUser {
 
         $endpointURI = $endpoint + '/' + $sdpHost.id
 
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -context $context 
         return $results
     }
 

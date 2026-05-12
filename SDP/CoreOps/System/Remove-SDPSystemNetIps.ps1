@@ -25,7 +25,7 @@ function Remove-SDPSystemNetIps {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -38,7 +38,7 @@ function Remove-SDPSystemNetIps {
         }
         if ($PSCmdlet.ShouldProcess("SDPSystemNetIp id=$id", 'Remove')) {
             $endpointURI = "$endpoint/$id"
-            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -context $context
             return $results
         }
     }

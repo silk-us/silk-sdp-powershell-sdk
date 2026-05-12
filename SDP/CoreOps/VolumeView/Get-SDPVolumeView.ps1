@@ -32,7 +32,7 @@ function Get-SDPVolumeView {
         [parameter()]
         [string] $source,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -43,11 +43,11 @@ function Get-SDPVolumeView {
     process {
         # Query 
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPVolSnap]::new($hit, $k2context)
+            [SDPVolSnap]::new($hit, $context)
         }
-        return ($instances | Update-SDPRefObjects -k2context $k2context)
+        return ($instances | Update-SDPRefObjects -context $context)
     }
 }

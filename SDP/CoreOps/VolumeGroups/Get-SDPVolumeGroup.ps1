@@ -50,11 +50,11 @@ class SDPVolumeGroup {
     [psobject] $replication_rpo_history
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPVolumeGroup() {}
 
-    SDPVolumeGroup([psobject] $apiHit, [string] $k2context) {
+    SDPVolumeGroup([psobject] $apiHit, [string] $context) {
         $this.id                            = $apiHit.id
         $this.name                          = $apiHit.name
         $this.description                   = $apiHit.description
@@ -74,7 +74,7 @@ class SDPVolumeGroup {
         $this.is_dedup                      = [bool] $apiHit.is_dedup
         $this.creation_time                 = $apiHit.creation_time
         $this.last_snapshot_creation_time   = $apiHit.last_snapshot_creation_time
-        $this.k2context                     = $k2context
+        $this.context                     = $context
 
         # Computed: GB from KB-block quota.
         if ($apiHit.quota) {
@@ -97,17 +97,17 @@ class SDPVolumeGroup {
     # ---- Operational methods --------------------------------------------
 
     [void] AddVolume([string] $volumeName, [int] $sizeInGB) {
-        New-SDPVolume -name $volumeName -sizeInGB $sizeInGB -VolumeGroupName $this.name -k2context $this.k2context | Out-Null
+        New-SDPVolume -name $volumeName -sizeInGB $sizeInGB -VolumeGroupName $this.name -context $this.context | Out-Null
     }
 
     [SDPVolumeGroup] SetQuota([int] $newQuotaInGB) {
-        Set-SDPVolumeGroup -id $this.id -quotaInGB $newQuotaInGB -k2context $this.k2context | Out-Null
+        Set-SDPVolumeGroup -id $this.id -quotaInGB $newQuotaInGB -context $this.context | Out-Null
         return $this.Refresh()
     }
 
     [SDPVolumeGroup] Refresh() {
         # Mutate $this in place so callers' existing references stay current.
-        $fresh = Get-SDPVolumeGroup -id $this.id -k2context $this.k2context
+        $fresh = Get-SDPVolumeGroup -id $this.id -context $this.context
         foreach ($p in $fresh.PSObject.Properties) {
             if ($this.PSObject.Properties[$p.Name]) {
                 $this.($p.Name) = $p.Value
@@ -119,7 +119,7 @@ class SDPVolumeGroup {
     }
 
     [void] Delete() {
-        Remove-SDPVolumeGroup -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPVolumeGroup -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -156,9 +156,9 @@ Update-TypeData -TypeName 'SDPVolumeGroup' `
     .PARAMETER replication_peer_volume_group
     Filter volume groups by replication peer volume group.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Get-SDPVolumeGroup
@@ -195,7 +195,7 @@ function Get-SDPVolumeGroup {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -204,16 +204,16 @@ function Get-SDPVolumeGroup {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPVolumeGroup]::new($hit, $k2context)
+            [SDPVolumeGroup]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

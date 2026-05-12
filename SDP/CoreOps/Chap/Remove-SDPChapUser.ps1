@@ -12,8 +12,8 @@
     .PARAMETER id
     The CHAP user id to remove. Accepts pipeline input by property name.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPChapUser -name ChapUser01
@@ -40,7 +40,7 @@ function Remove-SDPChapUser {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -52,7 +52,7 @@ function Remove-SDPChapUser {
         # Special Ops — resolve name -> id when no id was given.
 
         if ($name -and -not $id) {
-            $id = (Get-SDPChapUser -name $name -k2context $k2context -doNotResolve).id
+            $id = (Get-SDPChapUser -name $name -context $context -doNotResolve).id
         }
 
         # Call
@@ -61,7 +61,7 @@ function Remove-SDPChapUser {
             $ConfirmPreference = 'None'
         }
         if ($PSCmdlet.ShouldProcess("SDPChapUser id=$id", 'Remove')) {
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

@@ -9,8 +9,8 @@
     .PARAMETER doNotResolve
     Skip ref-name resolution on the returned objects.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPReplicationPeerVolumeGroups
@@ -58,7 +58,7 @@ function Get-SDPReplicationPeerVolumeGroups {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -69,12 +69,12 @@ function Get-SDPReplicationPeerVolumeGroups {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
             Add-SDPTypeName -TypeName 'SDPReplicationPeerVolumeGroup'
 
         if ($doNotResolve) {
             return $results
         }
-        return ($results | Update-SDPRefObjects -k2context $k2context)
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

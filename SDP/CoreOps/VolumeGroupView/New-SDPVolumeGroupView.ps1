@@ -27,8 +27,8 @@
     .PARAMETER retentionPolicyName
     Retention policy to apply to the new view.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     New-SDPVolumeGroupView -name test-view -snapshotName test-snap -retentionPolicyName Backup
@@ -55,7 +55,7 @@ function New-SDPVolumeGroupView {
         [parameter(Mandatory)]
         [string] $retentionPolicyName,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -68,9 +68,9 @@ function New-SDPVolumeGroupView {
         # Full name (vg:short_name) → look up by name. Otherwise short_name.
 
         if ($snapshotName -match ':') {
-            $snapshot = Get-SDPVolumeGroupSnapshot -name $snapshotName -k2context $k2context -doNotResolve
+            $snapshot = Get-SDPVolumeGroupSnapshot -name $snapshotName -context $context -doNotResolve
         } else {
-            $snapshot = Get-SDPVolumeGroupSnapshot -short_name $snapshotName -k2context $k2context -doNotResolve
+            $snapshot = Get-SDPVolumeGroupSnapshot -short_name $snapshotName -context $context -doNotResolve
         }
 
         if (!$snapshot) {
@@ -86,7 +86,7 @@ function New-SDPVolumeGroupView {
 
         # Resolve retention policy ref.
 
-        $rp = Get-SDPRetentionPolicy -name $retentionPolicyName -k2context $k2context -doNotResolve
+        $rp = Get-SDPRetentionPolicy -name $retentionPolicyName -context $context -doNotResolve
         if (!$rp) {
             Write-Error "No retention policy named $retentionPolicyName exists."
             return
@@ -112,13 +112,13 @@ function New-SDPVolumeGroupView {
         # POST returns nothing on success — submit and poll.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $expectedFullName -Get {
-            Get-SDPVolumeGroupView -name $expectedFullName -k2context $k2context
+            Get-SDPVolumeGroupView -name $expectedFullName -context $context
         }
 
         return $results

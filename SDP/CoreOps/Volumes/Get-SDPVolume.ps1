@@ -64,11 +64,11 @@ class SDPVolume {
 
     # Hidden — used by instance methods to stay on the same SDP context
     # the object came from.
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPVolume() {}
 
-    SDPVolume([psobject] $apiHit, [string] $k2context) {
+    SDPVolume([psobject] $apiHit, [string] $context) {
         $this.id                       = $apiHit.id
         $this.name                     = $apiHit.name
         $this.scsi_sn                  = $apiHit.scsi_sn
@@ -83,7 +83,7 @@ class SDPVolume {
         $this.is_new                   = [bool] $apiHit.is_new
         $this.marked_for_deletion      = [bool] $apiHit.marked_for_deletion
         $this.creation_time            = $apiHit.creation_time
-        $this.k2context                = $k2context
+        $this.context                = $context
 
         # Computed: GB from the API's KB-block size.
         if ($apiHit.size) {
@@ -108,26 +108,26 @@ class SDPVolume {
     # ---- Operational methods --------------------------------------------
 
     [SDPVolume] Resize([int] $newSizeInGB) {
-        Set-SDPVolume -id $this.id -sizeInGB $newSizeInGB -k2context $this.k2context | Out-Null
+        Set-SDPVolume -id $this.id -sizeInGB $newSizeInGB -context $this.context | Out-Null
         $this.sizeInGB = $newSizeInGB
         $this.size     = $newSizeInGB * 1024 * 1024
         return $this
     }
 
     [void] Map([string] $hostName) {
-        New-SDPHostMapping -hostName $hostName -volumeName $this.name -k2context $this.k2context | Out-Null
+        New-SDPHostMapping -hostName $hostName -volumeName $this.name -context $this.context | Out-Null
     }
 
     [void] Unmap([string] $hostName) {
-        Get-SDPHostMapping -hostName $hostName -volumeName $this.name -k2context $this.k2context |
-            Remove-SDPHostMapping -k2context $this.k2context | Out-Null
+        Get-SDPHostMapping -hostName $hostName -volumeName $this.name -context $this.context |
+            Remove-SDPHostMapping -context $this.context | Out-Null
     }
 
     [SDPVolume] Refresh() {
         # Mutate $this in place so callers' existing references stay current.
         # Copy declared properties via assignment; carry over Update-SDPRefObjects
         # NoteProperties (volume_group_name, etc.) via Add-Member -Force.
-        $fresh = Get-SDPVolume -id $this.id -k2context $this.k2context
+        $fresh = Get-SDPVolume -id $this.id -context $this.context
         foreach ($p in $fresh.PSObject.Properties) {
             if ($this.PSObject.Properties[$p.Name]) {
                 $this.($p.Name) = $p.Value
@@ -139,7 +139,7 @@ class SDPVolume {
     }
 
     [void] Delete() {
-        Remove-SDPVolume -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPVolume -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -181,9 +181,9 @@ Update-TypeData -TypeName 'SDPVolume' `
     Filter volumes by volume group name or ID. Accepts piped input from
     Get-SDPVolumeGroup.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Get-SDPVolume
@@ -229,7 +229,7 @@ function Get-SDPVolume {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -244,8 +244,8 @@ function Get-SDPVolume {
         # When piped an SDPVolumeGroup, derive volume_group filter + inherit context.
         if ($InputObject) {
             $volume_group = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
         $PSBoundParameters.Remove('InputObject') | Out-Null
@@ -263,12 +263,12 @@ function Get-SDPVolume {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         # Emit typed objects so the default view + class methods kick in.
 
         $instances = foreach ($hit in $results) {
-            [SDPVolume]::new($hit, $k2context)
+            [SDPVolume]::new($hit, $context)
         }
 
         # Auto-resolve refs unless the caller opted out. Ref resolution
@@ -277,7 +277,7 @@ function Get-SDPVolume {
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

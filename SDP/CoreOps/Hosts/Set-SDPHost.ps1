@@ -17,9 +17,9 @@
     .PARAMETER hostGroupName
     Move the host into a different host group, by name.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Set-SDPHost -id 20 -name WinHost02
@@ -48,7 +48,7 @@ function Set-SDPHost {
         [ValidateSet('Linux','Windows','ESX','AIX','Solaris',IgnoreCase = $false)]
         [string] $type,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -60,7 +60,7 @@ function Set-SDPHost {
         # Special Ops — resolve host group ref if a name was supplied.
 
         if ($hostGroupName) {
-            $hostGroup = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
+            $hostGroup = Get-SDPHostGroup -name $hostGroupName -context $context
             $hostGroupRef = ConvertTo-SDPObjectPrefix -ObjectID $hostGroup.id -ObjectPath host_groups -nestedObject
         }
 
@@ -79,7 +79,7 @@ function Set-SDPHost {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -context $context
         return $results
     }
 }

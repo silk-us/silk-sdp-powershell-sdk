@@ -19,8 +19,8 @@
     Skip ref-name resolution on the returned objects. Used by internal
     callers to avoid recursive resolution.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPChapUser
@@ -48,7 +48,7 @@ function Get-SDPChapUser {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -62,12 +62,12 @@ function Get-SDPChapUser {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
             Add-SDPTypeName -TypeName 'SDPChapUser'
 
         if ($doNotResolve) {
             return $results
         }
-        return ($results | Update-SDPRefObjects -k2context $k2context)
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

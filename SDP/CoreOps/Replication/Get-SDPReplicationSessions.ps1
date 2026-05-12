@@ -69,7 +69,7 @@ function Get-SDPReplicationSessions {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     $endpoint = "replication/sessions"
@@ -77,9 +77,9 @@ function Get-SDPReplicationSessions {
     $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
     if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -context $context -strictURI
     } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
     }
 
     $results = $results | Add-SDPTypeName -TypeName 'SDPReplicationSession'
@@ -87,5 +87,5 @@ function Get-SDPReplicationSessions {
     if ($doNotResolve) {
         return $results
     }
-    return ($results | Update-SDPRefObjects -k2context $k2context)
+    return ($results | Update-SDPRefObjects -context $context)
 }

@@ -4,7 +4,7 @@ Functions for managing SDP replication peer arrays.
 
 ## New-SDPReplicationPeerArray
 ```PowerShell
-New-SDPReplicationPeerArray [-name] <string> [-mgmt_host] <string> [-localCredential] <pscredential> [-remoteCredential] <pscredential> [[-k2context] <string>] [<CommonParameters>]
+New-SDPReplicationPeerArray [-name] <string> [-mgmt_host] <string> [-localCredential] <pscredential> [-remoteCredential] <pscredential> [[-context] <string>] [<CommonParameters>]
 ```
 
 ### Special notes:
@@ -41,7 +41,7 @@ New-SDPReplicationPeerArray -name ReplicationPeer01 -mgmt_host 10.21.0.4 -localC
 
 ## Get-SDPReplicationPeerArray
 ```PowerShell
-Get-SDPReplicationPeerArray [[-bandwidth_limit] <int>] [[-capacity_allocated] <string>] [[-capacity_allocated_snapshots_and_views] <int>] [[-capacity_allocated_volumes] <string>] [[-capacity_free] <string>] [[-capacity_physical] <string>] [[-capacity_provisioned] <string>] [[-capacity_provisioned_snapshots] <string>] [[-capacity_provisioned_views] <string>] [[-capacity_provisioned_volumes] <string>] [[-capacity_reserved] <string>] [[-capacity_state] <string>] [[-capacity_total] <string>] [[-id] <int>] [[-logical_bandwidth_limit] <string>] [[-mgmt_connectivity_state] <string>] [[-mgmt_host] <string>] [[-name] <string>] [[-system_id] <int>] [[-username] <string>] [[-k2context] <string>] [<CommonParameters>]
+Get-SDPReplicationPeerArray [[-bandwidth_limit] <int>] [[-capacity_allocated] <string>] [[-capacity_allocated_snapshots_and_views] <int>] [[-capacity_allocated_volumes] <string>] [[-capacity_free] <string>] [[-capacity_physical] <string>] [[-capacity_provisioned] <string>] [[-capacity_provisioned_snapshots] <string>] [[-capacity_provisioned_views] <string>] [[-capacity_provisioned_volumes] <string>] [[-capacity_reserved] <string>] [[-capacity_state] <string>] [[-capacity_total] <string>] [[-id] <int>] [[-logical_bandwidth_limit] <string>] [[-mgmt_connectivity_state] <string>] [[-mgmt_host] <string>] [[-name] <string>] [[-system_id] <int>] [[-username] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -81,7 +81,7 @@ Get-SDPReplicationPeerArray -name ReplicationPeer01
 
 ## Remove-SDPReplicationPeerArray
 ```PowerShell
-Remove-SDPReplicationPeerArray [[-id] <string>] [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPReplicationPeerArray [[-id] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

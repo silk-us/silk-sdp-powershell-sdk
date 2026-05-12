@@ -16,14 +16,14 @@ class SDPHostNqn {
     [psobject] $host
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPHostNqn() {}
 
-    SDPHostNqn([psobject] $apiHit, [string] $k2context) {
+    SDPHostNqn([psobject] $apiHit, [string] $context) {
         $this.id        = $apiHit.id
         $this.nqn       = $apiHit.nqn
-        $this.k2context = $k2context
+        $this.context = $context
 
         if ($apiHit.host) { $this.host = $apiHit.host }
     }
@@ -32,8 +32,8 @@ class SDPHostNqn {
 
     [SDPHostNqn] Refresh() {
         return [SDPHostNqn]::new(
-            (Get-SDPHostNqn -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPHostNqn -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
@@ -42,8 +42,8 @@ class SDPHostNqn {
         $hostRef = $this.host
         if ($hostRef -and $hostRef.ref) {
             $hostId = ($hostRef.ref -split '/')[-1]
-            $hostObj = Get-SDPHost -id $hostId -k2context $this.k2context -doNotResolve
-            Remove-SDPHostNqn -hostName $hostObj.name -k2context $this.k2context | Out-Null
+            $hostObj = Get-SDPHost -id $hostId -context $this.context -doNotResolve
+            Remove-SDPHostNqn -hostName $hostObj.name -context $this.context | Out-Null
         }
     }
 
@@ -92,7 +92,7 @@ function Get-SDPHostNqn {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -104,7 +104,7 @@ function Get-SDPHostNqn {
         # Special Ops
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+            $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
             $PSBoundParameters.host = $hostPath
             $PSBoundParameters.remove('hostName') | Out-Null
@@ -114,16 +114,16 @@ function Get-SDPHostNqn {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPHostNqn]::new($hit, $k2context)
+            [SDPHostNqn]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

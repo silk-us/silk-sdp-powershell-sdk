@@ -15,8 +15,8 @@
     .PARAMETER DNSServer3
     Tertiary DNS server IP address.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Set-SDPDNSServers -DNSServer1 8.8.8.8 -DNSServer2 8.8.4.4
@@ -38,7 +38,7 @@ function Set-SDPDNSServers {
         [parameter()]
         [ipaddress] $DNSServer3,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -63,7 +63,7 @@ function Set-SDPDNSServers {
         # Call
 
         try {
-            $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }

@@ -5,7 +5,7 @@ SDP volume functions.
 ## New-SDPVolume
 ```PowerShell
 New-SDPVolume [-name] <string> [-sizeInGB] <int> [[-VolumeGroupName] <string>] [[-volumeGroupId] <string>] [[-Description] <string>] 
-[[-k2context] <string>] [-VMWare] [<CommonParameters>]
+[[-context] <string>] [-VMWare] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -37,7 +37,7 @@ Get-SDPVolumeGroup -name VolumeGroup01 | New-SDPVolume -name Volume01
 
 ## Set-SDPVolume
 ```PowerShell
-Set-SDPVolume [-id] <string> [[-name] <string>] [[-sizeInGB] <int>] [[-Description] <string>] [[-VolumeGroupName] <string>] [[-k2context] 
+Set-SDPVolume [-id] <string> [[-name] <string>] [[-sizeInGB] <int>] [[-Description] <string>] [[-VolumeGroupName] <string>] [[-context] 
 <string>] [<CommonParameters>]
 ```
 
@@ -68,7 +68,7 @@ Get-SDPVolume -name Volume01 | Set-SDPVolume -name Volume02
 
 ## Get-SDPVolume
 ```PowerShell
-Get-SDPVolume [[-name] <string>] [-description <string>] [-id <int>] [-vmware_support <bool>] [-volume_group <string>] [-k2context <string>] [<CommonParameters>]
+Get-SDPVolume [[-name] <string>] [-description <string>] [-id <int>] [-vmware_support <bool>] [-volume_group <string>] [-context <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -97,7 +97,7 @@ Get-SDPVolume -VolumeGroup VolumeGroup01
 
 ## Remove-SDPVolume
 ```PowerShell
-Remove-SDPVolume [[-id] <string>] [[-name] <string>] [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPVolume [[-id] <string>] [[-name] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

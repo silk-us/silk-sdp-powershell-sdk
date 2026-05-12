@@ -13,8 +13,8 @@
     .PARAMETER chapUserName
     The CHAP user name to attach.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Add-SDPHostChapUser -hostName Host01 -chapUserName ChapUser01
@@ -38,7 +38,7 @@ function Add-SDPHostChapUser {
         [parameter(Mandatory)]
         [string] $chapUserName,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -49,8 +49,8 @@ function Add-SDPHostChapUser {
 
         # Special Ops — resolve the host and CHAP user.
 
-        $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
-        $chapUserObj = Get-SDPChapUser -name $chapUserName -k2context $k2context -doNotResolve
+        $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
+        $chapUserObj = Get-SDPChapUser -name $chapUserName -context $context -doNotResolve
 
         # Build the request body
 
@@ -59,7 +59,7 @@ function Add-SDPHostChapUser {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -context $context
         return $results
     }
 }

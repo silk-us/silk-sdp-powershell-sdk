@@ -28,7 +28,7 @@ function Get-SDPSystemNetIps {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -36,7 +36,7 @@ function Get-SDPSystemNetIps {
     }
 
     process {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context -strictURI
 
         if ($portID) {
             $portRef = ConvertTo-SDPObjectPrefix -ObjectID $portID -ObjectPath 'system/net_ports'
@@ -46,6 +46,6 @@ function Get-SDPSystemNetIps {
         $results = $results | Add-SDPTypeName -TypeName 'SDPSystemNetIp'
 
         if ($doNotResolve) { return $results }
-        return ($results | Update-SDPRefObjects -k2context $k2context)
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

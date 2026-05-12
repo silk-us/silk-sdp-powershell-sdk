@@ -24,9 +24,9 @@
     Move the volume to a different volume group by specifying the volume
     group name.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Set-SDPVolume -id 123 -sizeInGB 200
@@ -58,7 +58,7 @@ function Set-SDPVolume {
         [parameter()]
         [string] $VolumeGroupName,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -76,7 +76,7 @@ function Set-SDPVolume {
 
         if ($VolumeGroupName) {
             Write-Verbose "Working with volume group name $VolumeGroupName"
-            $volumeGroup = Get-SDPVolumeGroup -name $VolumeGroupName -k2context $k2context
+            $volumeGroup = Get-SDPVolumeGroup -name $VolumeGroupName -context $context
             if (!$volumeGroup) {
                 return "No volume group named $VolumeGroupName exists."
             }
@@ -101,7 +101,7 @@ function Set-SDPVolume {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -context $context
         return $results
     }
 }

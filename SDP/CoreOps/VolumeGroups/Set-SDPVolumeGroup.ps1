@@ -23,9 +23,9 @@
     .PARAMETER capacityPolicy
     Name of a capacity policy to apply to this volume group.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Set-SDPVolumeGroup -id 15 -quotaInGB 10000
@@ -58,7 +58,7 @@ function Set-SDPVolumeGroup {
         [parameter()]
         [string] $capacityPolicy,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -74,7 +74,7 @@ function Set-SDPVolumeGroup {
         }
 
         if ($capacityPolicy) {
-            $capacityPolicyObj = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object { $_.name -eq $capacityPolicy }
+            $capacityPolicyObj = Get-SDPVgCapacityPolicies -context $context | Where-Object { $_.name -eq $capacityPolicy }
             $capacityPolicyRef = ConvertTo-SDPObjectPrefix -ObjectID $capacityPolicyObj.id -ObjectPath vg_capacity_policies -nestedObject
         }
 
@@ -98,7 +98,7 @@ function Set-SDPVolumeGroup {
         # Call
 
         Write-Verbose "$endpoint/$id"
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -context $context
         return $results
     }
 }

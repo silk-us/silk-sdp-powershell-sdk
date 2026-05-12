@@ -23,9 +23,9 @@
     .PARAMETER capacityPolicy
     Name of the capacity policy to apply to this volume group.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     New-SDPVolumeGroup -name "VG01"
@@ -58,7 +58,7 @@ function New-SDPVolumeGroup {
         [parameter()]
         [string] $capacityPolicy,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -74,7 +74,7 @@ function New-SDPVolumeGroup {
         }
 
         if ($capacityPolicy) {
-            $capacityPolicyObj = Get-SDPVgCapacityPolicies -k2context $k2context | Where-Object { $_.name -eq $capacityPolicy }
+            $capacityPolicyObj = Get-SDPVgCapacityPolicies -context $context | Where-Object { $_.name -eq $capacityPolicy }
             $capacityPolicyRef = ConvertTo-SDPObjectPrefix -ObjectID $capacityPolicyObj.id -ObjectPath vg_capacity_policies -nestedObject
         }
 
@@ -102,13 +102,13 @@ function New-SDPVolumeGroup {
         # until the new volume group appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $name -Get {
-            Get-SDPVolumeGroup -name $name -k2context $k2context
+            Get-SDPVolumeGroup -name $name -context $context
         }
 
         return $results

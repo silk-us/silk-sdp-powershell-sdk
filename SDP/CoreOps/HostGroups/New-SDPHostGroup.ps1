@@ -26,7 +26,7 @@ function New-SDPHostGroup {
         [parameter()]
         [switch] $allowDifferentHostTypes,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -50,13 +50,13 @@ function New-SDPHostGroup {
         # until the new host group appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $name -Get {
-            Get-SDPHostGroup -name $name -k2context $k2context
+            Get-SDPHostGroup -name $name -context $context
         }
 
         return $results

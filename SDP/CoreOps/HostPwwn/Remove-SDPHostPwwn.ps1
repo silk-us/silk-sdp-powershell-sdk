@@ -7,7 +7,7 @@ function Remove-SDPHostPwwn {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
     <#
         .SYNOPSIS
@@ -41,7 +41,7 @@ function Remove-SDPHostPwwn {
         if ($PSCmdlet.ShouldProcess("SDPHostPwwn id=$id", 'Remove')) {
             ## Make the call
             $endpointURI = $endpoint + '/' + $id
-            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -context $context
             return $results
         }
     }

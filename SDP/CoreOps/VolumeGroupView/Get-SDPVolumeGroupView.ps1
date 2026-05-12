@@ -49,11 +49,11 @@ class SDPVolumeGroupView {
     [psobject] $replication_session
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPVolumeGroupView() {}
 
-    SDPVolumeGroupView([psobject] $apiHit, [string] $k2context) {
+    SDPVolumeGroupView([psobject] $apiHit, [string] $context) {
         $this.id                            = $apiHit.id
         $this.name                          = $apiHit.name
         $this.short_name                    = $apiHit.short_name
@@ -75,7 +75,7 @@ class SDPVolumeGroupView {
         $this.is_external                   = [bool] $apiHit.is_external
         $this.is_locked_by_replication      = [bool] $apiHit.is_locked_by_replication
         $this.is_originating_from_peer      = [bool] $apiHit.is_originating_from_peer
-        $this.k2context                     = $k2context
+        $this.context                     = $context
 
         if ($apiHit.creation_time) {
             $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
@@ -91,16 +91,16 @@ class SDPVolumeGroupView {
 
     [SDPVolumeGroupView] Refresh() {
         return [SDPVolumeGroupView]::new(
-            (Get-SDPVolumeGroupView -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPVolumeGroupView -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Map([string] $hostName) {
-        New-SDPHostMapping -hostName $hostName -viewName $this.name -k2context $this.k2context | Out-Null
+        New-SDPHostMapping -hostName $hostName -viewName $this.name -context $this.context | Out-Null
     }
 
     [void] Delete() {
-        Remove-SDPVolumeGroupView -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPVolumeGroupView -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -142,8 +142,8 @@ Update-TypeData -TypeName 'SDPVolumeGroupView' `
     .PARAMETER doNotResolve
     Skip the auto-pipe through Update-SDPRefObjects.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPVolumeGroupView
@@ -232,7 +232,7 @@ function Get-SDPVolumeGroupView {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -248,8 +248,8 @@ function Get-SDPVolumeGroupView {
         # (skip the name → id lookup) and inherit context.
         if ($InputObject) {
             $PSBoundParameters.volume_group = ConvertTo-SDPObjectPrefix -ObjectID $InputObject.id -ObjectPath 'volume_groups' -nestedObject
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
         $PSBoundParameters.Remove('InputObject') | Out-Null
@@ -257,7 +257,7 @@ function Get-SDPVolumeGroupView {
         # Special Ops — translate volumeGroupName to a volume_group ref.
 
         if ($volumeGroupName) {
-            $vg = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context -doNotResolve
+            $vg = Get-SDPVolumeGroup -name $volumeGroupName -context $context -doNotResolve
             $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $vg.id -ObjectPath 'volume_groups' -nestedObject
             $PSBoundParameters.remove('volumeGroupName') | Out-Null
             $PSBoundParameters.volume_group = $volumeGroupPath
@@ -265,7 +265,7 @@ function Get-SDPVolumeGroupView {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         # Views: source is a /snapshots/ ref AND that source itself has
         # source = /volume_groups/ (i.e. it's a regular snapshot, not a view).
@@ -279,13 +279,13 @@ function Get-SDPVolumeGroupView {
         }
 
         $instances = foreach ($hit in $views) {
-            [SDPVolumeGroupView]::new($hit, $k2context)
+            [SDPVolumeGroupView]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

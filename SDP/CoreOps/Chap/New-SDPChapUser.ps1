@@ -12,8 +12,8 @@
     .PARAMETER chapCredentials
     PSCredential carrying the CHAP username and password.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     New-SDPChapUser -name ChapUser01 -chapCredentials (Get-Credential)
@@ -33,7 +33,7 @@ function New-SDPChapUser {
         [parameter(Mandatory)]
         [System.Management.Automation.PSCredential] $chapCredentials,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -57,7 +57,7 @@ function New-SDPChapUser {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         return $results
     }
 }

@@ -18,7 +18,7 @@
     .PARAMETER object
     Pipeline input. Any object with `ref`-shaped properties.
 
-    .PARAMETER k2context
+    .PARAMETER context
     K2 context name. Threaded through to the inner Get-SDP* lookup so
     multi-context callers resolve names against the right SDP.
 
@@ -35,7 +35,7 @@ function Update-SDPRefObjects {
         [parameter(ValueFromPipeline)]
         [psobject] $object,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -87,7 +87,7 @@ function Update-SDPRefObjects {
                 # Update-SDPRefObjects from cascading across nested
                 # refs (e.g. resolving a volume_group then trying to
                 # resolve that group's capacity_policy, etc.).
-                $objectName = (& $queryFunction -id $objectDetails.ObjectId -k2context $k2context -doNotResolve).name
+                $objectName = (& $queryFunction -id $objectDetails.ObjectId -context $context -doNotResolve).name
                 $refCache[$cacheKey] = $objectName
             }
 

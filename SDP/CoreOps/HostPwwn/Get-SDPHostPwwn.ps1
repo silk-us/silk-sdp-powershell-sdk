@@ -16,14 +16,14 @@ class SDPHostPwwn {
     [psobject] $host
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPHostPwwn() {}
 
-    SDPHostPwwn([psobject] $apiHit, [string] $k2context) {
+    SDPHostPwwn([psobject] $apiHit, [string] $context) {
         $this.id        = $apiHit.id
         $this.pwwn      = $apiHit.pwwn
-        $this.k2context = $k2context
+        $this.context = $context
 
         if ($apiHit.host) { $this.host = $apiHit.host }
     }
@@ -32,12 +32,12 @@ class SDPHostPwwn {
 
     [SDPHostPwwn] Refresh() {
         return [SDPHostPwwn]::new(
-            (Get-SDPHostPwwn -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPHostPwwn -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
-        Remove-SDPHostPwwn -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPHostPwwn -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -71,8 +71,8 @@ Update-TypeData -TypeName 'SDPHostPwwn' `
     Skip the auto-pipe through Update-SDPRefObjects. Returns raw API
     objects.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPHostPwwn -hostName Host01
@@ -102,7 +102,7 @@ function Get-SDPHostPwwn {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -114,7 +114,7 @@ function Get-SDPHostPwwn {
         # Special Ops — translate hostName to a host ref.
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+            $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
             $PSBoundParameters.host = $hostPath
             $PSBoundParameters.remove('hostName') | Out-Null
@@ -122,16 +122,16 @@ function Get-SDPHostPwwn {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPHostPwwn]::new($hit, $k2context)
+            [SDPHostPwwn]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

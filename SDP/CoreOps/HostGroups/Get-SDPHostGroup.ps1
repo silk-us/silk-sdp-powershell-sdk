@@ -21,11 +21,11 @@ class SDPHostGroup {
     [string]   $connectivity_type
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPHostGroup() {}
 
-    SDPHostGroup([psobject] $apiHit, [string] $k2context) {
+    SDPHostGroup([psobject] $apiHit, [string] $context) {
         $this.id                         = $apiHit.id
         $this.name                       = $apiHit.name
         $this.description                = $apiHit.description
@@ -33,19 +33,19 @@ class SDPHostGroup {
         $this.allow_different_host_types = [bool] $apiHit.allow_different_host_types
         $this.hosts_count                = $apiHit.hosts_count
         $this.volumes_count              = $apiHit.volumes_count
-        $this.k2context                  = $k2context
+        $this.context                  = $context
     }
 
     # ---- Operational methods --------------------------------------------
 
     [SDPHostGroup] Refresh() {
         return [SDPHostGroup]::new(
-            (Get-SDPHostGroup -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPHostGroup -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
-        Remove-SDPHostGroup -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPHostGroup -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -87,7 +87,7 @@ function Get-SDPHostGroup {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -96,16 +96,16 @@ function Get-SDPHostGroup {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         $instances = foreach ($hit in $results) {
-            [SDPHostGroup]::new($hit, $k2context)
+            [SDPHostGroup]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

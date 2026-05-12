@@ -17,9 +17,9 @@
     Name of the volume group view (snapshot) to expose. Mutually exclusive
     with -volumeName.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     New-SDPHostMapping -hostName Host01 -volumeName Vol01
@@ -46,7 +46,7 @@ function New-SDPHostMapping {
         [Alias('snapshotName')]
         [string] $viewName,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -57,7 +57,7 @@ function New-SDPHostMapping {
 
         # Special Ops — resolve host and target (volume or view) to refs.
 
-        $hostObj = Get-SDPHost -name $hostName -k2context $k2context
+        $hostObj = Get-SDPHost -name $hostName -context $context
         $hostRef = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
 
         if ($hostObj.host_) {
@@ -65,10 +65,10 @@ function New-SDPHostMapping {
         }
 
         if ($volumeName) {
-            $volumeObj = Get-SDPVolume -name $volumeName -k2context $k2context
+            $volumeObj = Get-SDPVolume -name $volumeName -context $context
             $volumeRef = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeObj.id -nestedObject
         } elseif ($viewName) {
-            $volumeObj = Get-SDPVolumeGroupView -name $viewName -k2context $k2context
+            $volumeObj = Get-SDPVolumeGroupView -name $viewName -context $context
             $volumeRef = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeObj.id -nestedObject
         } else {
             return "Please supply either a -volumeName or -viewName" | Write-Error
@@ -83,12 +83,12 @@ function New-SDPHostMapping {
         # Call
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue -TimeOut 5
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue -TimeOut 5
         } catch {
             return $Error[0]
         }
 
-        $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName -k2context $k2context
+        $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName -context $context
         return $response
     }
 }

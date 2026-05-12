@@ -48,8 +48,8 @@
     the SDP treats this as a replication snapshot and `retentionPolicyName`
     is not required.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     New-SDPVolumeGroupSnapshot -name test-snap -volumeGroupName test-vg -retentionPolicyName Backup
@@ -94,7 +94,7 @@ function New-SDPVolumeGroupSnapshot {
         [string] $replicationSession,
 
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -112,7 +112,7 @@ function New-SDPVolumeGroupSnapshot {
         # Resolve the source ref based on which parameter set was chosen.
         $isViewSnap = $PSCmdlet.ParameterSetName -eq 'View'
         if ($isViewSnap) {
-            $sourceObj = Get-SDPVolumeGroupView -name $viewName -k2context $k2context
+            $sourceObj = Get-SDPVolumeGroupView -name $viewName -context $context
             if (!$sourceObj) {
                 Write-Error "No view named $viewName exists."
                 return
@@ -120,7 +120,7 @@ function New-SDPVolumeGroupSnapshot {
             $sourceRef       = ConvertTo-SDPObjectPrefix -ObjectPath 'snapshots' -ObjectID $sourceObj.id -nestedObject
             $expectedFullName = "${viewName}:${name}"
         } else {
-            $sourceObj = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context -doNotResolve
+            $sourceObj = Get-SDPVolumeGroup -name $volumeGroupName -context $context -doNotResolve
             if (!$sourceObj) {
                 Write-Error "No volume group named $volumeGroupName exists."
                 return
@@ -136,7 +136,7 @@ function New-SDPVolumeGroupSnapshot {
         $body | Add-Member -MemberType NoteProperty -Name 'source'     -Value $sourceRef
 
         if ($retentionPolicyName) {
-            $rp = Get-SDPRetentionPolicy -name $retentionPolicyName -k2context $k2context -doNotResolve
+            $rp = Get-SDPRetentionPolicy -name $retentionPolicyName -context $context -doNotResolve
             if (!$rp) {
                 Write-Error "No retention policy named $retentionPolicyName exists."
                 return
@@ -153,7 +153,7 @@ function New-SDPVolumeGroupSnapshot {
         }
 
         if ($replicationSession) {
-            $session = Get-SDPReplicationSessions -name $replicationSession -k2context $k2context
+            $session = Get-SDPReplicationSessions -name $replicationSession -context $context
             if (!$session) {
                 Write-Error "No replication session named $replicationSession exists."
                 return
@@ -166,16 +166,16 @@ function New-SDPVolumeGroupSnapshot {
         # until the new snapshot appears.
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -ErrorAction SilentlyContinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -ErrorAction SilentlyContinue
         } catch {
             return $Error[0]
         }
 
         $results = Wait-SDPObject -Activity $expectedFullName -Get {
             if ($isViewSnap) {
-                Get-SDPVolumeGroupSnapshot -name $expectedFullName -asViewSnapshot -k2context $k2context -doNotResolve
+                Get-SDPVolumeGroupSnapshot -name $expectedFullName -asViewSnapshot -context $context -doNotResolve
             } else {
-                Get-SDPVolumeGroupSnapshot -name $expectedFullName -k2context $k2context -doNotResolve
+                Get-SDPVolumeGroupSnapshot -name $expectedFullName -context $context -doNotResolve
             }
         }
 

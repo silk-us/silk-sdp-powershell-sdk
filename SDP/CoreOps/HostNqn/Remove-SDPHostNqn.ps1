@@ -27,7 +27,7 @@ function Remove-SDPHostNqn {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -38,7 +38,7 @@ function Remove-SDPHostNqn {
 
         # Special Ops — locate the NQN record by host.
 
-        $hostNqn = Get-SDPHostNqn -hostName $hostName -k2context $k2context -doNotResolve
+        $hostNqn = Get-SDPHostNqn -hostName $hostName -context $context -doNotResolve
 
         # Call
 
@@ -46,7 +46,7 @@ function Remove-SDPHostNqn {
             $ConfirmPreference = 'None'
         }
         if ($PSCmdlet.ShouldProcess("SDPHostNqn hostName=$hostName id=$($hostNqn.id)", 'Remove')) {
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostNqn.id)" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostNqn.id)" -method DELETE -context $context
             return $results
         }
     }

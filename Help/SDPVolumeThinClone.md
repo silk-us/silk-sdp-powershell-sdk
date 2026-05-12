@@ -4,7 +4,7 @@ Function for generating a thin clone for a volume,
 
 ## New-SDPVolumeThinClone
 ```PowerShell
-New-SDPVolumeThinClone [-name] <string> [-volumeName] <string> [-volumeGroupName] <string> [-snapshotName] <string> [[-k2context] <string>] [<CommonParameters>]
+New-SDPVolumeThinClone [-name] <string> [-volumeName] <string> [-volumeGroupName] <string> [-snapshotName] <string> [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

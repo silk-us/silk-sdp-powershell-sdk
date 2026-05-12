@@ -10,8 +10,8 @@
     The host name to clear the CHAP user from. Accepts pipeline input by
     property name.
 
-    .PARAMETER k2context
-    K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPHostChapUser -hostName Host01
@@ -35,7 +35,7 @@ function Remove-SDPHostChapUser {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -46,7 +46,7 @@ function Remove-SDPHostChapUser {
 
         # Special Ops — resolve the host.
 
-        $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+        $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
 
         # Build the request body
 
@@ -59,7 +59,7 @@ function Remove-SDPHostChapUser {
             $ConfirmPreference = 'None'
         }
         if ($PSCmdlet.ShouldProcess("SDPHost hostName=$hostName CHAP user", 'Remove')) {
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostObj.id)" -method PATCH -body $body -context $context
             return $results
         }
     }

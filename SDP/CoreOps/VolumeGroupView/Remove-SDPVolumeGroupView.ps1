@@ -10,8 +10,8 @@
     The unique identifier of the view to remove. Accepts piped input
     from Get-SDPVolumeGroupView.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPVolumeGroupView -id 12
@@ -35,7 +35,7 @@ function Remove-SDPVolumeGroupView {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -48,7 +48,7 @@ function Remove-SDPVolumeGroupView {
         }
         if ($PSCmdlet.ShouldProcess("SDPVolumeGroupView id=$id", 'Remove')) {
             Write-Verbose "Removing view with id $id"
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

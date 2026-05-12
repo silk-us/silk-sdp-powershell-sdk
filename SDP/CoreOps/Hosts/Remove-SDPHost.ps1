@@ -13,9 +13,9 @@
     .PARAMETER name
     The name of the host to remove.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPHost -name "WinHost01"
@@ -48,7 +48,7 @@ function Remove-SDPHost {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -61,13 +61,13 @@ function Remove-SDPHost {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
 
         if ($name) {
-            $id = (Get-SDPHost -name $name -k2context $k2context).id
+            $id = (Get-SDPHost -name $name -context $context).id
         }
 
         if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
@@ -75,7 +75,7 @@ function Remove-SDPHost {
         }
         if ($PSCmdlet.ShouldProcess("SDPHost id=$id", 'Remove')) {
             Write-Verbose "Removing host with id $id"
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
             return $results
         }
     }

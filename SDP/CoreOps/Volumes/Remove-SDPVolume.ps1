@@ -13,9 +13,9 @@
     .PARAMETER name
     The name of the volume to remove.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Remove-SDPVolume -name "Vol01"
@@ -51,7 +51,7 @@ function Remove-SDPVolume {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -65,15 +65,15 @@ function Remove-SDPVolume {
         }
         if ($InputObject) {
             $id = $InputObject.id
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
 
         # Special Ops — resolve name to id when no id was passed.
 
         if ($name) {
-            $volume = Get-SDPVolume -name $name -k2context $k2context
+            $volume = Get-SDPVolume -name $name -context $context
             if (!$volume) {
                 return "No volume with name $name exists."
             } elseif (($volume | Measure-Object).Count -gt 1) {
@@ -90,7 +90,7 @@ function Remove-SDPVolume {
         }
         if ($PSCmdlet.ShouldProcess("SDPVolume id=$id", 'Remove')) {
             Write-Verbose "Removing volume with id $id"
-            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
 
             return $results
         }

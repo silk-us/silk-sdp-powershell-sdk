@@ -8,7 +8,7 @@
     This will return the .hits return for the https://{k2Server}/api/v2/volume_groups API endpoint using the method GET.
 
     .EXAMPLE
-    Invoke-SDPRestCall -endpoint volume -method PATCH -body $body -k2context TestDev
+    Invoke-SDPRestCall -endpoint volume -method PATCH -body $body -context TestDev
     This will render the .hits return for the https://{k2Server}/api/v2/volumes API endpoint. 
             
     .NOTES
@@ -30,7 +30,7 @@ function Invoke-SDPRestCall {
         [parameter()]
         [hashtable] $parameterList,
         [parameter()]
-        [string] $k2context = 'k2rfconnection',
+        [string] $context = 'sdpconnection',
         [parameter()]
         [int] $limit = 9999,
         [parameter()]
@@ -54,16 +54,16 @@ function Invoke-SDPRestCall {
     # to append a query string (legacy path) or pass query params via
     # -Body to Invoke-RestMethod (strictURI path).
 
-    $endpointURI = (New-SDPURI -endpoint $endpoint -k2context $k2context).TrimEnd('?')
+    $endpointURI = (New-SDPURI -endpoint $endpoint -context $context).TrimEnd('?')
 
-    # Strip CommonParameters and k2context from the parameter list so we
+    # Strip CommonParameters and context from the parameter list so we
     # only walk user-supplied filters.
 
     if ($parameterList) {
         foreach ($p in [System.Management.Automation.PSCmdlet]::CommonParameters) {
             $parameterList.Remove($p) | Out-Null
         }
-        $parameterList.Remove('k2context') | Out-Null
+        $parameterList.Remove('context') | Out-Null
     }
 
     # Decide how to deliver query parameters.
@@ -120,7 +120,7 @@ function Invoke-SDPRestCall {
         if ($method -eq 'GET' -and -not $noLimit) {
             $endpointURI = $endpointURI + '?__limit=' + $limit
         }
-        $endpointURI = New-URLEncode -URL $endpointURI -k2context $k2context
+        $endpointURI = New-URLEncode -URL $endpointURI -context $context
 
         if ($parameterList -and $parameterList.Count -gt 0) {
             Write-Verbose "-- REST using parameters (post-fetch filter) --"
@@ -140,9 +140,9 @@ function Invoke-SDPRestCall {
 
     # declare the requested context's credential information
 
-    $restContext = Get-Variable -Scope Global -Name $k2context -ValueOnly -ErrorAction SilentlyContinue
+    $restContext = Get-Variable -Scope Global -Name $context -ValueOnly -ErrorAction SilentlyContinue
     if (-not $restContext) {
-        Write-Error "No SDP session found for context '$k2context'. Run 'Connect-SDP' (or pass -k2context <name> if you connected with a custom context name)." -Category AuthenticationError
+        Write-Error "No SDP session found for context '$context'. Run 'Connect-SDP' (or pass -context <name> if you connected with a custom context name)." -Category AuthenticationError
         return
     }
 

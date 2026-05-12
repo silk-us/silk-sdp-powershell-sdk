@@ -33,7 +33,7 @@ function Set-SDPHostGroup {
         [parameter()]
         [bool] $allowDifferentHostTypes,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -63,7 +63,7 @@ function Set-SDPHostGroup {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -context $context
         return $results
     }
 }

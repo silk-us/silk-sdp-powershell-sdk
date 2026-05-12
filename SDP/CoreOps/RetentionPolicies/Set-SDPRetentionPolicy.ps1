@@ -26,9 +26,9 @@
     .PARAMETER hours
     New number of hours to retain snapshots.
 
-    .PARAMETER k2context
+    .PARAMETER context
     Specifies the K2 context to use for authentication. Defaults to
-    'k2rfconnection'.
+    'sdpconnection'.
 
     .EXAMPLE
     Set-SDPRetentionPolicy -id 5 -snapshotCount 14
@@ -62,7 +62,7 @@ function Set-SDPRetentionPolicy {
         [parameter()]
         [int] $hours,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -94,7 +94,7 @@ function Set-SDPRetentionPolicy {
 
         # Call
 
-        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method PATCH -body $body -context $context
         return $results
     }
 }

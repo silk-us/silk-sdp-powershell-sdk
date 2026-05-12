@@ -7,7 +7,7 @@ function Remove-SDPReplicationPeerArray {
         [parameter()]
         [switch] $Force,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     ## Special Ops
@@ -22,7 +22,7 @@ function Remove-SDPReplicationPeerArray {
         if ($PSCmdlet.ShouldProcess("SDPReplicationPeerArray id=$id", 'Remove')) {
             ## Make the call
             $subendpoint = $endpoint + '/' + $id
-            $results = Invoke-SDPRestCall -endpoint $subendpoint -method DELETE -k2context $k2context
+            $results = Invoke-SDPRestCall -endpoint $subendpoint -method DELETE -context $context
             return $results
         }
     }

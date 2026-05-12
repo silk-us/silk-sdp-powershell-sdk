@@ -20,14 +20,14 @@ class SDPHostGroupMapping {
     [psobject] $volume
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPHostGroupMapping() {}
 
-    SDPHostGroupMapping([psobject] $apiHit, [string] $k2context) {
+    SDPHostGroupMapping([psobject] $apiHit, [string] $context) {
         $this.id        = $apiHit.id
         $this.lun       = $apiHit.lun
-        $this.k2context = $k2context
+        $this.context = $context
 
         if ($apiHit.host)   { $this.host   = $apiHit.host }
         if ($apiHit.volume) { $this.volume = $apiHit.volume }
@@ -37,12 +37,12 @@ class SDPHostGroupMapping {
 
     [SDPHostGroupMapping] Refresh() {
         return [SDPHostGroupMapping]::new(
-            (Get-SDPHostGroupMapping -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPHostGroupMapping -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
-        Remove-SDPHostGroupMapping -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPHostGroupMapping -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -88,8 +88,8 @@ Update-TypeData -TypeName 'SDPHostGroupMapping' `
     .PARAMETER doNotResolve
     Skip the auto-pipe through Update-SDPRefObjects.
 
-    .PARAMETER k2context
-    K2 context name. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Get-SDPHostGroupMapping -hostGroupName "HostGroup01"
@@ -125,7 +125,7 @@ function Get-SDPHostGroupMapping {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -144,21 +144,21 @@ function Get-SDPHostGroupMapping {
         # special ops — resolve volumeName / hostGroupName to refs.
 
         if ($volumeName) {
-            $volumeObj  = Get-SDPVolume -name $volumeName -k2context $k2context -doNotResolve
+            $volumeObj  = Get-SDPVolume -name $volumeName -context $context -doNotResolve
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeObj.id -nestedObject
             $PSBoundParameters.volume = $volumePath
             $PSBoundParameters.remove('volumeName') | Out-Null
         }
 
         if ($hostGroupName) {
-            $hostGroupObj  = Get-SDPHostGroup -name $hostGroupName -k2context $k2context -doNotResolve
+            $hostGroupObj  = Get-SDPHostGroup -name $hostGroupName -context $context -doNotResolve
             $hostGroupPath = ConvertTo-SDPObjectPrefix -ObjectPath "host_groups" -ObjectID $hostGroupObj.id -nestedObject
             $PSBoundParameters.host = $hostGroupPath
             $PSBoundParameters.remove('hostGroupName') | Out-Null
         }
 
         # make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
 
         if ($asSnapshot) {
             $results = $results | Where-Object { $_.volume -match '/snapshots/' }
@@ -168,13 +168,13 @@ function Get-SDPHostGroupMapping {
         $results = $results | Where-Object { $_.host.ref -match '/host_groups/' }
 
         $instances = foreach ($hit in $results) {
-            [SDPHostGroupMapping]::new($hit, $k2context)
+            [SDPHostGroupMapping]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }

@@ -17,8 +17,8 @@
     .PARAMETER snapshotName
     The name of the snapshot to use as the clone source.
 
-    .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    Specifies the K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     New-SDPVolumeThinClone -name "Vol01-Clone" -volumeName "Vol01" -volumeGroupName "VG01" -snapshotName "Snap01"
@@ -46,20 +46,20 @@ function New-SDPVolumeThinClone {
         [parameter(Mandatory)]
         [string] $snapshotName,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [string] $context = "sdpconnection"
     )
     begin {
         $endpoint = "volumes"
     }
 
     process {
-        $volumeGroup = Get-SDPVolumeGroup -name $volumeGroupName -k2context $k2context
+        $volumeGroup = Get-SDPVolumeGroup -name $volumeGroupName -context $context
         $volumeGroupRef = ConvertTo-SDPObjectPrefix -ObjectID $volumeGroup.id -ObjectPath volume_groups -nestedObject
         
-        $volume = Get-SDPVolume -name $volumeName -k2context $k2context
+        $volume = Get-SDPVolume -name $volumeName -context $context
         $volumeRef = ConvertTo-SDPObjectPrefix -ObjectID $volume.id -ObjectPath volumes -nestedObject
         
-        $snapshot = Get-SDPVolumeGroupSnapshot -k2context $k2context | Where-Object {$_.name -match $snapshotName} 
+        $snapshot = Get-SDPVolumeGroupSnapshot -context $context | Where-Object {$_.name -match $snapshotName} 
         $snapshotRef  = ConvertTo-SDPObjectPrefix -ObjectID $snapshot.id -ObjectPath snapshots -nestedObject
         
         
@@ -73,15 +73,15 @@ function New-SDPVolumeThinClone {
         $body = $o 
 
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -erroraction silentlycontinue
         } catch {
             return $Error[0]
         }
         
-        $results = Get-SDPVolume -name $name -k2context $k2context
+        $results = Get-SDPVolume -name $name -context $context
         while (!$results) {
             Write-Verbose " --> Waiting on volume $name"
-            $results = Get-SDPVolume -name $name -k2context $k2context
+            $results = Get-SDPVolume -name $name -context $context
             Start-Sleep 1
         }
 

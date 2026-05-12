@@ -17,14 +17,14 @@ class SDPHostMapping {
     [psobject] $volume
 
     # Hidden context
-    hidden [string] $k2context
+    hidden [string] $context
 
     SDPHostMapping() {}
 
-    SDPHostMapping([psobject] $apiHit, [string] $k2context) {
+    SDPHostMapping([psobject] $apiHit, [string] $context) {
         $this.id        = $apiHit.id
         $this.lun       = $apiHit.lun
-        $this.k2context = $k2context
+        $this.context = $context
 
         if ($apiHit.host)   { $this.host   = $apiHit.host }
         if ($apiHit.volume) { $this.volume = $apiHit.volume }
@@ -34,12 +34,12 @@ class SDPHostMapping {
 
     [SDPHostMapping] Refresh() {
         return [SDPHostMapping]::new(
-            (Get-SDPHostMapping -id $this.id -k2context $this.k2context -doNotResolve),
-            $this.k2context)
+            (Get-SDPHostMapping -id $this.id -context $this.context -doNotResolve),
+            $this.context)
     }
 
     [void] Delete() {
-        Remove-SDPHostMapping -id $this.id -k2context $this.k2context | Out-Null
+        Remove-SDPHostMapping -id $this.id -context $this.context | Out-Null
     }
 
     [string] ToString() {
@@ -100,7 +100,7 @@ function Get-SDPHostMapping {
         [parameter()]
         [switch] $doNotResolve,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -114,8 +114,8 @@ function Get-SDPHostMapping {
         # When piped an SDPHost, derive hostName + inherit context.
         if ($InputObject) {
             $hostName = $InputObject.name
-            if (-not $PSBoundParameters.ContainsKey('k2context')) {
-                $k2context = $InputObject.k2context
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
             }
         }
         $PSBoundParameters.Remove('InputObject') | Out-Null
@@ -131,21 +131,21 @@ function Get-SDPHostMapping {
         # special ops
 
         if ($volumeName) {
-            $volumeObj = Get-SDPVolume -name $volumeName -k2context $k2context -doNotResolve
+            $volumeObj = Get-SDPVolume -name $volumeName -context $context -doNotResolve
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeObj.id -nestedObject
             $PSBoundParameters.volume = $volumePath
             $PSBoundParameters.remove('volumeName') | Out-Null
         }
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName -k2context $k2context -doNotResolve
+            $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
             $PSBoundParameters.host = $hostPath
             $PSBoundParameters.remove('hostName') | Out-Null
         }
 
         # make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
         if ($asSnapshot) {
             $results = $results | Where-Object {$_.volume -match '/snapshots/'}
         }
@@ -153,13 +153,13 @@ function Get-SDPHostMapping {
         $results = $results | Where-Object {$_.host.ref -notmatch '/host_groups/'}
 
         $instances = foreach ($hit in $results) {
-            [SDPHostMapping]::new($hit, $k2context)
+            [SDPHostMapping]::new($hit, $context)
         }
 
         if ($doNotResolve) {
             $instances
         } else {
-            $instances | Update-SDPRefObjects -k2context $k2context
+            $instances | Update-SDPRefObjects -context $context
         }
     }
 }
