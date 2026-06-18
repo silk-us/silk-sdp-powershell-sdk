@@ -1,46 +1,72 @@
+<#
+    .SYNOPSIS
+    Removes any existing Host Group.
+
+    .EXAMPLE
+    Remove-SDPHostGroup -name HostGroup01
+
+    .EXAMPLE
+    Get-SDPHostGroup | where {$_.name -like "LinuxHosts*"} | Remove-SDPHostGroup
+
+    .DESCRIPTION
+    Use this function to remove any existing Host Group. This command accepts piped input from a Get-SDPHostGroup query.
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Remove-SDPHostGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPHostGroup class. Validated to [SDPHostGroup] at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
         [parameter()]
         [string] $name,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [switch] $Force,
+        [parameter()]
+        [string] $context = 'sdpconnection'
     )
-    <#
-        .SYNOPSIS
-        Removes any existing Host Group. 
 
-        .EXAMPLE 
-        Remove-SDPHostGroup -name HostGroup01
-
-        .EXAMPLE 
-        Get-SDPHostGroup | where {$_.name -like "LinuxHosts*"} | Remove-SDPHostGroup 
-
-        .DESCRIPTION
-        Use this function to remove any existing Host Group. This command accepts piped input from a Get-SDPHostGroup query. 
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
     begin {
         $endpoint = 'host_groups'
     }
 
     process {
-        # Special Ops
-        if ($name -and !$id) {
-            $id = (Get-SDPHostGroup -name $name -k2context $k2context).id
+
+        if ($InputObject -and $InputObject -isnot [SDPHostGroup]) {
+            throw "Remove-SDPHostGroup accepts pipeline input only from SDPHostGroup; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
         }
 
-        # Make the call
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
-        return $results
+        # Special Ops — resolve name to id when no id was passed.
+
+        if ($name -and !$id) {
+            $hostGroup = Get-SDPHostGroup -name $name -context $context -doNotResolve
+            $id = $hostGroup.id
+        }
+
+        # Call
+
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHostGroup id=$id", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
+            return $results
+        }
     }
 }

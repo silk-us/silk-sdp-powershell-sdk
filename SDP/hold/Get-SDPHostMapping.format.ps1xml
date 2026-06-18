@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPHostMapping.
+
+    Mappings have no `name` field on the API object — identity is the
+    numeric id. `host_name` and `volume_name` are attached at runtime by
+    Update-SDPRefObjects.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPHostMapping</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPHostMapping</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>id</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>host_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>volume_name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>lun</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>id</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>host_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>volume_name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>lun</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

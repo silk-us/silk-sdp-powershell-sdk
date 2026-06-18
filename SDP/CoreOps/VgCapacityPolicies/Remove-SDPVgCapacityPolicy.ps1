@@ -1,10 +1,17 @@
 function Remove-SDPVgCapacityPolicy {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
+        # Typed as [object] to dodge module load-order coupling on the
+        # SDPVgCapacityPolicy class. Validated at the top of process.
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $id,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [switch] $Force,
+        [parameter()]
+        [string] $context = 'sdpconnection'
     )
 
     ## Special Ops
@@ -13,9 +20,24 @@ function Remove-SDPVgCapacityPolicy {
     }
 
     process {
+        if ($InputObject -and $InputObject -isnot [SDPVgCapacityPolicy]) {
+            throw "Remove-SDPVgCapacityPolicy accepts pipeline input only from SDPVgCapacityPolicy; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $id = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
+        }
+
         ## Make the call
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPVgCapacityPolicy id=$id", 'Remove')) {
+            $endpointURI = $endpoint + '/' + $id
+            $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -context $context
+            return $results
+        }
     }
 }

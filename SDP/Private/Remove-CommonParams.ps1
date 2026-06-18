@@ -8,7 +8,7 @@ function Remove-CommonParams {
         foreach ($p in [System.Management.Automation.PSCmdlet]::CommonParameters) {
             $parameterList.Remove($p)
         }
-        $parameterList.Remove('k2context')
+        $parameterList.Remove('context')
     }
     return $parameterList
 }

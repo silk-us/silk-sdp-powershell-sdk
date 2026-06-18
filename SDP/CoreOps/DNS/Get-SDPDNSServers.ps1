@@ -1,35 +1,50 @@
+<#
+    .SYNOPSIS
+    Retrieves the configured DNS servers from the SDP.
+
+    .DESCRIPTION
+    Pulls the DNS server fields out of the SDP partial system parameters
+    endpoint. Returns just the dns_* properties.
+
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
+
+    .EXAMPLE
+    Get-SDPDNSServers
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPDNSServers {
+    [CmdletBinding()]
     param(
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
-    <#
-        .SYNOPSIS
 
-        .EXAMPLE 
-
-        .DESCRIPTION
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
     begin {
         $endpoint = "system/partial_system_parameters"
     }
 
     process {
-        
+
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method GET -k2context $k2context -erroraction silentlycontinue | select dns_*
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context -strictURI -ErrorAction SilentlyContinue | Select-Object dns_*
         } catch {
             return $Error[0]
         }
-        
-        return $results
-    }
 
+        $results = $results | Add-SDPTypeName -TypeName 'SDPDNSServer'
+
+        if ($doNotResolve) {
+            return $results
+        }
+        return ($results | Update-SDPRefObjects -context $context)
+    }
 }

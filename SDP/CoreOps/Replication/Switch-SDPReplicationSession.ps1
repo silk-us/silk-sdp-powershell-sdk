@@ -6,7 +6,7 @@ function Switch-SDPReplicationSession {
         [parameter()]
         [switch] $wait,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -14,7 +14,7 @@ function Switch-SDPReplicationSession {
     }
     
     process {
-        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+        $session = Get-SDPReplicationSessions -name $name -context $context
         if ($session) {
             <#
             if ($session.state -ne 'suspended') {
@@ -30,17 +30,17 @@ function Switch-SDPReplicationSession {
             $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -k2context $k2context 
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -context $context 
             } catch {
                 return $Error[0]
             }
             if ($wait) {
                 while ($session.state -ne 'failed_over') {
-                    $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+                    $session = Get-SDPReplicationSessions -name $name -context $context
                     Start-Sleep -Seconds 2
                 }
             }
-            $results = Get-SDPReplicationSessions -name $name -k2context $k2context
+            $results = Get-SDPReplicationSessions -name $name -context $context
             return $results
         }
     }

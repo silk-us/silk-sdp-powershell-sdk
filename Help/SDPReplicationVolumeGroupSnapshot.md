@@ -4,7 +4,7 @@ Singular function for creating volume group snapshots within a replication sessi
 
 ## New-SDPReplicationVolumeGroupSnapshot
 ```PowerShell
-New-SDPReplicationVolumeGroupSnapshot [-volumeGroupName] <string> [-replicationSession] <string> [[-k2context] <string>] [<CommonParameters>]
+New-SDPReplicationVolumeGroupSnapshot [-volumeGroupName] <string> [-replicationSession] <string> [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

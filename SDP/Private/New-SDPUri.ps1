@@ -13,7 +13,7 @@ function New-SDPURI {
         [parameter(Mandatory)]
         [string] $endpoint,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     # trim front and rear / marks if needed
@@ -34,7 +34,12 @@ function New-SDPURI {
         $trail = '?'
     }
 
-    $server = Get-Variable -Scope Global -Name $k2context -ValueOnly
+    $server = Get-Variable -Scope Global -Name $context -ValueOnly -ErrorAction SilentlyContinue
+    if (-not $server) {
+        throw "New-SDPURI: No variable found for context '$context'. Please ensure you have logged in with the correct context or specify the correct context variable name."   
+    } else {
+        Write-Verbose "New-SDPURI: Found variable for context '$context'. Using its K2Endpoint value for URI construction."
+    }
     $results = 'https://' + $server.K2Endpoint + '/api/v2/' + $endpoint + $trail
     write-verbose "-- Invoke-SDPRestCall --> New-SDPURI -> Using SDPURI endpoint URI $results"
     return $results

@@ -1,4 +1,23 @@
+<#
+    .SYNOPSIS
+    Retrieves FC connection mapper state from the SDP.
+
+    .DESCRIPTION
+    Queries the `system/fc_connection_mapper` endpoint. Filter by host
+    FC port, server, server FC port, or id.
+
+    .EXAMPLE
+    Get-SDPSystemFcConnectionMapper
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPSystemFcConnectionMapper {
+    [CmdletBinding()]
     param(
         [parameter()]
         [Alias("HostFcPort")]
@@ -11,15 +30,22 @@ function Get-SDPSystemFcConnectionMapper {
         [Alias("ServerFcPort")]
         [string] $server_fc_port,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
-    $endpoint = "system/fc_connection_mapper"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "system/fc_connection_mapper"
     }
-    return $results
+
+    process {
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+            Add-SDPTypeName -TypeName 'SDPSystemFcConnection'
+
+        if ($doNotResolve) { return $results }
+        return ($results | Update-SDPRefObjects -context $context)
+    }
 }

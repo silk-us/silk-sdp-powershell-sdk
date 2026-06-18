@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPRetentionPolicy.
+
+    See Get-SDPVolume.format.ps1xml for the rationale on why a TableControl
+    is needed instead of just Update-TypeData -DefaultDisplayPropertySet.
+
+    Retention policies don't carry ref-shaped properties so there are no
+    *_name resolved columns to surface — just the raw retention values.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPRetentionPolicy</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPRetentionPolicy</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>id</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>num_snapshots</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>weeks</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>days</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>hours</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>id</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>num_snapshots</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>weeks</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>days</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>hours</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

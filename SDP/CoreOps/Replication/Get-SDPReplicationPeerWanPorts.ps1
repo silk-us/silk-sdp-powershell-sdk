@@ -12,15 +12,25 @@ function Get-SDPReplicationPeerWanPorts {
         [Alias("ReplicationPeerK2array")]
         [string] $replication_peer_k2array,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
     $endpoint = "replication/peer_wan_ports"
 
+    $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
     if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -context $context -strictURI
     } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
     }
-    return $results
+
+    $results = $results | Add-SDPTypeName -TypeName 'SDPReplicationPeerWanPort'
+
+    if ($doNotResolve) {
+        return $results
+    }
+    return ($results | Update-SDPRefObjects -context $context)
 }

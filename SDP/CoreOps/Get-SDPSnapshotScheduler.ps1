@@ -1,11 +1,20 @@
 function Get-SDPSnapshotScheduler {
+    [CmdletBinding()]
     param(
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = 'sdpconnection'
     )
 
     $endpoint = "snapshot_scheduler"
 
-    $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
-    return $results
+    $PSBoundParameters.Remove('doNotResolve') | Out-Null
+    $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+        Add-SDPTypeName -TypeName 'SDPSnapshotScheduler'
+
+    if ($doNotResolve) {
+        return $results
+    }
+    return ($results | Update-SDPRefObjects -context $context)
 }

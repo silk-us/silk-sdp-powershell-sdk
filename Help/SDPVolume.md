@@ -5,7 +5,7 @@ SDP volume functions.
 ## New-SDPVolume
 ```PowerShell
 New-SDPVolume [-name] <string> [-sizeInGB] <int> [[-VolumeGroupName] <string>] [[-volumeGroupId] <string>] [[-Description] <string>] 
-[[-k2context] <string>] [-VMWare] [-ReadOnly] [<CommonParameters>]
+[[-context] <string>] [-VMWare] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -17,7 +17,6 @@ Mandatory
 Optional
 * `-volumeGroupName` - [string] - Provide desired existing volume group name in which to place the volume. 
 * `-volumeGroupId` - [string] - Provide desired existing volume group id in which to place the volume. This can be inffered via pipe. 
-* `-ReadOnly` - [switch] - Create the volume as read-only. 
 * `-VMWare` - [switch] - Create the volume for use with VMWare vmfs. 
 * `-Description` [string] - Set the description for the volume. 
 
@@ -38,8 +37,8 @@ Get-SDPVolumeGroup -name VolumeGroup01 | New-SDPVolume -name Volume01
 
 ## Set-SDPVolume
 ```PowerShell
-Set-SDPVolume [-id] <string> [[-name] <string>] [[-sizeInGB] <int>] [[-Description] <string>] [[-VolumeGroupName] <string>] [[-k2context] 
-<string>] [-ReadOnly] [-ReadWrite] [<CommonParameters>]
+Set-SDPVolume [-id] <string> [[-name] <string>] [[-sizeInGB] <int>] [[-Description] <string>] [[-VolumeGroupName] <string>] [[-context] 
+<string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -51,8 +50,6 @@ Optional
 * `-name` - [string] - The desired name in which to rename the volume. 
 * `-sizeInGB` - [int] - Provide the desired size in GB (byte * 1024) for the volume. This must be larger than the current volume size. 
 * `-Description` [string] - Set the description for the volume. 
-* `-ReadOnly` - [switch] - Set the volume for read-only.
-* `-ReadWrite` - [switch] - Set the volume for read-write.
 
 Examples:
 
@@ -71,7 +68,7 @@ Get-SDPVolume -name Volume01 | Set-SDPVolume -name Volume02
 
 ## Get-SDPVolume
 ```PowerShell
-Get-SDPVolume [[-name] <string>] [-description <string>] [-id <int>] [-vmware_support <bool>] [-volume_group <string>] [-k2context <string>] [<CommonParameters>]
+Get-SDPVolume [[-name] <string>] [-description <string>] [-id <int>] [-vmware_support <bool>] [-volume_group <string>] [-context <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -100,7 +97,7 @@ Get-SDPVolume -VolumeGroup VolumeGroup01
 
 ## Remove-SDPVolume
 ```PowerShell
-Remove-SDPVolume [[-id] <string>] [[-name] <string>] [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPVolume [[-id] <string>] [[-name] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

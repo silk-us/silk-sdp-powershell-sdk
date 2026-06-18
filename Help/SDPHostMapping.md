@@ -4,7 +4,7 @@ SDP host mapping functions.
 
 ## New-SDPHostMapping
 ```PowerShell
-New-SDPHostMapping [-hostName] <string> [[-volumeName] <string>] [[-viewName] <string>] [[-k2context] <string>] [<CommonParameters>]
+New-SDPHostMapping [-hostName] <string> [[-volumeName] <string>] [[-viewName] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -32,7 +32,7 @@ New-SDPHostMapping -hostName WinHost01 -volumeName Volume01 -Lun 3
 
 ## Set-SDPHostMapping
 ```PowerShell
-Set-SDPHostMapping [-id] <string> [[-hostName] <string>] [[-lun] <int>] [[-k2context] <string>] [<CommonParameters>]
+Set-SDPHostMapping [-id] <string> [[-hostName] <string>] [[-lun] <int>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -68,7 +68,7 @@ Set-SDPHostMapping -id 15 -lun 66
 
 ## Get-SDPHostMapping
 ```PowerShell
-Get-SDPHostMapping [[-hostName] <string>] [[-hostName] <int>] [[-lun] <int>] [[-unique_target] <bool>] [[-volumeName] <string>] [[-k2context] <string>] [-asSnapshot] [<CommonParameters>]
+Get-SDPHostMapping [[-hostName] <string>] [[-hostName] <int>] [[-lun] <int>] [[-unique_target] <bool>] [[-volumeName] <string>] [[-context] <string>] [-asSnapshot] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -97,7 +97,7 @@ Get-SDPHostMapping -hostName WinHost01
 
 ## Remove-SDPHostMapping
 ```PowerShell
-Remove-SDPHostMapping [[-id] <string>] [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPHostMapping [[-id] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

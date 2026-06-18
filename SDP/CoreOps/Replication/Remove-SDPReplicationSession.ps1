@@ -1,31 +1,39 @@
 function Remove-SDPReplicationSession {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $name,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $Force,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
     begin {
-        $endpoint = "replication/sessions" 
+        $endpoint = "replication/sessions"
     }
-    
+
     process {
-        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+        $session = Get-SDPReplicationSessions -name $name -context $context
         if ($session) {
             if ($session.state -ne 'idle') {
                 $errormsg = 'Please ensure replication session is currently "idle"'
                 return $errormsg | Write-Error
             }
-            $subendpoint = $endpoint + '/' + $session.id
-            
-            try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method DELETE -k2context $k2context
-            } catch {
-                return $Error[0]
+            if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+                $ConfirmPreference = 'None'
             }
-            return $results
+            if ($PSCmdlet.ShouldProcess("SDPReplicationSession name=$name id=$($session.id)", 'Remove')) {
+                $subendpoint = $endpoint + '/' + $session.id
+
+                try {
+                    $results = Invoke-SDPRestCall -endpoint $subendpoint -method DELETE -context $context
+                } catch {
+                    return $Error[0]
+                }
+                return $results
+            }
         }
     }
 }

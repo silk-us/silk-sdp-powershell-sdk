@@ -18,7 +18,7 @@ function Set-SDPVgCapacityPolicy {
         [parameter()]
         [int] $snapshotCount,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -56,7 +56,7 @@ function Set-SDPVgCapacityPolicy {
         $body = $o
         
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -k2context $k2context 
+            Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -context $context 
         } catch {
             return $Error[0]
         }

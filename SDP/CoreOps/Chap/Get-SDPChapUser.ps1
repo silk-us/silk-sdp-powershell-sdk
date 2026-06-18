@@ -1,4 +1,42 @@
+<#
+    .SYNOPSIS
+    Retrieves CHAP user information from the SDP.
+
+    .DESCRIPTION
+    Queries the SDP for existing CHAP host auth profiles. Filter by name
+    or id.
+
+    .PARAMETER name
+    Filter by CHAP user name. Accepts pipeline input by property name.
+
+    .PARAMETER id
+    Filter by CHAP user id.
+
+    .PARAMETER userName
+    Filter by underlying CHAP username.
+
+    .PARAMETER doNotResolve
+    Skip ref-name resolution on the returned objects. Used by internal
+    callers to avoid recursive resolution.
+
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
+
+    .EXAMPLE
+    Get-SDPChapUser
+
+    .EXAMPLE
+    Get-SDPChapUser -name ChapUser01
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPChapUser {
+    [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -8,7 +46,9 @@ function Get-SDPChapUser {
         [parameter()]
         [int] $userName,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -17,12 +57,17 @@ function Get-SDPChapUser {
 
     process {
 
-        # Special Ops
-        
-        # Query 
+        # Strip internal-only switches before passing to the URI builder.
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        # Query
 
-        return $results
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+            Add-SDPTypeName -TypeName 'SDPChapUser'
+
+        if ($doNotResolve) {
+            return $results
+        }
+        return ($results | Update-SDPRefObjects -context $context)
     }
 }

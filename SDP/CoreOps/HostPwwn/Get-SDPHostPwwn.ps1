@@ -1,4 +1,95 @@
+<#
+    SDPHostPwwn — typed wrapper for an FC port (PWWN) attached to a
+    host. Endpoint is /api/v2/host_fc_ports.
+
+    `host` is the only ref-shaped property; Update-SDPRefObjects attaches
+    `host_name` at runtime.
+#>
+
+class SDPHostPwwn {
+
+    # --- Properties shown in the default table view ---
+    [string]   $id
+    [string]   $pwwn
+
+    # --- Refs preserved for Update-SDPRefObjects to walk. ---
+    [psobject] $host
+
+    # Hidden context
+    hidden [string] $context
+
+    SDPHostPwwn() {}
+
+    SDPHostPwwn([psobject] $apiHit, [string] $context) {
+        $this.id        = $apiHit.id
+        $this.pwwn      = $apiHit.pwwn
+        $this.context = $context
+
+        if ($apiHit.host) { $this.host = $apiHit.host }
+    }
+
+    # ---- Operational methods --------------------------------------------
+
+    [SDPHostPwwn] Refresh() {
+        return [SDPHostPwwn]::new(
+            (Get-SDPHostPwwn -id $this.id -context $this.context -doNotResolve),
+            $this.context)
+    }
+
+    [void] Delete() {
+        Remove-SDPHostPwwn -id $this.id -context $this.context | Out-Null
+    }
+
+    [string] ToString() {
+        return $this.pwwn
+    }
+}
+
+Update-TypeData -TypeName 'SDPHostPwwn' `
+                -DefaultDisplayPropertySet 'id','pwwn','host_name' `
+                -Force
+
+
+<#
+    .SYNOPSIS
+    Returns a list of host PWWNs (FC ports).
+
+    .DESCRIPTION
+    Queries the /host_fc_ports endpoint. Filter by host or by PWWN
+    string. Accepts piped input from Get-SDPHost.
+
+    .PARAMETER hostName
+    Filter by host name.
+
+    .PARAMETER id
+    The unique identifier of the PWWN record.
+
+    .PARAMETER pwwn
+    Filter by PWWN string.
+
+    .PARAMETER doNotResolve
+    Skip the auto-pipe through Update-SDPRefObjects. Returns raw API
+    objects.
+
+    .PARAMETER context
+    K2 context name. Defaults to 'sdpconnection'.
+
+    .EXAMPLE
+    Get-SDPHostPwwn -hostName Host01
+
+    .EXAMPLE
+    Get-SDPHost | where-object {$_.name -like "TestDev*"} | Get-SDPHostPwwn
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPHostPwwn {
+    [CmdletBinding()]
+    [OutputType([SDPHostPwwn])]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -9,28 +100,10 @@ function Get-SDPHostPwwn {
         [parameter()]
         [string] $pwwn,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
-    <#
-        .SYNOPSIS
-        Returns a list of host PWWNs
-
-        .EXAMPLE 
-        Get-SDPHostPwwn -hostName Host01
-
-        .EXAMPLE 
-        Get-SDPHost | where-object {$_.name -like "TestDev*"} | Get-SDPHostPwwn
-
-        .DESCRIPTION
-        Gets a list of all hosts and their PWWNs. Can specify by host or PWWN. Accepts piped input from Get-SDPHost
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
 
     begin {
         $endpoint = 'host_fc_ports'
@@ -38,19 +111,27 @@ function Get-SDPHostPwwn {
 
     process {
 
-        # Special Ops
+        # Special Ops — translate hostName to a host ref.
 
         if ($hostName) {
-            $hostObj = Get-SDPHost -name $hostName
+            $hostObj = Get-SDPHost -name $hostName -context $context -doNotResolve
             $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
-            $PSBoundParameters.host = $hostPath 
+            $PSBoundParameters.host = $hostPath
             $PSBoundParameters.remove('hostName') | Out-Null
         }
-        
-        # Query 
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        return $results
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+
+        $instances = foreach ($hit in $results) {
+            [SDPHostPwwn]::new($hit, $context)
+        }
+
+        if ($doNotResolve) {
+            $instances
+        } else {
+            $instances | Update-SDPRefObjects -context $context
+        }
     }
 }

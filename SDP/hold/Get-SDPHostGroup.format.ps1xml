@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Format-Table view for SDPHostGroup.
+
+    See Get-SDPVolume.format.ps1xml for why a TableControl is required
+    once a default view exceeds 4 properties.
+-->
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>SDPHostGroup</Name>
+            <ViewSelectedBy>
+                <TypeName>SDPHostGroup</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>id</Label>
+                        <Width>6</Width>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>allow_different_host_types</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>hosts_count</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>volumes_count</Label>
+                        <Alignment>Right</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>id</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>allow_different_host_types</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>hosts_count</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>volumes_count</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

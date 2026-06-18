@@ -1,4 +1,23 @@
+<#
+    .SYNOPSIS
+    Retrieves FC port state from the SDP.
+
+    .DESCRIPTION
+    Queries the `system/fc_ports` endpoint. Filter by name, id, pwwn,
+    server, speed state, or status.
+
+    .EXAMPLE
+    Get-SDPSystemFcPorts
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Get-SDPSystemFcPorts {
+    [CmdletBinding()]
     param(
         [parameter()]
         [int] $id,
@@ -14,15 +33,22 @@ function Get-SDPSystemFcPorts {
         [parameter()]
         [string] $status,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
-    $endpoint = "system/fc_ports"
-
-    if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
-    } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+    begin {
+        $endpoint = "system/fc_ports"
     }
-    return $results
+
+    process {
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+            Add-SDPTypeName -TypeName 'SDPSystemFcPort'
+
+        if ($doNotResolve) { return $results }
+        return ($results | Update-SDPRefObjects -context $context)
+    }
 }

@@ -35,7 +35,7 @@ function New-SDPReplicationSession {
         [parameter()]
         [bool] $autoConfigurePeerVolumes = $true,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
 
@@ -84,11 +84,11 @@ function New-SDPReplicationSession {
         $body = $o
         
         try {
-            $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context 
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
         } catch {
             return $Error[0]
         }
-        $results = Get-SDPReplicationSessions -name $name -k2context $k2context
+        $results = Get-SDPReplicationSessions -name $name -context $context
         return $results
     }
 }

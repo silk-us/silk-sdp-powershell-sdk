@@ -11,8 +11,8 @@
     .PARAMETER pwwn
     The Port World Wide Name to assign to the host. Format: 16 hexadecimal characters (e.g., 50:06:0B:00:00:C2:62:10).
 
-    .PARAMETER k2context
-    Specifies the K2 context to use for authentication. Defaults to 'k2rfconnection'.
+    .PARAMETER context
+    Specifies the K2 context to use for authentication. Defaults to 'sdpconnection'.
 
     .EXAMPLE
     Set-SDPHostPwwn -hostName "ESXHost01" -pwwn "50:06:0B:00:00:C2:62:10"
@@ -36,7 +36,7 @@ function Set-SDPHostPwwn {
         [parameter(Mandatory)]
         [string] $pwwn,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -46,7 +46,7 @@ function Set-SDPHostPwwn {
     process{
         ## Special Ops
 
-        $hostid = Get-SDPHost -name $hostname -k2context $k2context
+        $hostid = Get-SDPHost -name $hostname -context $context
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath 'hosts' -ObjectID $hostid.id -nestedObject
 
         # Build the Object
@@ -58,7 +58,7 @@ function Set-SDPHostPwwn {
 
         ## Make the call
         # $endpointURI = $endpoint + '/' + $hostid.id
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context 
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
         return $results
     }
 }

@@ -34,7 +34,7 @@ function New-SDPReplicationVolume {
         [parameter(Mandatory)]
         [string] $replicationSessionName,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -44,13 +44,13 @@ function New-SDPReplicationVolume {
     process{
         ## Special Ops
 
-        $volumeId = Get-SDPVolume -name $volumeName -k2context $k2context
-        $sessionId = Get-SDPReplicationPeerArray -name $replicationSessionName -k2context $k2context
+        $volumeId = Get-SDPVolume -name $volumeName -context $context
+        $sessionId = Get-SDPReplicationPeerArray -name $replicationSessionName -context $context
 
-        $volumeId = Get-SDPVolume -name $volumeName -k2context $k2context
+        $volumeId = Get-SDPVolume -name $volumeName -context $context
         $volumeObj = ConvertTo-SDPObjectPrefix -ObjectID $volumeId.id -ObjectPath 'volumes' -nestedObject 
 
-        $sessionId = Get-SDPReplicationSessions -name $replicationSessionName -k2context $k2context
+        $sessionId = Get-SDPReplicationSessions -name $replicationSessionName -context $context
         $peerArrayPath = ConvertTo-SDPObjectPrefix -ObjectID $sessionId.id -ObjectPath 'replication/sessions' -nestedObject
 
         # Build the object
@@ -64,7 +64,7 @@ function New-SDPReplicationVolume {
         $body = $o
         
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context 
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
         } catch {
             return $Error[0]
         }

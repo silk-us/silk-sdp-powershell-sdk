@@ -1,31 +1,34 @@
+<#
+    .SYNOPSIS
+    Remove an existing host iqn.
+
+    .EXAMPLE
+    Remove-SDPHostIqn -id 123
+
+    .EXAMPLE
+    Get-SDPHostIqn -hostName LinuxHost03 | Remove-SDPHostIqn
+
+    .DESCRIPTION
+    Use this function to remove an existing host iqn using these examples. Accepts piped imput from Get-SDPHostIqn
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Remove-SDPHostIqn {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $hostName,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [switch] $Force,
+        [parameter()]
+        [string] $context = 'sdpconnection'
     )
-    <#
-        .SYNOPSIS
-        Remove an existing host iqn. 
-
-        .EXAMPLE 
-        Remove-SDPHostIqn -id 123
-
-        .EXAMPLE 
-        Get-SDPHostIqn -hostName LinuxHost03 | Remove-SDPHostIqn 
-        
-        .DESCRIPTION
-        Use this function to remove an existing host iqn using these examples. Accepts piped imput from Get-SDPHostIqn
-
-        .NOTES
-        Authored by J.R. Phillips (GitHub: JayAreP)
-
-        .LINK
-        https://github.com/silk-us/silk-sdp-powershell-sdk
-
-    #>
 
     begin {
         $endpoint = 'host_iqns'
@@ -33,11 +36,18 @@ function Remove-SDPHostIqn {
 
     process {
 
-        $hostObject = Get-SDPHostIqn -hostName $hostName -k2context $k2context
+        # Special Ops — locate the IQN record by host.
 
-        ## Make the call
-        $endpointURI = $endpoint + '/' + $hostObject.id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
-        return $results
+        $hostIqn = Get-SDPHostIqn -hostName $hostName -context $context -doNotResolve
+
+        # Call
+
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPHostIqn hostName=$hostName id=$($hostIqn.id)", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$($hostIqn.id)" -method DELETE -context $context
+            return $results
+        }
     }
 }

@@ -1,15 +1,26 @@
 function Get-SDPReplicationRpoHistory {
+    [CmdletBinding()]
     param(
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = 'sdpconnection'
     )
 
     $endpoint = "replication/rpo_history"
 
+    $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
     if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -context $context -strictURI
     } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
     }
-    return $results
+
+    $results = $results | Add-SDPTypeName -TypeName 'SDPReplicationRpoEntry'
+
+    if ($doNotResolve) {
+        return $results
+    }
+    return ($results | Update-SDPRefObjects -context $context)
 }

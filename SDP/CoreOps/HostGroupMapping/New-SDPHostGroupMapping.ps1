@@ -8,7 +8,7 @@ function New-SDPHostGroupMapping {
         [parameter()]
         [string] $snapshotName,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
     <#
         .SYNOPSIS
@@ -37,14 +37,14 @@ function New-SDPHostGroupMapping {
     process{
         ## Special Ops
     
-        $hostGroupid = Get-SDPHostGroup -name $hostGroupName -k2context $k2context
+        $hostGroupid = Get-SDPHostGroup -name $hostGroupName -context $context
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "host_groups" -ObjectID $hostGroupid.id -nestedObject
 
         if ($volumeName) {
-            $volumeid = Get-SDPVolume -name $volumeName -k2context $k2context 
+            $volumeid = Get-SDPVolume -name $volumeName -context $context 
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
         } elseif ($snapshotName) {
-            $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName -k2context $k2context
+            $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName -context $context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "snapshots" -ObjectID $volumeid.id -nestedObject
         } else {
             $message = "Please supply either a -volumeName or -snapshotName"
@@ -59,7 +59,7 @@ function New-SDPHostGroupMapping {
 
         ## Make the call
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -k2context $k2context -erroraction silentlycontinue
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -erroraction silentlycontinue
         } catch {
             return $Error[0]
         }

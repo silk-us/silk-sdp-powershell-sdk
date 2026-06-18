@@ -15,7 +15,7 @@ function Set-SDPReplicationSession {
         [ValidateSet('mapped','readOnly')]
         [string] $targetExposure,
         [parameter()]
-        [string] $k2context = 'k2rfconnection'
+        [string] $context = 'sdpconnection'
     )
 
     begin {
@@ -23,7 +23,7 @@ function Set-SDPReplicationSession {
     }
     
     process {
-        $session = Get-SDPReplicationSessions -name $name -k2context $k2context
+        $session = Get-SDPReplicationSessions -name $name -context $context
         if ($session) {
             $o = New-Object psobject
 
@@ -37,13 +37,13 @@ function Set-SDPReplicationSession {
             }
 
             if ($retentionPolicyName) {
-                $retentionPolicyId = Get-SDPRetentionPolicy -name $retentionPolicyName -k2context $k2context
+                $retentionPolicyId = Get-SDPRetentionPolicy -name $retentionPolicyName -context $context
                 $retentionPolicypath = ConvertTo-SDPObjectPrefix -ObjectID $retentionPolicyId.id -ObjectPath 'retention_policies' -nestedObject
                 $o | Add-Member -MemberType NoteProperty -Name "retention_policy" -Value $retentionPolicypath
             }
 
             if ($externalRetentionPolicyName) {
-                $externalRetentionPolicyId = Get-SDPRetentionPolicy -name $externalRetentionPolicyName -k2context $k2context
+                $externalRetentionPolicyId = Get-SDPRetentionPolicy -name $externalRetentionPolicyName -context $context
                 $externalRetentionPolicypath = ConvertTo-SDPObjectPrefix -ObjectID $externalRetentionPolicyId.id -ObjectPath 'retention_policies' -nestedObject
                 $o | Add-Member -MemberType NoteProperty -Name "external_retention_policy" -Value $externalRetentionPolicypath
             }
@@ -60,11 +60,11 @@ function Set-SDPReplicationSession {
             $endpointURI = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -k2context $k2context 
+                $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -context $context 
             } catch {
                 return $Error[0]
             }
-            $results = Get-SDPReplicationSessions -name $name -k2context $k2context
+            $results = Get-SDPReplicationSessions -name $name -context $context
             return $results
         }
     }

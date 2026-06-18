@@ -4,7 +4,7 @@ SDP volume group snapshot functions.
 
 ## New-SDPVolumeGroupSnapshot
 ```PowerShell
-New-SDPVolumeGroupSnapshot [-name] <string> [-volumeGroupName] <string> [-retentionPolicyName] <string> [[-k2context] <string>] [-deletable] [-exposable] [<CommonParameters>]
+New-SDPVolumeGroupSnapshot [-name] <string> [-volumeGroupName] <string> [-retentionPolicyName] <string> [[-context] <string>] [-deletable] [-exposable] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -29,7 +29,7 @@ New-SDPVolumeGroupSnapshot -name Snapshot01 -volumeGroupName VolumeGroup01 -rete
 
 ## Get-SDPVolumeGroupSnapshot
 ```PowerShell
-Get-SDPVolumeGroupSnapshot [[-volumeGroupName] <string>] [[-description] <string>] [[-generation_number] <int>] [[-id] <int>] [[-iscsi_tgt_converted_name] <string>] [[-is_application_consistent] <bool>] [[-is_auto_deleteable] <bool>] [[-is_deleted] <bool>] [[-is_exist_on_peer] <bool>] [[-is_exposable] <bool>] [[-is_external] <bool>] [[-is_originating_from_peer] <bool>] [[-last_exposed_time] <string>] [[-name] <string>] [[-replication_session] <string>] [[-retention_policy] <string>] [[-short_name] <string>] [[-triggered_by] <string>] [[-volsnaps_provisioned_capacity] <int>] [[-volume_group] <string>] [[-wwn] <string>] [[-k2context] <string>] [<CommonParameters>]
+Get-SDPVolumeGroupSnapshot [[-volumeGroupName] <string>] [[-description] <string>] [[-generation_number] <int>] [[-id] <int>] [[-iscsi_tgt_converted_name] <string>] [[-is_application_consistent] <bool>] [[-is_auto_deleteable] <bool>] [[-is_deleted] <bool>] [[-is_exist_on_peer] <bool>] [[-is_exposable] <bool>] [[-is_external] <bool>] [[-is_originating_from_peer] <bool>] [[-last_exposed_time] <string>] [[-name] <string>] [[-replication_session] <string>] [[-retention_policy] <string>] [[-short_name] <string>] [[-triggered_by] <string>] [[-volsnaps_provisioned_capacity] <int>] [[-volume_group] <string>] [[-wwn] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -71,7 +71,7 @@ Get-SDPVolumeGroupSnapshot -name VolumeGroup01:Snapshot01
 
 ## Remove-SDPVolumeGroupSnapshot
 ```PowerShell
-Remove-SDPVolumeGroupSnapshot [-id] <string> [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPVolumeGroupSnapshot [-id] <string> [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

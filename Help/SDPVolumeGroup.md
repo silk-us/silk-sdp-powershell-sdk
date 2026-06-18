@@ -4,7 +4,7 @@ SDP volume group functions
 
 ## New-SDPVolumeGroup
 ```PowerShell
-New-SDPVolumeGroup [-name] <string> [[-quotaInGB] <int>] [[-Description] <string>] [[-capacityPolicy] <string>] [[-k2context] <string>] [-enableDeDuplication] [<CommonParameters>]
+New-SDPVolumeGroup [-name] <string> [[-quotaInGB] <int>] [[-Description] <string>] [[-capacityPolicy] <string>] [[-context] <string>] [-enableDeDuplication] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -34,7 +34,7 @@ New-SDPVolumeGroup -name VolumeGroup01 -quotaInGB 4096
 
 ## Set-SDPVolumeGroup
 ```PowerShell
-Set-SDPVolumeGroup [[-id] <array>] [[-name] <string>] [[-quotaInGB] <int>] [[-enableDeDuplication] <bool>] [[-Description] <string>] [[-capacityPolicy] <string>] [[-k2context] <string>] [<CommonParameters>]
+Set-SDPVolumeGroup [[-id] <array>] [[-name] <string>] [[-quotaInGB] <int>] [[-enableDeDuplication] <bool>] [[-Description] <string>] [[-capacityPolicy] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -64,7 +64,7 @@ Get-SDPVolumeGroup -name VolumeGroup01 | Set-SDPVolumeGroup -name VolumeGroup02
 
 ## Get-SDPVolumeGroup
 ```PowerShell
-Get-SDPVolumeGroup [[-name] <string>] [-capacity_state <string>] [-description <string>] [-id <int>] [-replication_peer_volume_group <string>] [-k2context <string>] [<CommonParameters>]
+Get-SDPVolumeGroup [[-name] <string>] [-capacity_state <string>] [-description <string>] [-id <int>] [-replication_peer_volume_group <string>] [-context <string>] [<CommonParameters>]
 ```
 
 #### Parameters
@@ -92,7 +92,7 @@ Get-SDPVolumeGroup -CapacityState ok
 
 ## Remove-SDPVolumeGroup
 ```PowerShell
-Remove-SDPVolumeGroup [[-id] <string>] [[-name] <string>] [[-k2context] <string>] [<CommonParameters>]
+Remove-SDPVolumeGroup [[-id] <string>] [[-name] <string>] [[-context] <string>] [<CommonParameters>]
 ```
 
 #### Parameters

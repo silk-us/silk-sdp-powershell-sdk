@@ -1,4 +1,35 @@
+<#
+    .SYNOPSIS
+    Deletes a CHAP user from the SDP.
+
+    .DESCRIPTION
+    Removes an existing CHAP host auth profile. Accepts either a name or
+    an id; when only a name is given it is resolved to an id first.
+
+    .PARAMETER name
+    The CHAP user name to remove.
+
+    .PARAMETER id
+    The CHAP user id to remove. Accepts pipeline input by property name.
+
+    .PARAMETER context
+    K2 context to use for authentication. Defaults to 'sdpconnection'.
+
+    .EXAMPLE
+    Remove-SDPChapUser -name ChapUser01
+
+    .EXAMPLE
+    Get-SDPChapUser -name ChapUser01 | Remove-SDPChapUser
+
+    .NOTES
+    Authored by J.R. Phillips (GitHub: JayAreP)
+
+    .LINK
+    https://github.com/silk-us/silk-sdp-powershell-sdk
+#>
+
 function Remove-SDPChapUser {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
@@ -7,7 +38,9 @@ function Remove-SDPChapUser {
         [Alias('pipeId')]
         [int] $id,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $Force,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
     begin {
@@ -16,15 +49,20 @@ function Remove-SDPChapUser {
 
     process {
 
-        # Special Ops
-        if ($name) {
-            $id = (Get-SDPChapUser -name $name -k2context $k2context).id
+        # Special Ops — resolve name -> id when no id was given.
+
+        if ($name -and -not $id) {
+            $id = (Get-SDPChapUser -name $name -context $context -doNotResolve).id
         }
-        # Query 
 
-        $endpointURI = $endpoint + '/' + $id
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method DELETE -k2context $k2context
+        # Call
 
-        return $results
+        if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) {
+            $ConfirmPreference = 'None'
+        }
+        if ($PSCmdlet.ShouldProcess("SDPChapUser id=$id", 'Remove')) {
+            $results = Invoke-SDPRestCall -endpoint "$endpoint/$id" -method DELETE -context $context
+            return $results
+        }
     }
 }

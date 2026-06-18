@@ -14,15 +14,25 @@ function Get-SDPReplicationPeerVolumes {
         [Alias("ReplicationPeerVolumeGroup")]
         [string] $replication_peer_volume_group,
         [parameter()]
-        [string] $k2context = "k2rfconnection"
+        [switch] $doNotResolve,
+        [parameter()]
+        [string] $context = "sdpconnection"
     )
 
     $endpoint = "replication/peer_volumes"
 
+    $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
     if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -context $context -strictURI
     } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -k2context $k2context
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
     }
-    return $results
+
+    $results = $results | Add-SDPTypeName -TypeName 'SDPReplicationPeerVolume'
+
+    if ($doNotResolve) {
+        return $results
+    }
+    return ($results | Update-SDPRefObjects -context $context)
 }
