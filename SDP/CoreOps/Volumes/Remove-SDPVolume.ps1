@@ -60,7 +60,7 @@ function Remove-SDPVolume {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPVolume]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolume') {
             throw "Remove-SDPVolume accepts pipeline input only from SDPVolume; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

@@ -1082,20 +1082,38 @@
         <View>
             <Name>sdpsystemstats</Name>
             <ViewSelectedBy><TypeName>sdpsystemstats</TypeName></ViewSelectedBy>
+            <!-- show every class property, AutoSize so nothing gets chopped -->
             <TableControl>
+                <AutoSize/>
                 <TableHeaders>
                     <TableColumnHeader><Label>timestamp</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>throughputInMB</Label><Alignment>Right</Alignment></TableColumnHeader>
-                    <TableColumnHeader><Label>iops</Label><Alignment>Right</Alignment></TableColumnHeader>
-                    <TableColumnHeader><Label>latencyOuter</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>resolution</Label></TableColumnHeader>
                     <TableColumnHeader><Label>rw</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>blockSize</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>iopsAvg</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>iopsMax</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>tputAvgMB</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>tputMaxMB</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>throughputAvg</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>throughputMax</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>latInner</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>latOuter</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>peerName</Label></TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries><TableRowEntry><TableColumnItems>
                     <TableColumnItem><PropertyName>timestamp</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>throughputInMB</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>iops</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>latencyOuter</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>resolution</PropertyName></TableColumnItem>
                     <TableColumnItem><PropertyName>rw</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>blockSize</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>iopsAvg</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>iopsMax</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputAvgInMB</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputMaxInMB</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputAvg</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputMax</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>latencyInner</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>latencyOuter</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>peerName</PropertyName></TableColumnItem>
                 </TableColumnItems></TableRowEntry></TableRowEntries>
             </TableControl>
         </View>
@@ -1103,22 +1121,41 @@
         <View>
             <Name>sdpvolumestats</Name>
             <ViewSelectedBy><TypeName>sdpvolumestats</TypeName></ViewSelectedBy>
+            <!-- show every class property, AutoSize so nothing gets chopped -->
             <TableControl>
+                <AutoSize/>
                 <TableHeaders>
                     <TableColumnHeader><Label>timestamp</Label></TableColumnHeader>
                     <TableColumnHeader><Label>volumeName</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>throughputInMB</Label><Alignment>Right</Alignment></TableColumnHeader>
-                    <TableColumnHeader><Label>iops</Label><Alignment>Right</Alignment></TableColumnHeader>
-                    <TableColumnHeader><Label>latencyOuter</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>resolution</Label></TableColumnHeader>
                     <TableColumnHeader><Label>rw</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>blockSize</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>iopsAvg</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>iopsMax</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>tputAvgMB</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>tputMaxMB</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>throughputAvg</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>throughputMax</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>latInner</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>latOuter</Label><Alignment>Right</Alignment></TableColumnHeader>
+                    <TableColumnHeader><Label>peerName</Label></TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries><TableRowEntry><TableColumnItems>
                     <TableColumnItem><PropertyName>timestamp</PropertyName></TableColumnItem>
                     <TableColumnItem><PropertyName>volumeName</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>throughputInMB</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>iops</PropertyName></TableColumnItem>
-                    <TableColumnItem><PropertyName>latencyOuter</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>resolution</PropertyName></TableColumnItem>
                     <TableColumnItem><PropertyName>rw</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>blockSize</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>iopsAvg</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>iopsMax</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputAvgInMB</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputMaxInMB</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputAvg</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>throughputMax</PropertyName></TableColumnItem>
+                    <!-- class misspells this prop as latencyInnter -->
+                    <TableColumnItem><PropertyName>latencyInnter</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>latencyOuter</PropertyName></TableColumnItem>
+                    <TableColumnItem><PropertyName>peerName</PropertyName></TableColumnItem>
                 </TableColumnItems></TableRowEntry></TableRowEntries>
             </TableControl>
         </View>

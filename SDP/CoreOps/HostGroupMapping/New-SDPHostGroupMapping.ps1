@@ -1,7 +1,8 @@
 function New-SDPHostGroupMapping {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostGroupName,
         [parameter()]
         [string] $volumeName,
@@ -12,12 +13,12 @@ function New-SDPHostGroupMapping {
     )
     <#
         .SYNOPSIS
-        Map a host group to an existing volume.     
+        Map a host group to an existing volume.
 
-        .EXAMPLE 
+        .EXAMPLE
         New-SDPHostGroupMapping -hostGroupName HG01 -volumeName Vol01
 
-        .EXAMPLE 
+        .EXAMPLE
         Get-SDPHostGroup -name HG01 | New-SDPHostGroupMapping -volumeName Vol01
 
         .DESCRIPTION
@@ -36,12 +37,16 @@ function New-SDPHostGroupMapping {
 
     process{
         ## Special Ops
-    
-        $hostGroupid = Get-SDPHostGroup -name $hostGroupName -context $context
+
+        $hostGroupid = Get-SDPHostGroup -name $hostGroupName -context $context -doNotResolve
+        if (!$hostGroupid) {
+            Write-Error "No host group named $hostGroupName exists."
+            return
+        }
         $hostPath = ConvertTo-SDPObjectPrefix -ObjectPath "host_groups" -ObjectID $hostGroupid.id -nestedObject
 
         if ($volumeName) {
-            $volumeid = Get-SDPVolume -name $volumeName -context $context 
+            $volumeid = Get-SDPVolume -name $volumeName -context $context
             $volumePath = ConvertTo-SDPObjectPrefix -ObjectPath "volumes" -ObjectID $volumeid.id -nestedObject
         } elseif ($snapshotName) {
             $volumeid = Get-SDPVolumeGroupSnapshot -name $snapshotName -context $context
@@ -64,7 +69,12 @@ function New-SDPHostGroupMapping {
             return $Error[0]
         }
 
-        return $body
-        
+        $results = Wait-SDPObject -Activity "$hostGroupName -> $($volumePath.ref)" -Get {
+            Get-SDPHostGroupMapping -hostGroupName $hostGroupName -context $context -doNotResolve |
+                Where-Object { $_.volume.ref -eq $volumePath.ref }
+        }
+        return ($results | Update-SDPRefObjects -context $context)
+        # return $body
+
     }
 }

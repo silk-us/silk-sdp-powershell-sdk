@@ -54,8 +54,12 @@ class SDPVolSnap {
             $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
         }
 
-        if ($apiHit.snapshot) { $this.snapshot = $apiHit.snapshot }
-        if ($apiHit.source)   { $this.source   = $apiHit.source }
+        if ($apiHit.snapshot) {
+            $this.snapshot = $apiHit.snapshot
+        }
+        if ($apiHit.source) {
+            $this.source   = $apiHit.source
+        }
     }
 
     # ---- Operational methods --------------------------------------------
@@ -114,6 +118,9 @@ function Get-SDPVolSnap {
     [CmdletBinding()]
     [OutputType([SDPVolSnap])]
     param(
+        # piped SDPVolumeGroupSnapshot lands here
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [string] $sourceId,
@@ -133,15 +140,31 @@ function Get-SDPVolSnap {
     }
 
     process {
-
-        # Query
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context -strictURI
-
-        # Special Ops — client-side filter by source snapshot.
-        if ($sourceId) {
-            $sourceObject = ConvertTo-SDPObjectPrefix -ObjectID $sourceId -ObjectPath "snapshots" -compact
-            $results = $results | Where-Object { $_.snapshot -match $sourceObject }
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolumeGroupSnapshot') {
+            throw "Get-SDPVolSnap accepts pipeline input only from SDPVolumeGroupSnapshot; got [$($InputObject.GetType().FullName)]."
         }
+        if ($InputObject) {
+            $sourceId = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
+        }
+        $PSBoundParameters.Remove('InputObject') | Out-Null
+
+        # sourceId is the parent snapshot, send it as a snapshot ref
+        if ($sourceId) {
+            $PSBoundParameters.snapshot = ConvertTo-SDPObjectPrefix -ObjectID $sourceId -ObjectPath "snapshots" -nestedObject
+            $PSBoundParameters.Remove('sourceId') | Out-Null
+        }
+        $PSBoundParameters.Remove('doNotResolve') | Out-Null
+
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
+
+        # $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context
+        # if ($sourceId) {
+        #     $sourceObject = ConvertTo-SDPObjectPrefix -ObjectID $sourceId -ObjectPath "snapshots" -compact
+        #     $results = $results | Where-Object { $_.snapshot -match $sourceObject }
+        # }
 
         $instances = foreach ($hit in $results) {
             [SDPVolSnap]::new($hit, $context)

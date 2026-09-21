@@ -20,7 +20,7 @@ function Remove-SDPVgCapacityPolicy {
     }
 
     process {
-        if ($InputObject -and $InputObject -isnot [SDPVgCapacityPolicy]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVgCapacityPolicy') {
             throw "Remove-SDPVgCapacityPolicy accepts pipeline input only from SDPVgCapacityPolicy; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

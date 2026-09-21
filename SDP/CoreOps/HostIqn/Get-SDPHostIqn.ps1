@@ -25,7 +25,9 @@ class SDPHostIqn {
         $this.iqn       = $apiHit.iqn
         $this.context = $context
 
-        if ($apiHit.host) { $this.host = $apiHit.host }
+        if ($apiHit.host) {
+            $this.host = $apiHit.host
+        }
     }
 
     # ---- Operational methods --------------------------------------------
@@ -43,7 +45,7 @@ class SDPHostIqn {
         if ($hostRef -and $hostRef.ref) {
             $hostId = ($hostRef.ref -split '/')[-1]
             $hostObj = Get-SDPHost -id $hostId -context $this.context -doNotResolve
-            Remove-SDPHostIqn -hostName $hostObj.name -context $this.context | Out-Null
+            Remove-SDPHostIqn -hostName $hostObj.name -context $this.context -Force | Out-Null
         }
     }
 
@@ -114,7 +116,7 @@ function Get-SDPHostIqn {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPHostIqn]::new($hit, $context)

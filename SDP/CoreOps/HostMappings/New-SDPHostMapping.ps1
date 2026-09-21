@@ -38,7 +38,7 @@ function New-SDPHostMapping {
     [CmdletBinding()]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostName,
         [parameter()]
         [string] $volumeName,
@@ -60,8 +60,13 @@ function New-SDPHostMapping {
         $hostObj = Get-SDPHost -name $hostName -context $context
         $hostRef = ConvertTo-SDPObjectPrefix -ObjectPath "hosts" -ObjectID $hostObj.id -nestedObject
 
-        if ($hostObj.host_) {
-            Write-Error "Host $hostName is a member of a host group, please use New-SDPHostMapping for the parent or select an unused host."
+        if (!$hostObj) {
+            Write-Error "No host named $hostName exists."
+            return
+        }
+        if ($hostObj.host_group) {
+            Write-Error "Host $hostName is a member of a host group, please use New-SDPHostGroupMapping for the parent or select an unused host."
+            return
         }
 
         if ($volumeName) {
@@ -88,7 +93,13 @@ function New-SDPHostMapping {
             return $Error[0]
         }
 
-        $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName -context $context
-        return $response
+        # poll for the mapping by host + target ref so views work too
+        $results = Wait-SDPObject -Activity "$hostName -> $($volumeRef.ref)" -Get {
+            Get-SDPHostMapping -hostName $hostName -context $context -doNotResolve |
+                Where-Object { $_.volume.ref -eq $volumeRef.ref }
+        }
+        return ($results | Update-SDPRefObjects -context $context)
+        # $response = Get-SDPHostMapping -hostName $hostName -volumeName $volumeName -context $context
+        # return $response
     }
 }

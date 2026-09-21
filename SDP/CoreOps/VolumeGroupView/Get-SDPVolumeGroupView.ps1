@@ -81,10 +81,18 @@ class SDPVolumeGroupView {
             $this.creationTime = Convert-SDPTimeStampFrom -timestamp ([int] $apiHit.creation_time)
         }
 
-        if ($apiHit.source)              { $this.source              = $apiHit.source }
-        if ($apiHit.volume_group)        { $this.volume_group        = $apiHit.volume_group }
-        if ($apiHit.retention_policy)    { $this.retention_policy    = $apiHit.retention_policy }
-        if ($apiHit.replication_session) { $this.replication_session = $apiHit.replication_session }
+        if ($apiHit.source) {
+            $this.source              = $apiHit.source
+        }
+        if ($apiHit.volume_group) {
+            $this.volume_group        = $apiHit.volume_group
+        }
+        if ($apiHit.retention_policy) {
+            $this.retention_policy    = $apiHit.retention_policy
+        }
+        if ($apiHit.replication_session) {
+            $this.replication_session = $apiHit.replication_session
+        }
     }
 
     # ---- Operational methods --------------------------------------------
@@ -100,7 +108,7 @@ class SDPVolumeGroupView {
     }
 
     [void] Delete() {
-        Remove-SDPVolumeGroupView -id $this.id -context $this.context | Out-Null
+        Remove-SDPVolumeGroupView -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -241,7 +249,7 @@ function Get-SDPVolumeGroupView {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPVolumeGroup]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolumeGroup') {
             throw "Get-SDPVolumeGroupView accepts pipeline input only from SDPVolumeGroup; got [$($InputObject.GetType().FullName)]."
         }
         # When piped an SDPVolumeGroup, write the volume_group ref directly
@@ -263,19 +271,36 @@ function Get-SDPVolumeGroupView {
             $PSBoundParameters.volume_group = $volumeGroupPath
         }
 
+        # these are ref fields on the api, turn a bare id into a ref object
+        if ($volume_group -and -not $PSBoundParameters.volume_group.ref) {
+            $PSBoundParameters.volume_group = ConvertTo-SDPObjectPrefix -ObjectPath volume_groups -ObjectID $volume_group -nestedObject
+        }
+        if ($retention_policy) {
+            $PSBoundParameters.retention_policy = ConvertTo-SDPObjectPrefix -ObjectPath retention_policies -ObjectID $retention_policy -nestedObject
+        }
+        if ($replication_session) {
+            $PSBoundParameters.replication_session = ConvertTo-SDPObjectPrefix -ObjectPath 'replication/sessions' -ObjectID $replication_session -nestedObject
+        }
+
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         # Views: source is a /snapshots/ ref AND that source itself has
         # source = /volume_groups/ (i.e. it's a regular snapshot, not a view).
         $snapSourced = foreach ($r in $results) {
             $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
-            if ($ref.ObjectPath -eq 'snapshots') { $r }
+            if ($ref.ObjectPath -eq 'snapshots') {
+                $r
+            }
         }
+        $parentPath = Get-SDPSnapshotParentPath -snapshots $snapSourced -context $context
         $views = foreach ($r in $snapSourced) {
             $ref = ConvertFrom-SDPObjectPrefix -Object $r.source
-            if ($snapSourced.id -notcontains $ref.ObjectId) { $r }
+            if ($parentPath[[string]$ref.ObjectId] -eq 'volume_groups') {
+                $r
+            }
+            # if ($snapSourced.id -notcontains $ref.ObjectId) { $r }
         }
 
         $instances = foreach ($hit in $views) {

@@ -45,7 +45,7 @@ class SDPHostGroup {
     }
 
     [void] Delete() {
-        Remove-SDPHostGroup -id $this.id -context $this.context | Out-Null
+        Remove-SDPHostGroup -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -96,7 +96,7 @@ function Get-SDPHostGroup {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPHostGroup]::new($hit, $context)

@@ -35,7 +35,7 @@ function New-SDPVolumeView {
         $body = $o
 
         ## Make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         return $results
     }
 }

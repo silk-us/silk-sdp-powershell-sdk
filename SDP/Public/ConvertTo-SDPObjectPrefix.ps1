@@ -1,10 +1,10 @@
 function ConvertTo-SDPObjectPrefix {
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [Alias('pipeId')]
+        [Alias('pipeId','id')]
         [string] $ObjectID,
         [parameter(Mandatory)]
-        [ValidateSet('volumes','volume_groups','hosts','host_groups','snapshots','vg_capacity_policies','retention_policies','replication/peer_k2arrays','replication/sessions','system/net_ports','host_auth_profiles','volsnaps',IgnoreCase = $false)]
+        [ValidateSet('volumes','volume_groups','hosts','host_groups','snapshots','vg_capacity_policies','retention_policies','replication/peer_k2arrays','replication/peer_volume_groups','replication/sessions','system/net_ports','host_auth_profiles','volsnaps',IgnoreCase = $false)]
         [string] $ObjectPath,
         [parameter()]
         [switch] $blank,
@@ -19,7 +19,7 @@ function ConvertTo-SDPObjectPrefix {
     } else {
         $hostprefix = '/' + $ObjectPath + '/' + $ObjectID
     }
-    
+
     if ($nestedObject) {
         $o = New-Object psobject
         $o | Add-Member -MemberType NoteProperty -Name 'ref' -Value $hostprefix

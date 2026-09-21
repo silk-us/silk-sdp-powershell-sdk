@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Creates a basic auth header from a PS credential object to use with REST API calls. 
+    Creates a basic auth header from a PS credential object to use with REST API calls.
 
 .EXAMPLE
     $creds = Get-Credential

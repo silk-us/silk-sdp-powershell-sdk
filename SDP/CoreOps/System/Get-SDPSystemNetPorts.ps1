@@ -31,10 +31,6 @@ function Get-SDPSystemNetPorts {
         [parameter()]
         [string] $name,
         [parameter()]
-        [int] $pipeId,
-        [parameter()]
-        [string] $pipeName,
-        [parameter()]
         [switch] $doNotResolve,
         [parameter()]
         [string] $context = "sdpconnection"
@@ -47,10 +43,12 @@ function Get-SDPSystemNetPorts {
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context |
             Add-SDPTypeName -TypeName 'SDPSystemNetPort'
 
-        if ($doNotResolve) { return $results }
+        if ($doNotResolve) {
+            return $results
+        }
         return ($results | Update-SDPRefObjects -context $context)
     }
 }

@@ -35,10 +35,15 @@
     https://www.github.com/silk-us/silk-sdp-powershell-sdk
 #>
 function New-SDPVolumeThinClone {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory)]
+        [ValidateLength(0, 42)]
         [string] $name,
-        [parameter(Mandatory,ValueFromPipelineByPropertyName)]
+        # piped SDPVolume lands here
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
+        [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $volumeName,
         [parameter(Mandatory)]
@@ -53,36 +58,69 @@ function New-SDPVolumeThinClone {
     }
 
     process {
-        $volumeGroup = Get-SDPVolumeGroup -name $volumeGroupName -context $context
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolume') {
+            throw "New-SDPVolumeThinClone accepts pipeline input only from SDPVolume; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $volumeName = $InputObject.name
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
+        }
+        if (!$volumeName) {
+            Write-Error "Specify -volumeName or pipe in a volume."
+            return
+        }
+
+        $volumeGroup = Get-SDPVolumeGroup -name $volumeGroupName -context $context -doNotResolve
+        if (!$volumeGroup) {
+            Write-Error "No volume group named $volumeGroupName exists."
+            return
+        }
         $volumeGroupRef = ConvertTo-SDPObjectPrefix -ObjectID $volumeGroup.id -ObjectPath volume_groups -nestedObject
-        
-        $volume = Get-SDPVolume -name $volumeName -context $context
+
+        $volume = Get-SDPVolume -name $volumeName -context $context -doNotResolve
+        if (!$volume) {
+            Write-Error "No volume named $volumeName exists."
+            return
+        }
         $volumeRef = ConvertTo-SDPObjectPrefix -ObjectID $volume.id -ObjectPath volumes -nestedObject
-        
-        $snapshot = Get-SDPVolumeGroupSnapshot -context $context | Where-Object {$_.name -match $snapshotName} 
+
+        # full vg:short_name or just the short name, same as New-SDPVolumeGroupView
+        if ($snapshotName -match ':') {
+            $snapshot = Get-SDPVolumeGroupSnapshot -name $snapshotName -context $context -doNotResolve
+        } else {
+            $snapshot = Get-SDPVolumeGroupSnapshot -short_name $snapshotName -context $context -doNotResolve
+        }
+        # $snapshot = Get-SDPVolumeGroupSnapshot -context $context | Where-Object {$_.name -match $snapshotName}
+        if (!$snapshot) {
+            Write-Error "No snapshot found matching $snapshotName."
+            return
+        }
+        if (($snapshot | Measure-Object).Count -gt 1) {
+            Write-Error "Multiple snapshots match '$snapshotName'. Use the full vg:short_name."
+            return
+        }
         $snapshotRef  = ConvertTo-SDPObjectPrefix -ObjectID $snapshot.id -ObjectPath snapshots -nestedObject
-        
-        
+
+
         $o = new-object psobject
-        $o | Add-Member -MemberType NoteProperty -Name volume_group -Value $volumeGroupRef 
+        $o | Add-Member -MemberType NoteProperty -Name volume_group -Value $volumeGroupRef
         $o | Add-Member -MemberType NoteProperty -Name source_snapshot -Value $snapshotRef
         $o | Add-Member -MemberType NoteProperty -Name name -Value $name
         $o | Add-Member -MemberType NoteProperty -Name is_thin_clone -Value 'true'
         $o | Add-Member -MemberType NoteProperty -Name source_volume -Value $volumeRef
 
-        $body = $o 
+        $body = $o
 
         try {
             Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context -erroraction silentlycontinue
         } catch {
             return $Error[0]
         }
-        
-        $results = Get-SDPVolume -name $name -context $context
-        while (!$results) {
-            Write-Verbose " --> Waiting on volume $name"
-            $results = Get-SDPVolume -name $name -context $context
-            Start-Sleep 1
+
+        $results = Wait-SDPObject -Activity $name -Get {
+            Get-SDPVolume -name $name -context $context
         }
 
         return $results

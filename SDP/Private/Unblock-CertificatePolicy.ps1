@@ -1,5 +1,5 @@
 function Unblock-CertificatePolicy {
-      
+
 if ([System.Net.ServicePointManager]::CertificatePolicy -notlike 'TrustAllCertsPolicy') {
     Add-Type -TypeDefinition @"
     using System.Net;

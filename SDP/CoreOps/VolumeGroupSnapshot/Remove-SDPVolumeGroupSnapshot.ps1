@@ -48,7 +48,7 @@ function Remove-SDPVolumeGroupSnapshot {
     }
 
     process {
-        if ($InputObject -and $InputObject -isnot [SDPVolumeGroupSnapshot]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolumeGroupSnapshot') {
             throw "Remove-SDPVolumeGroupSnapshot accepts pipeline input only from SDPVolumeGroupSnapshot; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

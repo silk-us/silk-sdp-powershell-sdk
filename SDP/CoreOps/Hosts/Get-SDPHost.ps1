@@ -52,7 +52,7 @@ class SDPHost {
 
     [void] UnmapVolume([string] $volumeName) {
         Get-SDPHostMapping -hostName $this.name -volumeName $volumeName -context $this.context |
-            Remove-SDPHostMapping -context $this.context | Out-Null
+            Remove-SDPHostMapping -context $this.context -Force | Out-Null
     }
 
     [SDPHost] AssignToGroup([string] $hostGroupName) {
@@ -74,7 +74,7 @@ class SDPHost {
     }
 
     [void] Delete() {
-        Remove-SDPHost -id $this.id -context $this.context | Out-Null
+        Remove-SDPHost -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -134,6 +134,9 @@ Update-TypeData -TypeName 'SDPHost' `
 function Get-SDPHost {
     [CmdletBinding()]
     param(
+        # piped SDPHostGroup lands here, validated in process
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
         [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeId')]
         [Alias("hostGroup")]
@@ -156,13 +159,24 @@ function Get-SDPHost {
     }
 
     process {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPHostGroup') {
+            throw "Get-SDPHost accepts pipeline input only from SDPHostGroup; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $host_group = $InputObject.id
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
+        }
+        $PSBoundParameters.Remove('InputObject') | Out-Null
+
         if ($host_group) {
             Write-Verbose "host_group specified, parsing SDP object reference"
             $PSBoundParameters.host_group = ConvertTo-SDPObjectPrefix -ObjectPath host_groups -ObjectID $host_group -nestedObject
         }
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPHost]::new($hit, $context)

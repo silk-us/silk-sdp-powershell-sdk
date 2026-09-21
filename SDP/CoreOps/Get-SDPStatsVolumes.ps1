@@ -116,7 +116,7 @@ function Get-SDPStatsVolumes {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPVolume]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolume') {
             throw "Get-SDPStatsVolumes accepts pipeline input only from SDPVolume; got [$($InputObject.GetType().FullName)]."
         }
         # When piped an SDPVolume, derive volume_name + inherit context.
@@ -130,7 +130,7 @@ function Get-SDPStatsVolumes {
         $PSBoundParameters.Remove('InputObject') | Out-Null
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context |
             Add-SDPTypeName -TypeName 'SDPStatsVolume'
 
         if ($doNotResolve) {

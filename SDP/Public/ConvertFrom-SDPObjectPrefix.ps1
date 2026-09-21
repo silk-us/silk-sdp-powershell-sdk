@@ -6,14 +6,14 @@ function ConvertFrom-SDPObjectPrefix {
         [switch] $getId
     )
 
-    
+
     $pathlength = $object.ref.Split('/').count
-    $pathlength-- 
+    $pathlength--
 
     $objectId = $object.ref.split('/')[$pathlength]
 
     $pathlength--
-    
+
     if ($pathlength -gt 1) {
         $objectPath = $object.ref.split('/')[1 .. $pathlength]
         $objectPath = $objectPath | Join-String -Separator '/'
@@ -29,5 +29,5 @@ function ConvertFrom-SDPObjectPrefix {
     } else {
         return $o
     }
-    
+
 }

@@ -10,7 +10,7 @@ function Set-SDPHostChapUser {
     <#
         .SYNOPSIS
 
-        .EXAMPLE 
+        .EXAMPLE
 
         .DESCRIPTION
 
@@ -24,7 +24,7 @@ function Set-SDPHostChapUser {
     begin {
         $endpoint = "hosts"
     }
-    
+
     process {
         # Grab host
         $sdpHost = Get-SDPHost -name $hostName -context $context
@@ -34,7 +34,7 @@ function Set-SDPHostChapUser {
 
         # Create body
         $o = New-Object psobject
-        $o | Add-Member -MemberType NoteProperty -Name 'id' -Value $sdpHost.id 
+        $o | Add-Member -MemberType NoteProperty -Name 'id' -Value $sdpHost.id
         $o | Add-Member -MemberType NoteProperty -Name 'tid' -Value $sdpHost.name
         $o | Add-Member -MemberType NoteProperty -Name 'host_auth_profile' -Value $sdpChapuser.name
 
@@ -42,7 +42,7 @@ function Set-SDPHostChapUser {
 
         $endpointURI = $endpoint + '/' + $sdpHost.id
 
-        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -context $context 
+        $results = Invoke-SDPRestCall -endpoint $endpointURI -method PATCH -body $body -context $context
         return $results
     }
 

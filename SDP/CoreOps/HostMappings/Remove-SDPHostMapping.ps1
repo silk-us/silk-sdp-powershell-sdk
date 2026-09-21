@@ -40,7 +40,7 @@ function Remove-SDPHostMapping {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPHostMapping]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPHostMapping') {
             throw "Remove-SDPHostMapping accepts pipeline input only from SDPHostMapping; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

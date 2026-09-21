@@ -41,9 +41,9 @@ function Get-SDPVolumeView {
     }
 
     process {
-        # Query 
+        # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPVolSnap]::new($hit, $context)

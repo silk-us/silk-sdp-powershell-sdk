@@ -32,35 +32,35 @@ function Set-SDPVgCapacityPolicy {
         if ($name) {
             $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
         }
-        if ($warningThreshold) {        
+        if ($warningThreshold) {
             $o | Add-Member -MemberType NoteProperty -Name "warning_threshold" -Value $warningThreshold
         }
-        if ($criticalThreshold) {     
+        if ($criticalThreshold) {
             $o | Add-Member -MemberType NoteProperty -Name "error_threshold" -Value $criticalThreshold
         }
-        if ($) {     
+        if ($) {
             $o | Add-Member -MemberType NoteProperty -Name "critical_threshold" -Value $criticalThreshold
         }
-        if ($fullThreshold) {     
+        if ($fullThreshold) {
             $o | Add-Member -MemberType NoteProperty -Name "full_threshold" -Value $fullThreshold
         }
-        if ($snapshotOverheadThreshold) {     
+        if ($snapshotOverheadThreshold) {
             $o | Add-Member -MemberType NoteProperty -Name "snapshot_overhead_threshold" -Value $snapshotOverheadThreshold
         }
         if ($size) {
             $o | Add-Member -MemberType NoteProperty -Name "num_snapshots" -Value $snapshotCount
         }
 
-        # Make the call 
+        # Make the call
 
         $body = $o
-        
+
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -context $context 
+            Invoke-SDPRestCall -endpoint $endpoint -method PATCH -body $body -context $context
         } catch {
             return $Error[0]
         }
-        
+
         return $body
     }
 }

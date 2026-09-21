@@ -45,7 +45,9 @@ function Update-SDPRefObjects {
     }
 
     process {
-        if ($null -eq $object) { return }
+        if ($null -eq $object) {
+            return
+        }
 
         foreach ($propInfo in $object.PSObject.Properties) {
             $prop = $propInfo.Name
@@ -60,14 +62,26 @@ function Update-SDPRefObjects {
             # cascading null errors inside ConvertFrom-SDPObjectPrefix.
             # Filtering out arrays / null / non-string refs up front
             # prevents that.
-            if ($null -eq $candidate)         { continue }
-            if ($candidate -is [array])       { continue }
-            if (-not $candidate.PSObject)     { continue }
+            if ($null -eq $candidate) {
+                continue
+            }
+            if ($candidate -is [array]) {
+                continue
+            }
+            if (-not $candidate.PSObject) {
+                continue
+            }
 
             $ref = $candidate.ref
-            if ($ref -isnot [string])         { continue }
-            if ([string]::IsNullOrWhiteSpace($ref)) { continue }
-            if (-not $ref.StartsWith('/'))    { continue }
+            if ($ref -isnot [string]) {
+                continue
+            }
+            if ([string]::IsNullOrWhiteSpace($ref)) {
+                continue
+            }
+            if (-not $ref.StartsWith('/')) {
+                continue
+            }
 
             Write-Verbose "--> Found ref for property $prop -> $ref"
             $cacheKey = $ref

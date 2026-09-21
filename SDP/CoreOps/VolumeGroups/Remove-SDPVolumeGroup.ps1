@@ -57,7 +57,7 @@ function Remove-SDPVolumeGroup {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPVolumeGroup]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolumeGroup') {
             throw "Remove-SDPVolumeGroup accepts pipeline input only from SDPVolumeGroup; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

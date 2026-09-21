@@ -22,7 +22,7 @@ function Set-SDPHostNqn {
     [CmdletBinding()]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostName,
         [parameter(Mandatory)]
         [string] $nqn,

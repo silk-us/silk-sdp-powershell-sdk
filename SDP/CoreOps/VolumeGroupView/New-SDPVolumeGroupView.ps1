@@ -49,7 +49,10 @@ function New-SDPVolumeGroupView {
         [parameter(Mandatory)]
         [ValidateLength(0, 42)]
         [string] $name,
-        [parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        # piped SDPVolumeGroupSnapshot lands here
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
+        [parameter(ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $snapshotName,
         [parameter(Mandatory)]
@@ -63,6 +66,20 @@ function New-SDPVolumeGroupView {
     }
 
     process {
+
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolumeGroupSnapshot') {
+            throw "New-SDPVolumeGroupView accepts pipeline input only from SDPVolumeGroupSnapshot; got [$($InputObject.GetType().FullName)]."
+        }
+        if ($InputObject) {
+            $snapshotName = $InputObject.name
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
+        }
+        if (!$snapshotName) {
+            Write-Error "Specify -snapshotName or pipe in a snapshot."
+            return
+        }
 
         # Special Ops — resolve the snapshot ref.
         # Full name (vg:short_name) → look up by name. Otherwise short_name.
@@ -106,7 +123,11 @@ function New-SDPVolumeGroupView {
         # name follows the source snapshot's full name pattern: the source
         # snapshot's name is `vg:short_name`, and the view inherits that
         # prefix → `vg:viewName`. Pull the prefix off the source.
-        $sourcePrefix = if ($snapshot.name -match ':') { $snapshot.name.Split(':')[0] } else { $snapshot.name }
+        $sourcePrefix = if ($snapshot.name -match ':') {
+            $snapshot.name.Split(':')[0]
+        } else {
+            $snapshot.name
+        }
         $expectedFullName = "${sourcePrefix}:${name}"
 
         # POST returns nothing on success — submit and poll.

@@ -42,7 +42,7 @@ function Remove-SDPHostGroup {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPHostGroup]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPHostGroup') {
             throw "Remove-SDPHostGroup accepts pipeline input only from SDPHostGroup; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

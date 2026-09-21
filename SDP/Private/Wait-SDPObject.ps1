@@ -49,7 +49,11 @@ function Wait-SDPObject {
     )
 
     $deadline = (Get-Date).AddSeconds($TimeoutSec)
-    $label = if ($Activity) { " ($Activity)" } else { '' }
+    $label = if ($Activity) {
+        " ($Activity)"
+    } else {
+        ''
+    }
 
     do {
         $result = & $Get

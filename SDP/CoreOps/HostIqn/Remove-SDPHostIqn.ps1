@@ -22,7 +22,7 @@ function Remove-SDPHostIqn {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostName,
         [parameter()]
         [switch] $Force,

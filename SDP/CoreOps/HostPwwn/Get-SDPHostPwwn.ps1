@@ -25,7 +25,9 @@ class SDPHostPwwn {
         $this.pwwn      = $apiHit.pwwn
         $this.context = $context
 
-        if ($apiHit.host) { $this.host = $apiHit.host }
+        if ($apiHit.host) {
+            $this.host = $apiHit.host
+        }
     }
 
     # ---- Operational methods --------------------------------------------
@@ -37,7 +39,7 @@ class SDPHostPwwn {
     }
 
     [void] Delete() {
-        Remove-SDPHostPwwn -id $this.id -context $this.context | Out-Null
+        Remove-SDPHostPwwn -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -122,7 +124,7 @@ function Get-SDPHostPwwn {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPHostPwwn]::new($hit, $context)

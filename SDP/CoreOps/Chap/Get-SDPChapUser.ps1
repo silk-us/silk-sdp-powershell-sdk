@@ -62,7 +62,7 @@ function Get-SDPChapUser {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context |
             Add-SDPTypeName -TypeName 'SDPChapUser'
 
         if ($doNotResolve) {

@@ -46,7 +46,7 @@ class SDPRetentionPolicy {
     }
 
     [void] Delete() {
-        Remove-SDPRetentionPolicy -id $this.id -context $this.context | Out-Null
+        Remove-SDPRetentionPolicy -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -122,7 +122,7 @@ function Get-SDPRetentionPolicy {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPRetentionPolicy]::new($hit, $context)

@@ -12,7 +12,7 @@ function Start-SDPReplicationSession {
     begin {
         $endpoint = 'replication/sessions'
     }
-    
+
     process {
         $session = Get-SDPReplicationSessions -name $name -context $context
         if ($session) {

@@ -50,7 +50,7 @@ class SDPVgCapacityPolicy {
     }
 
     [void] Delete() {
-        Remove-SDPVgCapacityPolicy -id $this.id -context $this.context | Out-Null
+        Remove-SDPVgCapacityPolicy -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -164,7 +164,7 @@ function Get-SDPVgCapacityPolicy {
 
     process {
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPVgCapacityPolicy]::new($hit, $context)

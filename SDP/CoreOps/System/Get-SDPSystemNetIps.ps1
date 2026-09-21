@@ -36,7 +36,7 @@ function Get-SDPSystemNetIps {
     }
 
     process {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -context $context
 
         if ($portID) {
             $portRef = ConvertTo-SDPObjectPrefix -ObjectID $portID -ObjectPath 'system/net_ports'
@@ -45,7 +45,9 @@ function Get-SDPSystemNetIps {
 
         $results = $results | Add-SDPTypeName -TypeName 'SDPSystemNetIp'
 
-        if ($doNotResolve) { return $results }
+        if ($doNotResolve) {
+            return $results
+        }
         return ($results | Update-SDPRefObjects -context $context)
     }
 }

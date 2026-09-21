@@ -74,11 +74,14 @@ function New-SDPVolumeGroupSnapshot {
         [ValidateLength(0, 42)]
         [string] $name,
 
-        [parameter(Mandatory, ParameterSetName = 'VolumeGroup', ValueFromPipelineByPropertyName)]
+        # piped SDPVolumeGroup or SDPVolumeGroupView lands here
+        [parameter(ValueFromPipeline)]
+        [object] $InputObject,
+        [parameter(ParameterSetName = 'VolumeGroup', ValueFromPipelineByPropertyName)]
         [Alias('pipeName')]
         [string] $volumeGroupName,
 
-        [parameter(Mandatory, ParameterSetName = 'View', ValueFromPipelineByPropertyName)]
+        [parameter(ParameterSetName = 'View', ValueFromPipelineByPropertyName)]
         [string] $viewName,
 
         [parameter()]
@@ -103,6 +106,23 @@ function New-SDPVolumeGroupSnapshot {
 
     process {
 
+        if ($InputObject) {
+            if ($InputObject.GetType().Name -eq 'SDPVolumeGroup') {
+                $volumeGroupName = $InputObject.name
+            } elseif ($InputObject.GetType().Name -eq 'SDPVolumeGroupView') {
+                $viewName = $InputObject.name
+            } else {
+                throw "New-SDPVolumeGroupSnapshot accepts pipeline input only from SDPVolumeGroup or SDPVolumeGroupView; got [$($InputObject.GetType().FullName)]."
+            }
+            if (-not $PSBoundParameters.ContainsKey('context')) {
+                $context = $InputObject.context
+            }
+        }
+        if (!$volumeGroupName -and !$viewName) {
+            Write-Error "Specify -volumeGroupName or -viewName (or pipe in a volume group / view)."
+            return
+        }
+
         # retention_policy is mandatory unless this is a replication snapshot.
         if (!$retentionPolicyName -and !$replicationSession) {
             Write-Error "Specify either -retentionPolicyName or -replicationSession."
@@ -110,7 +130,7 @@ function New-SDPVolumeGroupSnapshot {
         }
 
         # Resolve the source ref based on which parameter set was chosen.
-        $isViewSnap = $PSCmdlet.ParameterSetName -eq 'View'
+        $isViewSnap = [bool] $viewName
         if ($isViewSnap) {
             $sourceObj = Get-SDPVolumeGroupView -name $viewName -context $context
             if (!$sourceObj) {
@@ -118,7 +138,10 @@ function New-SDPVolumeGroupSnapshot {
                 return
             }
             $sourceRef       = ConvertTo-SDPObjectPrefix -ObjectPath 'snapshots' -ObjectID $sourceObj.id -nestedObject
-            $expectedFullName = "${viewName}:${name}"
+            # api names it {vg}:{short_name}, same prefix as the view, not {view}:{short_name}
+            $sourcePrefix    = $sourceObj.name.Split(':')[0]
+            $expectedFullName = "${sourcePrefix}:${name}"
+            # $expectedFullName = "${viewName}:${name}"
         } else {
             $sourceObj = Get-SDPVolumeGroup -name $volumeGroupName -context $context -doNotResolve
             if (!$sourceObj) {

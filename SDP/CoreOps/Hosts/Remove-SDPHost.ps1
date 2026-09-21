@@ -56,7 +56,7 @@ function Remove-SDPHost {
     }
 
     process {
-        if ($InputObject -and $InputObject -isnot [SDPHost]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPHost') {
             throw "Remove-SDPHost accepts pipeline input only from SDPHost; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

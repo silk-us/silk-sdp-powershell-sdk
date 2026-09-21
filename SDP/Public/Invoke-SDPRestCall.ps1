@@ -1,6 +1,15 @@
 <#
-    .SYNOPSIS 
-    Custom rest call for Kaminario K2 platform 
+    .SYNOPSIS
+    Custom rest call for Kaminario K2 platform
+
+    .DESCRIPTION
+    GET filters are sent to the API as a query string built from -parameterList.
+    The api wants bare key=value for equality, key__in=a,b for lists, and
+    key.ref=/path/id for nested ref fields. All of that is derived from the
+    parameter list here so cmdlets just hand over $PSBoundParameters.
+
+    -legacyFilter fetches the whole collection (__limit) and filters client
+    side the old way, including the .ref parser. Kept for testing/validation.
 
     .EXAMPLE
     (after logging into a K2)
@@ -9,8 +18,8 @@
 
     .EXAMPLE
     Invoke-SDPRestCall -endpoint volume -method PATCH -body $body -context TestDev
-    This will render the .hits return for the https://{k2Server}/api/v2/volumes API endpoint. 
-            
+    This will render the .hits return for the https://{k2Server}/api/v2/volumes API endpoint.
+
     .NOTES
     Authored by J.R. Phillips (GitHub: JayAreP)
 
@@ -34,6 +43,8 @@ function Invoke-SDPRestCall {
         [parameter()]
         [int] $limit = 9999,
         [parameter()]
+        [switch] $legacyFilter,
+        [parameter()]
         [switch] $strictURI,
         [parameter()]
         [switch] $strictString,
@@ -49,15 +60,12 @@ function Invoke-SDPRestCall {
         [int] $timeOut = 15
     )
 
-    # Construct the base URI. New-SDPURI returns a value ending in '?';
-    # strip it so we have a clean endpoint and can decide later whether
-    # to append a query string (legacy path) or pass query params via
-    # -Body to Invoke-RestMethod (strictURI path).
+    # strictURI / strictString are no-ops now, server side filtering is the default.
+    # left in so older callers dont blow up.
 
-    $endpointURI = (New-SDPURI -endpoint $endpoint -context $context).TrimEnd('?')
+    $endpointURI = (New-SDPURI -endpoint $endpoint -context $context).TrimEnd('?','&')
 
-    # Strip CommonParameters and context from the parameter list so we
-    # only walk user-supplied filters.
+    # drop the common params and context so we only walk real filters
 
     if ($parameterList) {
         foreach ($p in [System.Management.Automation.PSCmdlet]::CommonParameters) {
@@ -66,64 +74,57 @@ function Invoke-SDPRestCall {
         $parameterList.Remove('context') | Out-Null
     }
 
-    # Decide how to deliver query parameters.
+    # Build the query string for GET. Goes out via -Body which Invoke-RestMethod
+    # turns into a url encoded query string for us.
     #
-    # strictURI + GET: build a hashtable of operator-suffixed keys
-    # (name__in, id__gt, etc.) and pass it via -Body to Invoke-RestMethod.
-    # On a GET, Invoke-RestMethod auto-serializes a hashtable body to a
-    # URL-encoded query string - cleaner than the manual concatenation
-    # we used to do, and properly URL-encoded for free.
+    #   @{ref=/hosts/1}  ->  host.ref=/hosts/1
+    #   array            ->  key__in=a,b,c
+    #   int (gte/lte)    ->  key__gt / key__lt
+    #   everything else  ->  key=value
     #
-    # Everything else (legacy GET, POST/PATCH/DELETE): keep the URL plain
-    # and append __limit the old way for compatibility with cmdlets that
-    # haven't been migrated to strictURI yet. They'll still post-fetch
-    # filter client-side below.
+    # __limit only gets added when there are no filters, otherwise the api
+    # default is fine (filtered sets are small). Pass -limit explicitly to force it.
 
-    $queryParams = $null
+    $queryParams = @{}
 
-    if ($strictURI -and $method -eq 'GET') {
-        $queryParams = @{}
-        if (-not $noLimit) { $queryParams.Add('__limit', $limit) }
-
+    if ($method -eq 'GET' -and -not $legacyFilter) {
         if ($parameterList -and $parameterList.Count -gt 0) {
-            Write-Verbose "-- REST (strictURI) using parameters --"
+            Write-Verbose "-- REST using parameters --"
             $parameterList | ConvertTo-Json -Depth 10 | Write-Verbose
 
             foreach ($p in $parameterList.Keys) {
                 $value = $parameterList[$p]
-                if ($value.ref) {
-                    Write-Verbose "$p declared as REF; skipping URI"
+                if ($null -eq $value) {
                     continue
                 }
-                if ($value -is [int]) {
-                    if ($strictURIgte -contains $p) {
-                        $queryParams.Add("${p}__gt", $value)
-                    } elseif ($strictURIlte -contains $p) {
-                        $queryParams.Add("${p}__lt", $value)
-                    } else {
-                        $queryParams.Add("${p}__in", $value)
-                    }
-                } elseif ($value -is [bool]) {
-                    $queryParams.Add($p, $value)
+
+                if ($value -is [array]) {
+                    $queryParams.Add("${p}__in", ($value -join ','))
+                } elseif ($value.ref) {
+                    $queryParams.Add("$p.ref", $value.ref)
+                } elseif ($value -is [int] -and $strictURIgte -contains $p) {
+                    $queryParams.Add("${p}__gt", $value)
+                } elseif ($value -is [int] -and $strictURIlte -contains $p) {
+                    $queryParams.Add("${p}__lt", $value)
                 } else {
-                    # Strings: __in is the new default. -strictString is retained
-                    # for back-compat but is now a no-op since __in == bare equality
-                    # for a single scalar value.
-                    $queryParams.Add("${p}__in", $value)
+                    $queryParams.Add($p, $value)
                 }
             }
-            Write-Verbose "-- REST (strictURI) using keylist --"
+        }
+
+        if (-not $noLimit -and ($queryParams.Count -eq 0 -or $PSBoundParameters.ContainsKey('limit'))) {
+            $queryParams.Add('__limit', $limit)
+        }
+
+        if ($queryParams.Count -gt 0) {
+            Write-Verbose "-- REST query string --"
             $queryParams | ConvertTo-Json -Depth 10 | Write-Verbose
         }
-    } else {
-        # Legacy path: append __limit to URL for non-migrated cmdlets.
-        if ($method -eq 'GET' -and -not $noLimit) {
-            $endpointURI = $endpointURI + '?__limit=' + $limit
-        }
-        $endpointURI = New-URLEncode -URL $endpointURI -context $context
-
+    } elseif ($method -eq 'GET' -and -not $noLimit) {
+        # legacy, grab everything and filter below
+        $endpointURI = $endpointURI + '?__limit=' + $limit
         if ($parameterList -and $parameterList.Count -gt 0) {
-            Write-Verbose "-- REST using parameters (post-fetch filter) --"
+            Write-Verbose "-- REST using parameters (legacy post-fetch filter) --"
             $parameterList | ConvertTo-Json -Depth 10 | Write-Verbose
         }
     }
@@ -147,22 +148,17 @@ function Invoke-SDPRestCall {
     }
 
     # Make the call.
-    #
-    # Two failure modes need disambiguation in the catch:
-    #   1. HTTP 2xx with empty body and Content-Type: application/json. Invoke-
-    #      RestMethod's deserializer throws on empty-body JSON. The operation
-    #      actually succeeded; we should swallow the throw and return $null.
-    #   2. HTTP 4xx/5xx, with or without a body. The operation actually failed
-    #      and the caller needs to know - even when the server didn't bother
-    #      to include a JSON error_msg.
-    # The resolver inspects $_.Exception.Response.StatusCode to tell them apart.
 
     $resolveRestException = {
         param($errorRecord)
 
         $statusCode = $null
         if ($errorRecord.Exception.Response) {
-            try { $statusCode = [int]$errorRecord.Exception.Response.StatusCode } catch { }
+            try {
+                $statusCode = [int]$errorRecord.Exception.Response.StatusCode
+            } catch {
+
+            }
         }
 
         # Case 1: HTTP success, deserializer choked on empty body.
@@ -177,7 +173,11 @@ function Invoke-SDPRestCall {
         if (-not [string]::IsNullOrWhiteSpace($detailMsg)) {
             try {
                 $parsed = $detailMsg | ConvertFrom-Json -ErrorAction Stop
-                if ($parsed.error_msg) { $msg = $parsed.error_msg } else { $msg = $detailMsg }
+                if ($parsed.error_msg) {
+                    $msg = $parsed.error_msg
+                } else {
+                    $msg = $detailMsg
+                }
             } catch {
                 $msg = $detailMsg
             }
@@ -193,26 +193,21 @@ function Invoke-SDPRestCall {
         return $false
     }
 
+    $restSplat = @{
+        Method     = $method
+        Uri        = $endpointURI
+        Credential = $restContext.credentials
+        TimeoutSec = $timeOut
+    }
+    if ($body) {
+        $restSplat.Body        = $bodyjson
+        $restSplat.ContentType = 'application/json'
+    } elseif ($queryParams.Count -gt 0) {
+        $restSplat.Body = $queryParams
+    }
+
     if ($PSVersionTable.PSEdition -eq 'Core') {
-        if ($body) {
-            try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $bodyjson -ContentType 'application/json' -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
-            } catch {
-                if (& $resolveRestException $_) { $results = $null } else { return }
-            }
-        } elseif ($queryParams) {
-            try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $queryParams -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
-            } catch {
-                if (& $resolveRestException $_) { $results = $null } else { return }
-            }
-        } else {
-            try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -SkipCertificateCheck -TimeoutSec $timeOut
-            } catch {
-                if (& $resolveRestException $_) { $results = $null } else { return }
-            }
-        }
+        $restSplat.SkipCertificateCheck = $true
     } elseif ($PSVersionTable.PSEdition -eq 'Desktop') {
         if ([System.Net.ServicePointManager]::CertificatePolicy -notlike 'TrustAllCertsPolicy') {
             Write-Verbose "Correcting certificate policy"
@@ -221,61 +216,48 @@ function Invoke-SDPRestCall {
         if ([Net.ServicePointManager]::SecurityProtocol -notmatch 'Tls12') {
             [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol + 'Tls12'
         }
-        if ($body) {
-            try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $bodyjson -ContentType 'application/json' -Credential $restContext.credentials -TimeoutSec $timeOut
-            } catch {
-                if (& $resolveRestException $_) { $results = $null } else { return }
-            }
-        } elseif ($queryParams) {
-            try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -body $queryParams -Credential $restContext.credentials -TimeoutSec $timeOut
-            } catch {
-                if (& $resolveRestException $_) { $results = $null } else { return }
-            }
+    }
+
+    try {
+        $results = Invoke-RestMethod @restSplat
+    } catch {
+        if (& $resolveRestException $_) {
+            $results = $null
         } else {
-            try {
-                $results = Invoke-RestMethod -Method $method -Uri $endpointURI -Credential $restContext.credentials -TimeoutSec $timeOut
-            } catch {
-                if (& $resolveRestException $_) { $results = $null } else { return }
-            }
+            return
         }
     }
 
-    <#
-        Due to how the API accepts arguments, I often need to capture all results and filter for the desired objects after-the-fact.
-        If this looks inefficient, it's because it is. Thankfully there's not a lot of metadata presented through these queries, 
-        so the operational impact is minimal. 
-    #>
     if ($fullResponse) {
         return $results
     } else {
         $results = $results.hits
     }
-    
-    if ($parameterList.Count -gt 0 -and $strictURI -eq $false) {
+
+    # LEgacy post-fetch filter - no longer used. Kept for testing, only invoked if -legacyFilter is specified.
+
+    if ($legacyFilter -and $parameterList.Count -gt 0) {
         $rcount = $results.Count
         Write-Verbose "Found $rcount results"
         if ($parameterList.keys) {
             $searchkeys = $parameterList.keys.split()
         }
-    
+
         foreach ($i in $searchkeys) {
             Write-Verbose "Working with key: $i"
             $parseTarget = $parameterList[$i]
-            # return $parseTarget
             if ($parseTarget.ref) {
-                $results = $results | where-object {$_.$i.ref -eq $parseTarget.ref} 
+                $results = $results | where-object {$_.$i.ref -eq $parseTarget.ref}
                 $rcount = $results.Count
                 Write-Verbose "Searching for key $parseTarget as REF"
                 Write-Verbose "Found $rcount results for key $i"
             } else {
-                $results = $results | where-object {$_.$i -eq $parseTarget} 
+                $results = $results | where-object {$_.$i -eq $parseTarget}
                 $rcount = $results.Count
                 Write-Verbose "Searching for key $parseTarget"
                 Write-Verbose "Found $rcount results for key $i"
             }
-            
+
         }
     }
 
@@ -283,13 +265,17 @@ function Invoke-SDPRestCall {
     foreach ($o in $results) {
         if ($o.id) {
             $o | Add-Member -MemberType NoteProperty -Name 'pipeId' -Value $o.id
-        } 
+        }
         if ($o.name) {
             $o | Add-Member -MemberType NoteProperty -Name 'pipeName' -Value $o.name
         }
     }
     if ($restContext.throttleCorrection.IsPresent) {
         Start-Sleep -Seconds 1
+    }
+    # empty POST/DELETE reply shouldnt leak a $null into the callers output
+    if ($null -eq $results) {
+        return
     }
     return $results
 }

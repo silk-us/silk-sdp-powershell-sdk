@@ -29,16 +29,16 @@ function New-SDPReplicationPeerArray {
         $o | Add-Member -MemberType NoteProperty -Name "local_password" -Value $remoteCredential.GetNetworkCredential().password
 
 
-        # Make the call 
+        # Make the call
 
         $body = $o
-        
+
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         } catch {
             return $Error[0]
         }
-        
+
         $results = Get-SDPReplicationPeerArray -name $name -context $context
         return $results
     }

@@ -50,7 +50,7 @@ function Remove-SDPRetentionPolicy {
     }
 
     process {
-        if ($InputObject -and $InputObject -isnot [SDPRetentionPolicy]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPRetentionPolicy') {
             throw "Remove-SDPRetentionPolicy accepts pipeline input only from SDPRetentionPolicy; got [$($InputObject.GetType().FullName)]."
         }
         if ($InputObject) {

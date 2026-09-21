@@ -90,7 +90,7 @@ function Get-SDPEvents {
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI -strictURIgte timestamp
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURIgte timestamp
 
         # Project each raw record into a flat psobject and convert the
         # Unix timestamp to a DateTime for human readability.

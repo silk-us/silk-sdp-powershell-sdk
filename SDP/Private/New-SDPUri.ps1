@@ -1,11 +1,11 @@
 <#
-    .SYNOPSIS 
+    .SYNOPSIS
     Helper function for auto-generating an appropriate URI string for the Kaminario K2 Powershell SDK.
-    
+
     .EXAMPLE
     New-SDPURI -endpoint volume_groups
-    
-    This will return the full URI (https://{k2appliance}/api/v2/volume_groups) for the specified endpoint. 
+
+    This will return the full URI (https://{k2appliance}/api/v2/volume_groups) for the specified endpoint.
 #>
 
 function New-SDPURI {
@@ -23,7 +23,7 @@ function New-SDPURI {
     if ($endpoint[0] -eq '/') {
         $endpoint = $endpoint.Substring(1)
     }
-    
+
     if ($endpoint[-1] -eq '/') {
         $endpoint = $endpoint.Substring(0,$endpoint.Length-1)
     }
@@ -36,7 +36,7 @@ function New-SDPURI {
 
     $server = Get-Variable -Scope Global -Name $context -ValueOnly -ErrorAction SilentlyContinue
     if (-not $server) {
-        throw "New-SDPURI: No variable found for context '$context'. Please ensure you have logged in with the correct context or specify the correct context variable name."   
+        throw "New-SDPURI: No variable found for context '$context'. Please ensure you have logged in with the correct context or specify the correct context variable name."
     } else {
         Write-Verbose "New-SDPURI: Found variable for context '$context'. Using its K2Endpoint value for URI construction."
     }

@@ -31,7 +31,7 @@
 function Set-SDPHostPwwn {
     param(
         [parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostName,
         [parameter(Mandatory)]
         [string] $pwwn,
@@ -53,12 +53,12 @@ function Set-SDPHostPwwn {
         $o = New-Object psobject
         $o | Add-Member -MemberType NoteProperty -Name "pwwn" -Value $pwwn
         $o | Add-Member -MemberType NoteProperty -Name "host" -Value $hostPath
-        
+
         $body = $o
 
         ## Make the call
         # $endpointURI = $endpoint + '/' + $hostid.id
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         return $results
     }
 }

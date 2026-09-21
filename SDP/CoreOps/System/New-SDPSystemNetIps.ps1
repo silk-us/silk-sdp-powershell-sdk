@@ -29,7 +29,7 @@ function New-SDPSystemNetIps {
         [ValidateSet('iscsi','Replication', IgnoreCase = $false)]
         [string] $service,
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [Alias('pipeId')]
+        [Alias('pipeId','id')]
         [string] $interface,
         [parameter()]
         [string] $context = 'sdpconnection'

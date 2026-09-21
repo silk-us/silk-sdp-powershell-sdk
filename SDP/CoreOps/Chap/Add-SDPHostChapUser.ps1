@@ -33,7 +33,7 @@ function Add-SDPHostChapUser {
     [CmdletBinding()]
     param(
         [parameter(ValueFromPipelineByPropertyName, Mandatory)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostName,
         [parameter(Mandatory)]
         [string] $chapUserName,

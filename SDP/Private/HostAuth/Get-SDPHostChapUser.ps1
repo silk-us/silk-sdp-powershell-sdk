@@ -8,7 +8,7 @@ function Get-SDPHostChapUser {
     <#
         .SYNOPSIS
 
-        .EXAMPLE 
+        .EXAMPLE
 
         .DESCRIPTION
 
@@ -22,7 +22,7 @@ function Get-SDPHostChapUser {
     begin {
         $endpoint = "host_auth_profile_mappers"
     }
-    
+
     process {
         $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
         return $results

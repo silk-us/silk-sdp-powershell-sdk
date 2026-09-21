@@ -87,11 +87,21 @@ class SDPVolumeGroup {
         }
 
         # Refs preserved verbatim for Update-SDPRefObjects.
-        if ($apiHit.capacity_policy)               { $this.capacity_policy               = $apiHit.capacity_policy }
-        if ($apiHit.last_restored_from)            { $this.last_restored_from            = $apiHit.last_restored_from }
-        if ($apiHit.replication_session)           { $this.replication_session           = $apiHit.replication_session }
-        if ($apiHit.replication_peer_volume_group) { $this.replication_peer_volume_group = $apiHit.replication_peer_volume_group }
-        if ($apiHit.replication_rpo_history)       { $this.replication_rpo_history       = $apiHit.replication_rpo_history }
+        if ($apiHit.capacity_policy) {
+            $this.capacity_policy               = $apiHit.capacity_policy
+        }
+        if ($apiHit.last_restored_from) {
+            $this.last_restored_from            = $apiHit.last_restored_from
+        }
+        if ($apiHit.replication_session) {
+            $this.replication_session           = $apiHit.replication_session
+        }
+        if ($apiHit.replication_peer_volume_group) {
+            $this.replication_peer_volume_group = $apiHit.replication_peer_volume_group
+        }
+        if ($apiHit.replication_rpo_history) {
+            $this.replication_rpo_history       = $apiHit.replication_rpo_history
+        }
     }
 
     # ---- Operational methods --------------------------------------------
@@ -119,7 +129,7 @@ class SDPVolumeGroup {
     }
 
     [void] Delete() {
-        Remove-SDPVolumeGroup -id $this.id -context $this.context | Out-Null
+        Remove-SDPVolumeGroup -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -203,8 +213,11 @@ function Get-SDPVolumeGroup {
     }
 
     process {
+        if ($replication_peer_volume_group) {
+            $PSBoundParameters.replication_peer_volume_group = ConvertTo-SDPObjectPrefix -ObjectPath 'replication/peer_volume_groups' -ObjectID $replication_peer_volume_group -nestedObject
+        }
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         $instances = foreach ($hit in $results) {
             [SDPVolumeGroup]::new($hit, $context)

@@ -6,3 +6,9 @@ issues.md.old
 SDP/Public/test.json
 Test/Generate-TestFixtures.ps1
 Test/SDPTests.ps1
+Test/Test-SDPCrud-*.log
+.DS_Store
+test instructions.md
+probe.cred.xml
+Scrub-PublishScript.ps1
+Publish-SDP.ps1

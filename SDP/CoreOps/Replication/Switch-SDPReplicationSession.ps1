@@ -12,7 +12,7 @@ function Switch-SDPReplicationSession {
     begin {
         $endpoint = 'replication/sessions'
     }
-    
+
     process {
         $session = Get-SDPReplicationSessions -name $name -context $context
         if ($session) {
@@ -30,7 +30,7 @@ function Switch-SDPReplicationSession {
             $subendpoint = $endpoint + '/' + $session.id
 
             try {
-                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -context $context 
+                $results = Invoke-SDPRestCall -endpoint $subendpoint -method PATCH -body $body -context $context
             } catch {
                 return $Error[0]
             }

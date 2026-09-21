@@ -29,8 +29,12 @@ class SDPHostGroupMapping {
         $this.lun       = $apiHit.lun
         $this.context = $context
 
-        if ($apiHit.host)   { $this.host   = $apiHit.host }
-        if ($apiHit.volume) { $this.volume = $apiHit.volume }
+        if ($apiHit.host) {
+            $this.host   = $apiHit.host
+        }
+        if ($apiHit.volume) {
+            $this.volume = $apiHit.volume
+        }
     }
 
     # ---- Operational methods --------------------------------------------
@@ -42,7 +46,7 @@ class SDPHostGroupMapping {
     }
 
     [void] Delete() {
-        Remove-SDPHostGroupMapping -id $this.id -context $this.context | Out-Null
+        Remove-SDPHostGroupMapping -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -109,7 +113,7 @@ function Get-SDPHostGroupMapping {
     [OutputType([SDPHostGroupMapping])]
     param(
         [parameter(ValueFromPipelineByPropertyName)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostGroupName,
         [parameter()]
         [int] $id,
@@ -158,7 +162,7 @@ function Get-SDPHostGroupMapping {
         }
 
         # make the call
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         if ($asSnapshot) {
             $results = $results | Where-Object { $_.volume -match '/snapshots/' }

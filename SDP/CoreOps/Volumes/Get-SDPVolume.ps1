@@ -120,7 +120,7 @@ class SDPVolume {
 
     [void] Unmap([string] $hostName) {
         Get-SDPHostMapping -hostName $hostName -volumeName $this.name -context $this.context |
-            Remove-SDPHostMapping -context $this.context | Out-Null
+            Remove-SDPHostMapping -context $this.context -Force | Out-Null
     }
 
     [SDPVolume] Refresh() {
@@ -139,7 +139,7 @@ class SDPVolume {
     }
 
     [void] Delete() {
-        Remove-SDPVolume -id $this.id -context $this.context | Out-Null
+        Remove-SDPVolume -id $this.id -context $this.context -Force | Out-Null
     }
 
     [string] ToString() {
@@ -238,7 +238,7 @@ function Get-SDPVolume {
 
     process {
 
-        if ($InputObject -and $InputObject -isnot [SDPVolumeGroup]) {
+        if ($InputObject -and $InputObject.GetType().Name -ne 'SDPVolumeGroup') {
             throw "Get-SDPVolume accepts pipeline input only from SDPVolumeGroup; got [$($InputObject.GetType().FullName)]."
         }
         # When piped an SDPVolumeGroup, derive volume_group filter + inherit context.
@@ -263,7 +263,7 @@ function Get-SDPVolume {
 
         # Query
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
 
         # Emit typed objects so the default view + class methods kick in.
 

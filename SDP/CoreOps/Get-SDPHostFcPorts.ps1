@@ -50,13 +50,15 @@ function Get-SDPHostFcPorts {
 
     process {
         if ($hostref) {
-            $PSBoundParameters.host = $PSBoundParameters.hostref
+            # accept either a host id or a /hosts/N ref path
+            $hostId = ($hostref -split '/')[-1]
+            $PSBoundParameters.host = ConvertTo-SDPObjectPrefix -ObjectPath hosts -ObjectID $hostId -nestedObject
             $PSBoundParameters.Remove('hostref') | Out-Null
         }
 
         $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI |
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context |
             Add-SDPTypeName -TypeName 'SDPHostFcPort'
 
         if ($doNotResolve) {

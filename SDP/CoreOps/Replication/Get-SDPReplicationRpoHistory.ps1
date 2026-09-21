@@ -12,9 +12,9 @@ function Get-SDPReplicationRpoHistory {
     $PSBoundParameters.Remove('doNotResolve') | Out-Null
 
     if ($PSBoundParameters.Keys.Contains('Verbose')) {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -Verbose -context $context
     } else {
-        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context -strictURI
+        $results = Invoke-SDPRestCall -endpoint $endpoint -method GET -parameterList $PSBoundParameters -context $context
     }
 
     $results = $results | Add-SDPTypeName -TypeName 'SDPReplicationRpoEntry'

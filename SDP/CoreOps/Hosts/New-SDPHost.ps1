@@ -47,7 +47,7 @@ function New-SDPHost {
         [Alias("hostGroup")]
         [string] $hostGroupName,
         [parameter(ValueFromPipelineByPropertyName)]
-        [Alias('pipeId')]
+        [Alias('pipeId','id')]
         [string] $hostGroupId,
         [parameter(Mandatory)]
         [ValidateLength(0, 32)]

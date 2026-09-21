@@ -1,18 +1,18 @@
 <#
     .SYNOPSIS
-    Create replication peer volume declarations for newly created replication sessions that included -autoConfigurePeerVolumes $false as a parameter. 
+    Create replication peer volume declarations for newly created replication sessions that included -autoConfigurePeerVolumes $false as a parameter.
 
-    .EXAMPLE 
-    In this example I have a volume group named test01-vg that contains 2 volumes named test01-vol-1 and test01-vol-2. I established a replication session named testrep01 for this volume group that included -autoConfigurePeerVolumes $false as a parameter. 
-    
-    I want the volumes to retain their same name on the replication peer. 
+    .EXAMPLE
+    In this example I have a volume group named test01-vg that contains 2 volumes named test01-vol-1 and test01-vol-2. I established a replication session named testrep01 for this volume group that included -autoConfigurePeerVolumes $false as a parameter.
+
+    I want the volumes to retain their same name on the replication peer.
 
     Before I start this newly created session (testrep01) I declare the 2 volumes like so:
 
     New-SDPReplicationVolume -name test01-vol-1 -volumeName test01-vol-1 -replicationSessionName testrep01
     New-SDPReplicationVolume -name test01-vol-2 -volumeName test01-vol-2 -replicationSessionName testrep01
 
-    Then I am able to start the newly created replication session using Start-SDPReplicationSession. 
+    Then I am able to start the newly created replication session using Start-SDPReplicationSession.
 
     .DESCRIPTION
 
@@ -48,7 +48,7 @@ function New-SDPReplicationVolume {
         $sessionId = Get-SDPReplicationPeerArray -name $replicationSessionName -context $context
 
         $volumeId = Get-SDPVolume -name $volumeName -context $context
-        $volumeObj = ConvertTo-SDPObjectPrefix -ObjectID $volumeId.id -ObjectPath 'volumes' -nestedObject 
+        $volumeObj = ConvertTo-SDPObjectPrefix -ObjectID $volumeId.id -ObjectPath 'volumes' -nestedObject
 
         $sessionId = Get-SDPReplicationSessions -name $replicationSessionName -context $context
         $peerArrayPath = ConvertTo-SDPObjectPrefix -ObjectID $sessionId.id -ObjectPath 'replication/sessions' -nestedObject
@@ -59,16 +59,16 @@ function New-SDPReplicationVolume {
         $o | Add-Member -MemberType NoteProperty -Name "local_volume" -Value $volumeObj
         $o | Add-Member -MemberType NoteProperty -Name "replication_session" -Value $peerArrayPath
 
-        # Make the call 
+        # Make the call
 
         $body = $o
-        
+
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         } catch {
             return $Error[0]
         }
-        
+
         # return $body
     }
 }

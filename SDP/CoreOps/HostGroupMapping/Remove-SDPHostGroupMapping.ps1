@@ -11,14 +11,14 @@ function Remove-SDPHostGroupMapping {
     )
     <#
         .SYNOPSIS
-        Remove an existing host mapping. 
+        Remove an existing host mapping.
 
-        .EXAMPLE 
+        .EXAMPLE
         Remove-SDPHostGroupMapping -id 432
 
-        .EXAMPLE 
-        Get-SDPHostGroupMapping -hostGroupName HG01 | Remove-SDPHostGroupMapping 
-        
+        .EXAMPLE
+        Get-SDPHostGroupMapping -hostGroupName HG01 | Remove-SDPHostGroupMapping
+
         .DESCRIPTION
         Use this function to remove an existing host group mapping using these examples. Accepts piped imput from Get-SDPHostGroupMapping
 

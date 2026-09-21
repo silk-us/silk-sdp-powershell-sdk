@@ -37,16 +37,16 @@ function New-SDPVgCapacityPolicy {
             $o | Add-Member -MemberType NoteProperty -Name "num_snapshots" -Value $snapshotCount
         }
 
-        # Make the call 
+        # Make the call
 
         $body = $o
-        
+
         try {
-            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
+            Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         } catch {
             return $Error[0]
         }
-        
+
         return $body
     }
 }

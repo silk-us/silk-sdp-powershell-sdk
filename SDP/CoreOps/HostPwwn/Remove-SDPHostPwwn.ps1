@@ -11,14 +11,14 @@ function Remove-SDPHostPwwn {
     )
     <#
         .SYNOPSIS
-        Remove an existing host Pwwn. 
+        Remove an existing host Pwwn.
 
-        .EXAMPLE 
+        .EXAMPLE
         Remove-SDPHostPwwn -id 123
 
-        .EXAMPLE 
-        Get-SDPHostPwwn -hostName LinuxHost03 | Remove-SDPHostPwwn 
-        
+        .EXAMPLE
+        Get-SDPHostPwwn -hostName LinuxHost03 | Remove-SDPHostPwwn
+
         .DESCRIPTION
         Use this function to remove an existing host Pwwn using these examples. Accepts piped imput from Get-SDPHostPwwn
 

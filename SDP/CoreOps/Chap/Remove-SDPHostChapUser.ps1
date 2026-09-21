@@ -30,7 +30,7 @@ function Remove-SDPHostChapUser {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact='High')]
     param(
         [parameter(ValueFromPipelineByPropertyName, Mandatory)]
-        [Alias('pipeName')]
+        [Alias('pipeName','name')]
         [string] $hostName,
         [parameter()]
         [switch] $Force,

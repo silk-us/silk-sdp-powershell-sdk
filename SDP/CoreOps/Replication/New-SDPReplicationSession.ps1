@@ -1,7 +1,7 @@
 <#
     .SYNOPSIS
 
-    .EXAMPLE 
+    .EXAMPLE
     New-SDPReplicationSession -name testrep -volumeGroupName retest01 -replicationPeerName K2-5405 -retentionPolicyName Replication_Retention -externalRetentionPolicyName Replication_Retention -RPO 1200
 
     .DESCRIPTION
@@ -46,19 +46,19 @@ function New-SDPReplicationSession {
     process{
         ## Special Ops
 
-        $volumeGroupId = Get-SDPVolumeGroup -name $volumeGroupName
+        $volumeGroupId = Get-SDPVolumeGroup -name $volumeGroupName -context $context
         $volumeGroupPath = ConvertTo-SDPObjectPrefix -ObjectID $volumeGroupId.id -ObjectPath 'volume_groups' -nestedObject
 
-        $peerArrayId = Get-SDPReplicationPeerArray -name $replicationPeerName
+        $peerArrayId = Get-SDPReplicationPeerArray -name $replicationPeerName -context $context
         $peerArrayPath = ConvertTo-SDPObjectPrefix -ObjectID $peerArrayId.id -ObjectPath 'replication/peer_k2arrays' -nestedObject
 
-        $retentionPolicyId = Get-SDPRetentionPolicy -name $retentionPolicyName
+        $retentionPolicyId = Get-SDPRetentionPolicy -name $retentionPolicyName -context $context
         $retentionPolicypath = ConvertTo-SDPObjectPrefix -ObjectID $retentionPolicyId.id -ObjectPath 'retention_policies' -nestedObject
 
-        $externalRetentionPolicyId = Get-SDPRetentionPolicy -name $externalRetentionPolicyName
+        $externalRetentionPolicyId = Get-SDPRetentionPolicy -name $externalRetentionPolicyName -context $context
         $externalRetentionPolicypath = ConvertTo-SDPObjectPrefix -ObjectID $externalRetentionPolicyId.id -ObjectPath 'retention_policies' -nestedObject
 
-        
+
         # Build the object
         $o = New-Object psobject
         $o | Add-Member -MemberType NoteProperty -Name "name" -Value $name
@@ -75,16 +75,16 @@ function New-SDPReplicationSession {
         }
         if ($replicationVolumeGroupName) {
             $o | Add-Member -MemberType NoteProperty -Name "replication_peer_volume_group_name" -Value $replicationVolumeGroupName
-        } 
-       
+        }
 
 
-        # Make the call 
+
+        # Make the call
 
         $body = $o
-        
+
         try {
-            $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context 
+            $results = Invoke-SDPRestCall -endpoint $endpoint -method POST -body $body -context $context
         } catch {
             return $Error[0]
         }
